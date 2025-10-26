@@ -25,19 +25,13 @@ export class BusinessController {
   @Get()
   @ApiOperation({ summary: 'Get all businesses' })
   async findAll() {
-    const businesses = await this.businessService.findAll();
-    return {
-      data: businesses,
-    };
+    return await this.businessService.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get business by ID' })
   async findById(@Param('id') id: number) {
-    const business = await this.businessService.findById(id);
-    return {
-      data: business,
-    };
+    return await this.businessService.findById(id);
   }
 
   @Post()
@@ -46,10 +40,7 @@ export class BusinessController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new business' })
   async create(@Body() createBusinessDto: CreateBusinessDto) {
-    const business = await this.businessService.create(createBusinessDto);
-    return {
-      data: business,
-    };
+    return await this.businessService.create(createBusinessDto);
   }
 
   @Put(':id')
@@ -61,10 +52,7 @@ export class BusinessController {
     @Param('id') id: number,
     @Body() updateBusinessDto: UpdateBusinessDto,
   ) {
-    const business = await this.businessService.update(id, updateBusinessDto);
-    return {
-      data: business,
-    };
+    return await this.businessService.update(id, updateBusinessDto);
   }
 
   @Delete(':id')
