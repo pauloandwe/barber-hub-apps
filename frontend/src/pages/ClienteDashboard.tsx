@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { authAPI } from "@/api/auth";
+import { businessAPI } from "@/api/business";
+import { appointmentsAPI } from "@/api/appointments";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -47,14 +49,13 @@ const ClienteDashboard = () => {
 
   const fetchBarbearias = async () => {
     try {
-      const { data, error } = await supabase
-        .from("barbearias")
-        .select("id, nome")
-        .eq("ativo", true)
-        .order("nome");
-
-      if (error) throw error;
-      setBarbearias(data || []);
+      const businesses = await businessAPI.getAll();
+      setBarbearias(
+        businesses.map((b) => ({
+          id: b.id.toString(),
+          nome: b.name,
+        }))
+      );
     } catch (error) {
       console.error("Erro ao buscar barbearias:", error);
       toast.error("Erro ao carregar barbearias");
@@ -65,23 +66,35 @@ const ClienteDashboard = () => {
 
   const fetchMeusAgendamentos = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = authAPI.getStoredUser();
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from("agendamentos")
-        .select(`
-          *,
-          barbeiros (nome),
-          servicos (nome, duracao_min),
-          barbearias (nome)
-        `)
-        .eq("cliente_id", user.id)
-        .gte("data_inicio", new Date().toISOString())
-        .order("data_inicio");
+      // Get all businesses and their appointments
+      const businesses = await businessAPI.getAll();
+      const allAppointments: Agendamento[] = [];
 
-      if (error) throw error;
-      setAgendamentos(data || []);
+      for (const business of businesses) {
+        const appointments = await appointmentsAPI.getAll(business.id);
+        const userAppointments = appointments.filter(
+          (apt) =>
+            apt.clienteId === user.id &&
+            new Date(apt.data_inicio) >= new Date()
+        );
+        allAppointments.push(
+          ...userAppointments.map((apt) => ({
+            id: apt.id.toString(),
+            data_inicio: apt.data_inicio,
+            data_fim: apt.data_fim,
+            status: apt.status,
+            observacoes: apt.observacoes || null,
+            barbeiros: { nome: "Barbeiro" },
+            servicos: { nome: "Serviço", duracao_min: 30 },
+            barbearias: { nome: business.name },
+          }))
+        );
+      }
+
+      setAgendamentos(allAppointments);
     } catch (error) {
       console.error("Erro ao buscar agendamentos:", error);
       toast.error("Erro ao carregar agendamentos");
@@ -89,7 +102,7 @@ const ClienteDashboard = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    authAPI.logout();
     navigate("/login");
   };
 

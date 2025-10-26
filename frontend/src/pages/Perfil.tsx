@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { authAPI } from "@/api/auth";
+import { usersAPI } from "@/api/users";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,27 +52,18 @@ const Perfil = () => {
 
   const loadUserData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
+      const storedUser = authAPI.getStoredUser();
+
+      if (!storedUser) {
         navigate("/login");
         return;
       }
 
-      setUserId(user.id);
+      setUserId(storedUser.id.toString());
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("nome, telefone")
-        .eq("id", user.id)
-        .single();
-
-      if (profile) {
-        setValue("nome", profile.nome || "");
-        setValue("telefone", profile.telefone || "");
-      }
-
-      setValue("email", user.email || "");
+      setValue("nome", storedUser.nome || "");
+      setValue("telefone", storedUser.telefone || "");
+      setValue("email", storedUser.email || "");
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       toast.error("Erro ao carregar dados do perfil");
@@ -86,41 +78,27 @@ const Perfil = () => {
     setSaving(true);
 
     try {
+      const userId_num = parseInt(userId);
+
       // Atualizar perfil (nome e telefone)
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          nome: data.nome,
-          telefone: data.telefone || null,
-        })
-        .eq("id", userId);
+      await usersAPI.update(userId_num, {
+        nome: data.nome,
+        telefone: data.telefone || undefined,
+      });
 
-      if (profileError) throw profileError;
-
-      // Atualizar email e/ou senha no auth
-      const authUpdates: { email?: string; password?: string } = {};
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email !== data.email) {
-        authUpdates.email = data.email;
-      }
-
+      // TODO: Implementar mudança de password na API backend
       if (data.novaSenha && data.novaSenha.length > 0) {
-        authUpdates.password = data.novaSenha;
+        toast.warning("Mudança de senha ainda não implementada via API");
       }
 
-      if (Object.keys(authUpdates).length > 0) {
-        const { error: authError } = await supabase.auth.updateUser(authUpdates);
-        
-        if (authError) throw authError;
+      toast.success("Perfil atualizado com sucesso!");
 
-        if (authUpdates.email) {
-          toast.success("Perfil atualizado! Verifique seu email para confirmar a alteração.");
-        } else {
-          toast.success("Perfil atualizado com sucesso!");
-        }
-      } else {
-        toast.success("Perfil atualizado com sucesso!");
+      // Atualizar usuário armazenado
+      const storedUser = authAPI.getStoredUser();
+      if (storedUser) {
+        storedUser.nome = data.nome;
+        storedUser.telefone = data.telefone || "";
+        authAPI.setStoredUser(storedUser);
       }
 
       // Limpar campos de senha

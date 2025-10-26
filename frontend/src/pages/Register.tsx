@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { authAPI } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,31 +37,26 @@ const Register = () => {
 
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/app`,
-        data: {
-          nome,
-          telefone,
-          role: "CLIENTE",
-        },
-      },
-    });
+    try {
+      const user = await authAPI.register({
+        nome,
+        email,
+        password,
+        telefone: telefone || undefined,
+      });
 
-    if (error) {
-      toast.error("Erro ao criar conta: " + error.message);
-      setLoading(false);
-      return;
-    }
+      // Store user in localStorage
+      authAPI.setStoredUser(user);
 
-    if (data.user) {
-      toast.success("Conta criada com sucesso! Clientes sempre começam com perfil de CLIENTE.");
+      toast.success("Conta criada com sucesso! Você será redirecionado...");
+
+      // Redirecionar para dashboard do cliente
       navigate("/cliente");
+    } catch (error: any) {
+      toast.error("Erro ao criar conta: " + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

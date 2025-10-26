@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { authAPI } from "@/api/auth";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,30 +10,21 @@ import { LogOut, Calendar, Users, Scissors, Building2 } from "lucide-react";
 const AppPage = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadProfile();
   }, []);
 
-  const loadProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
+  const loadProfile = () => {
+    const user = authAPI.getStoredUser();
     if (user) {
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-      
-      setProfile(profileData);
+      setProfile(user);
     }
-    
-    setLoading(false);
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    authAPI.logout();
     toast.success("Logout realizado com sucesso!");
     navigate("/login");
   };

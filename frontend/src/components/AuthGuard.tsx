@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { authAPI } from "@/api/auth";
+
+interface UserProfile {
+  id: number;
+  email: string;
+  nome: string;
+  role: "ADMIN" | "BARBEARIA" | "CLIENTE";
+  telefone?: string;
+  barbearia_id?: number;
+  access_token: string;
+}
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -10,26 +19,30 @@ interface AuthGuardProps {
 
 export const AuthGuard = ({ children, requiredRole }: AuthGuardProps) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuthAndRole = async (userId: string) => {
+    const checkAuthAndRole = () => {
+      const storedUser = authAPI.getStoredUser();
+
+      if (!storedUser) {
+        navigate("/login");
+        setLoading(false);
+        return;
+      }
+
+      setUser(storedUser as UserProfile);
+
       if (!requiredRole) {
         setLoading(false);
         return;
       }
 
-      // Verificar role do usuário
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .single();
-
-      if (roleData?.role !== requiredRole) {
+      // Verificar se o usuário tem o role necessário
+      if (storedUser.role !== requiredRole) {
         // Redirecionar para a página correta baseado no role
-        switch (roleData?.role) {
+        switch (storedUser.role) {
           case "ADMIN":
             navigate("/admin");
             break;
@@ -46,31 +59,18 @@ export const AuthGuard = ({ children, requiredRole }: AuthGuardProps) => {
       setLoading(false);
     };
 
-    // Verificar sessão atual
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      
-      if (!session) {
-        navigate("/login");
-        setLoading(false);
-      } else {
-        checkAuthAndRole(session.user.id);
-      }
-    });
+    checkAuthAndRole();
 
-    // Escutar mudanças de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      
-      if (!session) {
-        navigate("/login");
-        setLoading(false);
-      } else {
-        checkAuthAndRole(session.user.id);
-      }
-    });
+    // Listen for storage changes (when user logs in/out in another tab)
+    const handleStorageChange = () => {
+      checkAuthAndRole();
+    };
 
-    return () => subscription.unsubscribe();
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, [navigate, requiredRole]);
 
   if (loading) {

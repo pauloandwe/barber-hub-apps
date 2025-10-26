@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { authAPI } from "@/api/auth";
 
 type AppRole = "ADMIN" | "BARBEARIA" | "CLIENTE" | null;
 
@@ -9,58 +9,47 @@ export const useUserRole = () => {
   const [barbeariaId, setBarbeariaId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUserRole = async () => {
+    const loadUserRole = () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
+        const user = authAPI.getStoredUser();
+
         if (!user) {
           setRole(null);
+          setBarbeariaId(null);
           setLoading(false);
           return;
         }
 
-        // Buscar role da tabela user_roles
-        const { data: roleData, error: roleError } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .single();
+        setRole(user.role as AppRole);
 
-        if (roleError) {
-          console.error("Erro ao buscar role:", roleError);
-          setRole(null);
-          setLoading(false);
-          return;
-        }
-
-        setRole(roleData.role as AppRole);
-
-        // Se for BARBEARIA, buscar o ID da barbearia vinculada
-        if (roleData.role === "BARBEARIA") {
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("barbearia_id")
-            .eq("id", user.id)
-            .single();
-
-          setBarbeariaId(profileData?.barbearia_id || null);
+        // Se for BARBEARIA, usar o ID da barbearia vinculada
+        if (user.role === "BARBEARIA") {
+          setBarbeariaId(user.barbearia_id?.toString() || null);
+        } else {
+          setBarbeariaId(null);
         }
 
         setLoading(false);
       } catch (error) {
         console.error("Erro ao buscar dados do usuário:", error);
         setRole(null);
+        setBarbeariaId(null);
         setLoading(false);
       }
     };
 
-    fetchUserRole();
+    loadUserRole();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      fetchUserRole();
-    });
+    // Listen for storage changes (when user logs in/out in another tab)
+    const handleStorageChange = () => {
+      loadUserRole();
+    };
 
-    return () => subscription.unsubscribe();
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   return { role, loading, barbeariaId };

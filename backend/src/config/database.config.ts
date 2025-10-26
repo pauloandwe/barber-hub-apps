@@ -13,7 +13,7 @@ export const getDatabaseConfig = (
   database: configService.get<string>('DATABASE_NAME', 'barber_hub_db'),
   entities: [path.join(__dirname, '../database/entities/*.entity{.ts,.js}')],
   migrations: [path.join(__dirname, '../database/migrations/*{.ts,.js}')],
-  synchronize: configService.get<string>('NODE_ENV') === 'development',
+  synchronize: false,
   logging: configService.get<string>('NODE_ENV') === 'development',
   dropSchema: false,
   migrationsRun: false,

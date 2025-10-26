@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { authAPI } from "@/api/auth";
+import { servicesAPI } from "@/api/services";
+import { barbersAPI } from "@/api/barbers";
+import { appointmentsAPI } from "@/api/appointments";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -57,15 +60,16 @@ export const AgendamentoDialog = ({ open, onOpenChange, barbeariaId, onSuccess }
 
   const fetchServicos = async () => {
     try {
-      const { data, error } = await supabase
-        .from("servicos")
-        .select("*")
-        .eq("barbearia_id", barbeariaId)
-        .eq("ativo", true)
-        .order("nome");
-
-      if (error) throw error;
-      setServicos(data || []);
+      const barbeariaIdNum = parseInt(barbeariaId);
+      const services = await servicesAPI.getAll(barbeariaIdNum);
+      setServicos(
+        services.map((s) => ({
+          id: s.id.toString(),
+          nome: s.nome,
+          duracao_min: s.duracao,
+          preco_centavos: Math.round(s.preco * 100),
+        }))
+      );
     } catch (error) {
       console.error("Erro ao buscar serviços:", error);
       toast.error("Erro ao carregar serviços");
@@ -74,15 +78,14 @@ export const AgendamentoDialog = ({ open, onOpenChange, barbeariaId, onSuccess }
 
   const fetchBarbeiros = async () => {
     try {
-      const { data, error } = await supabase
-        .from("barbeiros")
-        .select("*")
-        .eq("barbearia_id", barbeariaId)
-        .eq("ativo", true)
-        .order("nome");
-
-      if (error) throw error;
-      setBarbeiros(data || []);
+      const barbeariaIdNum = parseInt(barbeariaId);
+      const barbers = await barbersAPI.getAll(barbeariaIdNum);
+      setBarbeiros(
+        barbers.map((b) => ({
+          id: b.id.toString(),
+          nome: b.nome,
+        }))
+      );
     } catch (error) {
       console.error("Erro ao buscar barbeiros:", error);
       toast.error("Erro ao carregar barbeiros");
@@ -101,26 +104,12 @@ export const AgendamentoDialog = ({ open, onOpenChange, barbeariaId, onSuccess }
       const endOfSelectedDay = new Date(startOfSelectedDay);
       endOfSelectedDay.setHours(23, 59, 59, 999);
 
-      // Buscar agendamentos existentes do barbeiro para o dia
-      const { data: agendamentos, error } = await supabase
-        .from("agendamentos")
-        .select("data_inicio, data_fim")
-        .eq("barbeiro_id", selectedBarbeiro)
-        .gte("data_inicio", startOfSelectedDay.toISOString())
-        .lte("data_inicio", endOfSelectedDay.toISOString())
-        .neq("status", "cancelado");
-
-      if (error) throw error;
-
-      // Buscar bloqueios do barbeiro
-      const { data: bloqueios, error: bloqueiosError } = await supabase
-        .from("bloqueios")
-        .select("data_inicio, data_fim")
-        .eq("barbeiro_id", selectedBarbeiro)
-        .gte("data_inicio", startOfSelectedDay.toISOString())
-        .lte("data_fim", endOfSelectedDay.toISOString());
-
-      if (bloqueiosError) throw bloqueiosError;
+      // TODO: Buscar agendamentos e bloqueios via API
+      // const { barbeariaIdNum } = parseInt(barbeariaId);
+      // const agendamentos = await appointmentsAPI.getAll(barbeariaIdNum);
+      // const bloqueios = await bloqueiosAPI.getAll(...);
+      const agendamentos = [];
+      const bloqueios = [];
 
       // Gerar horários disponíveis (8h às 18h, a cada 30 minutos)
       const horarios: string[] = [];
@@ -176,32 +165,29 @@ export const AgendamentoDialog = ({ open, onOpenChange, barbeariaId, onSuccess }
 
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = authAPI.getStoredUser();
       if (!user) {
         toast.error("Usuário não autenticado");
         return;
       }
 
-      const servico = servicos.find(s => s.id === selectedServico);
+      const servico = servicos.find((s) => s.id === selectedServico);
       if (!servico) return;
 
       const [hours, minutes] = selectedTime.split(":").map(Number);
       const dataInicio = setHours(setMinutes(selectedDate, minutes), hours);
       const dataFim = addMinutes(dataInicio, servico.duracao_min);
+      const barbeariaIdNum = parseInt(barbeariaId);
 
-      const { error } = await supabase.from("agendamentos").insert({
-        barbearia_id: barbeariaId,
-        barbeiro_id: selectedBarbeiro,
-        servico_id: selectedServico,
-        cliente_id: user.id,
+      await appointmentsAPI.create(barbeariaIdNum, {
+        barberId: parseInt(selectedBarbeiro),
+        clienteId: user.id,
         data_inicio: dataInicio.toISOString(),
         data_fim: dataFim.toISOString(),
-        observacoes: observacoes || null,
+        observacoes: observacoes || undefined,
         status: "pendente",
         origem: "web",
       });
-
-      if (error) throw error;
 
       toast.success("Agendamento realizado com sucesso!");
       onSuccess();

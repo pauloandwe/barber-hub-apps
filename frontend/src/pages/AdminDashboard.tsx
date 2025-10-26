@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { businessAPI } from "@/api/business";
+import { usersAPI } from "@/api/users";
+import { authAPI } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,19 +27,19 @@ import {
 } from "@/components/ui/select";
 
 interface Barbearia {
-  id: string;
-  nome: string;
-  email: string | null;
-  telefone: string | null;
-  endereco: string | null;
-  ativo: boolean;
+  id: number;
+  name: string;
+  phone: string;
+  type?: string;
+  token?: string;
 }
 
 interface Usuario {
-  id: string;
+  id: number;
   nome: string;
+  email: string;
   telefone: string | null;
-  barbearia_id: string | null;
+  barbearia_id: number | null;
   role: string;
   barbearia_nome?: string;
 }
@@ -66,13 +68,16 @@ const AdminDashboard = () => {
 
   const fetchBarbearias = async () => {
     try {
-      const { data, error } = await supabase
-        .from("barbearias")
-        .select("*")
-        .order("nome");
-
-      if (error) throw error;
-      setBarbearias(data || []);
+      const businesses = await businessAPI.getAll();
+      setBarbearias(
+        businesses.map((b) => ({
+          id: b.id,
+          name: b.name,
+          phone: b.phone,
+          type: b.type,
+          token: b.token,
+        }))
+      );
     } catch (error) {
       console.error("Erro ao buscar barbearias:", error);
       toast.error("Erro ao carregar barbearias");
@@ -83,13 +88,13 @@ const AdminDashboard = () => {
 
   const handleCreateBarbearia = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    try {
-      const { error } = await supabase
-        .from("barbearias")
-        .insert([formData]);
 
-      if (error) throw error;
+    try {
+      await businessAPI.create({
+        name: formData.nome,
+        phone: formData.telefone,
+        type: formData.email,
+      });
 
       toast.success("Barbearia criada com sucesso!");
       setOpen(false);
@@ -103,45 +108,16 @@ const AdminDashboard = () => {
 
   const fetchUsuarios = async () => {
     try {
-      // Buscar todos os perfis com suas barbearias
-      const { data: profilesData, error: profilesError } = await supabase
-        .from("profiles")
-        .select(`
-          id,
-          nome,
-          telefone,
-          barbearia_id,
-          barbearias (nome)
-        `)
-        .order("nome");
-
-      if (profilesError) {
-        console.error("Erro ao buscar profiles:", profilesError);
-        throw profilesError;
-      }
-
-      // Buscar todos os roles
-      const { data: rolesData, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("user_id, role");
-
-      if (rolesError) {
-        console.error("Erro ao buscar roles:", rolesError);
-        throw rolesError;
-      }
-
-      // Combinar dados de profiles e roles
-      const usuariosComRoles = profilesData?.map((profile: any) => {
-        const userRole = rolesData?.find((r) => r.user_id === profile.id);
-        return {
-          id: profile.id,
-          nome: profile.nome,
-          telefone: profile.telefone,
-          barbearia_id: profile.barbearia_id,
-          role: userRole?.role || "CLIENTE",
-          barbearia_nome: profile.barbearias?.nome,
-        };
-      }) || [];
+      const users = await usersAPI.getAll();
+      const usuariosComRoles: Usuario[] = users.map((user: any) => ({
+        id: user.id,
+        nome: user.nome,
+        email: user.email,
+        telefone: user.telefone,
+        barbearia_id: user.barbearia_id,
+        role: user.role,
+        barbearia_nome: undefined,
+      }));
 
       console.log(`Total de usuários carregados: ${usuariosComRoles.length}`);
       setUsuarios(usuariosComRoles);
@@ -156,7 +132,7 @@ const AdminDashboard = () => {
   const handleEditUser = (user: Usuario) => {
     setSelectedUser(user);
     setSelectedRole(user.role);
-    setSelectedBarbeariaId(user.barbearia_id || "");
+    setSelectedBarbeariaId(user.barbearia_id ? user.barbearia_id.toString() : "");
     setUserDialogOpen(true);
   };
 
@@ -164,23 +140,13 @@ const AdminDashboard = () => {
     if (!selectedUser) return;
 
     try {
-      // Atualizar role
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .update({ role: selectedRole as "ADMIN" | "BARBEARIA" | "CLIENTE" })
-        .eq("user_id", selectedUser.id);
-
-      if (roleError) throw roleError;
-
-      // Atualizar barbearia_id no profile
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ 
-          barbearia_id: selectedRole === "BARBEARIA" ? selectedBarbeariaId || null : null 
-        })
-        .eq("id", selectedUser.id);
-
-      if (profileError) throw profileError;
+      await usersAPI.update(selectedUser.id, {
+        role: selectedRole as "ADMIN" | "BARBEARIA" | "CLIENTE",
+        barbearia_id:
+          selectedRole === "BARBEARIA"
+            ? parseInt(selectedBarbeariaId) || undefined
+            : undefined,
+      });
 
       toast.success("Usuário atualizado com sucesso!");
       setUserDialogOpen(false);
@@ -193,7 +159,7 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    authAPI.logout();
     navigate("/login");
   };
 
@@ -306,21 +272,15 @@ const AdminDashboard = () => {
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <Building2 className="h-8 w-8 text-primary" />
-                      <span className={`text-xs px-2 py-1 rounded ${barbearia.ativo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                        {barbearia.ativo ? 'Ativa' : 'Inativa'}
-                      </span>
                     </div>
-                    <CardTitle>{barbearia.nome}</CardTitle>
+                    <CardTitle>{barbearia.name}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
-                    {barbearia.email && (
-                      <p className="text-muted-foreground">📧 {barbearia.email}</p>
+                    {barbearia.phone && (
+                      <p className="text-muted-foreground">📱 {barbearia.phone}</p>
                     )}
-                    {barbearia.telefone && (
-                      <p className="text-muted-foreground">📱 {barbearia.telefone}</p>
-                    )}
-                    {barbearia.endereco && (
-                      <p className="text-muted-foreground">📍 {barbearia.endereco}</p>
+                    {barbearia.type && (
+                      <p className="text-muted-foreground">🏪 {barbearia.type}</p>
                     )}
                   </CardContent>
                 </Card>
@@ -425,8 +385,8 @@ const AdminDashboard = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {barbearias.map((barbearia) => (
-                        <SelectItem key={barbearia.id} value={barbearia.id}>
-                          {barbearia.nome}
+                        <SelectItem key={barbearia.id} value={barbearia.id.toString()}>
+                          {barbearia.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

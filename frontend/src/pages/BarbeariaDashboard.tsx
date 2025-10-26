@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { authAPI } from "@/api/auth";
+import { appointmentsAPI } from "@/api/appointments";
+import { barbersAPI } from "@/api/barbers";
+import { servicesAPI } from "@/api/services";
+import { businessAPI } from "@/api/business";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -61,46 +65,26 @@ const BarbeariaDashboard = () => {
     if (!barbeariaId) return;
 
     try {
-      // Buscar info da barbearia
-      const { data: barbeariaData } = await supabase
-        .from("barbearias")
-        .select("*")
-        .eq("id", barbeariaId)
-        .single();
+      const barbeariaIdNum = typeof barbeariaId === 'string' ? parseInt(barbeariaId) : barbeariaId;
 
-      setBarbeariaInfo(barbeariaData);
+      // Buscar info da barbearia
+      const business = await businessAPI.getById(barbeariaIdNum);
+      setBarbeariaInfo(business);
 
       // Buscar agendamentos da barbearia
-      const { data, error } = await supabase
-        .from("agendamentos")
-        .select(`
-          *,
-          barbeiros (nome),
-          profiles (nome),
-          servicos (nome, duracao_min)
-        `)
-        .eq("barbearia_id", barbeariaId)
-        .gte("data_inicio", new Date().toISOString())
-        .order("data_inicio");
-
-      if (error) throw error;
-      setAgendamentos(data || []);
+      const appointments = await appointmentsAPI.getAll(barbeariaIdNum);
+      const futureAppointments = appointments.filter(
+        (apt) => new Date(apt.data_inicio) >= new Date()
+      );
+      setAgendamentos(futureAppointments as any);
 
       // Buscar serviços
-      const { data: servicosData } = await supabase
-        .from("servicos")
-        .select("*")
-        .eq("barbearia_id", barbeariaId)
-        .order("nome");
-      setServicos(servicosData || []);
+      const services = await servicesAPI.getAll(barbeariaIdNum);
+      setServicos(services as any);
 
       // Buscar barbeiros
-      const { data: barbeirosData } = await supabase
-        .from("barbeiros")
-        .select("*")
-        .eq("barbearia_id", barbeariaId)
-        .order("nome");
-      setBarbeiros(barbeirosData || []);
+      const barbers = await barbersAPI.getAll(barbeariaIdNum);
+      setBarbeiros(barbers as any);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
       toast.error("Erro ao carregar dados");
@@ -113,19 +97,13 @@ const BarbeariaDashboard = () => {
     if (!barbeariaId) return [];
 
     try {
-      const { data, error } = await supabase
-        .from("agendamentos")
-        .select(`
-          *,
-          profiles (nome),
-          servicos (nome, duracao_min)
-        `)
-        .eq("barbeiro_id", barbeiroId)
-        .gte("data_inicio", new Date().toISOString())
-        .order("data_inicio");
-
-      if (error) throw error;
-      return data || [];
+      const barbeariaIdNum = typeof barbeariaId === 'string' ? parseInt(barbeariaId) : barbeariaId;
+      const appointments = await appointmentsAPI.getAll(barbeariaIdNum);
+      return appointments.filter(
+        (apt) =>
+          apt.barberId?.toString() === barbeiroId &&
+          new Date(apt.data_inicio) >= new Date()
+      );
     } catch (error) {
       console.error("Erro ao buscar agendamentos:", error);
       return [];
@@ -133,7 +111,7 @@ const BarbeariaDashboard = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    authAPI.logout();
     navigate("/login");
   };
 

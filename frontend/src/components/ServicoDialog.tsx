@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { authAPI } from "@/api/auth";
+import { servicesAPI } from "@/api/services";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -30,15 +31,15 @@ export const ServicoDialog = ({ open, onOpenChange, barbeariaId, onSuccess }: Se
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("servicos").insert({
+      const barbeariaIdNum = parseInt(barbeariaId);
+      await servicesAPI.create({
+        businessId: barbeariaIdNum,
         nome,
-        preco_centavos: Math.round(parseFloat(preco) * 100),
-        duracao_min: parseInt(duracao),
-        barbearia_id: barbeariaId,
+        descricao: undefined,
+        duracao: parseInt(duracao),
+        preco: parseFloat(preco),
         ativo: true,
       });
-
-      if (error) throw error;
 
       toast.success("Serviço cadastrado com sucesso!");
       onSuccess();

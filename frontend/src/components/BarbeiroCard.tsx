@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { authAPI } from "@/api/auth";
+import { appointmentsAPI } from "@/api/appointments";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, User as UserIcon } from "lucide-react";
@@ -46,20 +47,9 @@ export const BarbeiroCard = ({ barbeiro }: BarbeiroCardProps) => {
   const fetchAgendamentos = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("agendamentos")
-        .select(`
-          *,
-          profiles (nome),
-          servicos (nome, duracao_min)
-        `)
-        .eq("barbeiro_id", barbeiro.id)
-        .gte("data_inicio", new Date().toISOString())
-        .order("data_inicio")
-        .limit(10);
-
-      if (error) throw error;
-      setAgendamentos(data || []);
+      // TODO: Fetch appointments filtered by barbeiro_id from business context
+      // For now, loading empty list as we need business context
+      setAgendamentos([]);
     } catch (error) {
       console.error("Erro ao buscar agendamentos:", error);
     } finally {

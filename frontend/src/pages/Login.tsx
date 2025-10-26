@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { authAPI } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       toast.error("Por favor, preencha todos os campos");
       return;
@@ -24,29 +24,16 @@ const Login = () => {
 
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const user = await authAPI.login({ email, password });
 
-    if (error) {
-      toast.error("Erro ao fazer login: " + error.message);
-      setLoading(false);
-      return;
-    }
-
-    if (data.user) {
-      // Buscar role do usuário para redirecionar corretamente
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", data.user.id)
-        .single();
+      // Store user in localStorage
+      authAPI.setStoredUser(user);
 
       toast.success("Login realizado com sucesso!");
-      
+
       // Redirecionar baseado no role
-      switch (roleData?.role) {
+      switch (user.role) {
         case "ADMIN":
           navigate("/admin");
           break;
@@ -58,9 +45,11 @@ const Login = () => {
           navigate("/cliente");
           break;
       }
+    } catch (error: any) {
+      toast.error("Erro ao fazer login: " + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

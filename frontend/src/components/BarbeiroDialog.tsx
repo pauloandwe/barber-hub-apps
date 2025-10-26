@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { authAPI } from "@/api/auth";
+import { barbersAPI } from "@/api/barbers";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -30,14 +31,13 @@ export const BarbeiroDialog = ({ open, onOpenChange, barbeariaId, onSuccess }: B
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("barbeiros").insert({
+      const barbeariaIdNum = parseInt(barbeariaId);
+      await barbersAPI.create({
+        businessId: barbeariaIdNum,
         nome,
-        bio: bio || null,
-        barbearia_id: barbeariaId,
+        especialidades: [],
         ativo: true,
       });
-
-      if (error) throw error;
 
       toast.success("Barbeiro cadastrado com sucesso!");
       onSuccess();
