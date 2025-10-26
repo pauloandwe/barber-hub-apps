@@ -34,7 +34,7 @@ export class CreateInitialTables1700000000000 implements MigrationInterface {
         "name" VARCHAR(255) NOT NULL,
         "phone" VARCHAR(20) UNIQUE NOT NULL,
         "type" VARCHAR(50) NOT NULL,
-        "token" VARCHAR(255) UNIQUE NOT NULL,
+        "token" VARCHAR(255) UNIQUE,
         "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )

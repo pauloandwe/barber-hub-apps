@@ -31,8 +31,16 @@ export class BusinessService {
   }
 
   async create(createBusinessDto: CreateBusinessDto): Promise<BusinessEntity> {
+    // Generate a unique token if not provided
+    if (!createBusinessDto.token) {
+      createBusinessDto.token = this.generateToken();
+    }
     const business = this.businessRepository.create(createBusinessDto);
     return this.businessRepository.save(business);
+  }
+
+  private generateToken(): string {
+    return 'TOKEN_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   }
 
   async update(

@@ -33,17 +33,39 @@ export interface UserProfile {
 
 export const authAPI = {
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await apiClient.post('/auth/register', data);
-    const authData = response.data.data.data;
-    apiClient.setToken(authData.access_token);
-    return authData;
+    try {
+      console.log('🔄 Iniciando registro com email:', data.email);
+      const response = await apiClient.post('/auth/register', data);
+      console.log('✅ Resposta do servidor:', response.data);
+      const authData = response.data.data.data;
+      apiClient.setToken(authData.access_token);
+      console.log('✅ Token armazenado com sucesso');
+      return authData;
+    } catch (error: any) {
+      console.error('❌ Erro no registro:', error);
+      console.error('Response:', error.response?.data);
+      console.error('Message:', error.message);
+      throw error;
+    }
   },
 
   async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await apiClient.post('/auth/login', data);
-    const authData = response.data.data.data;
-    apiClient.setToken(authData.access_token);
-    return authData;
+    try {
+      console.log('🔄 Iniciando login com email:', data.email);
+      console.log('📍 URL da API:', import.meta.env.VITE_API_URL);
+      const response = await apiClient.post('/auth/login', data);
+      console.log('✅ Resposta do servidor:', response.data);
+      const authData = response.data.data.data;
+      apiClient.setToken(authData.access_token);
+      console.log('✅ Token armazenado com sucesso');
+      return authData;
+    } catch (error: any) {
+      console.error('❌ Erro no login:', error);
+      console.error('Status:', error.response?.status);
+      console.error('Data:', error.response?.data);
+      console.error('Message:', error.message);
+      throw error;
+    }
   },
 
   async getProfile(): Promise<UserProfile> {

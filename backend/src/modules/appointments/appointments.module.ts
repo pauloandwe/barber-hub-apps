@@ -7,10 +7,19 @@ import {
   BusinessEntity,
   ServiceEntity,
   BarberEntity,
+  ProfileEntity,
 } from 'src/database/entities';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AppointmentEntity, BusinessEntity, ServiceEntity, BarberEntity])],
+  imports: [
+    TypeOrmModule.forFeature([
+      AppointmentEntity,
+      BusinessEntity,
+      ServiceEntity,
+      BarberEntity,
+      ProfileEntity,
+    ]),
+  ],
   controllers: [AppointmentsController],
   providers: [AppointmentsService],
   exports: [AppointmentsService],

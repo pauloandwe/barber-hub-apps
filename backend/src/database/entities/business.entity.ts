@@ -28,8 +28,8 @@ export class BusinessEntity {
   @Column({ type: 'varchar', length: 50 })
   type: string;
 
-  @Column({ type: 'varchar', length: 255, unique: true })
-  token: string;
+  @Column({ type: 'varchar', length: 255, unique: true, nullable: true })
+  token?: string;
 
   @CreateDateColumn()
   createdAt: Date;
