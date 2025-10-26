@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: barber_hub_postgres
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME:-barber_hub}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-barber_hub_password}
+      POSTGRES_DB: ${DATABASE_NAME:-barber_hub_db}
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-barber_hub}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - barber_hub_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: barber_hub_backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-3001}
+      DATABASE_HOST: postgres
+      DATABASE_PORT: ${DATABASE_PORT:-5432}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-barber_hub}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-barber_hub_password}
+      DATABASE_NAME: ${DATABASE_NAME:-barber_hub_db}
+      JWT_SECRET: ${JWT_SECRET:-jwt-secret-key}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-24h}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173,http://localhost:3000}
+    ports:
+      - "${PORT:-3001}:3001"
+    volumes:
+      - ./src:/app/src
+      - /app/node_modules
+    command: npm run start:dev
+    networks:
+      - barber_hub_network
+
+volumes:
+  postgres_data:
+
+networks:
+  barber_hub_network:
+    driver: bridge
