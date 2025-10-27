@@ -6,6 +6,8 @@ import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { BloqueiosModule } from './modules/bloqueios/bloqueios.module';
 import { UsersModule } from './modules/users/users.module';
 import { BusinessModule } from './modules/business/business.module';
+import { BarbersModule } from './modules/barbers/barbers.module';
+import { ServicesModule } from './modules/services/services.module';
 import { getDatabaseConfig } from './config/database.config';
 import {
   BusinessEntity,
@@ -44,6 +46,8 @@ import {
     BloqueiosModule,
     UsersModule,
     BusinessModule,
+    BarbersModule,
+    ServicesModule,
   ],
 })
 export class AppModule {}

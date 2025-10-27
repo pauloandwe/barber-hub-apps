@@ -18,6 +18,7 @@ export interface AuthResponse {
   nome: string;
   telefone: string;
   role: 'ADMIN' | 'BARBEARIA' | 'CLIENTE';
+  barbearia_id?: number;
   access_token: string;
 }
 
@@ -55,9 +56,24 @@ export const authAPI = {
       console.log('📍 URL da API:', import.meta.env.VITE_API_URL);
       const response = await apiClient.post('/auth/login', data);
       console.log('✅ Resposta do servidor:', response.data);
-      const authData = response.data.data.data;
+      const authData = response.data.data.data as AuthResponse;
       apiClient.setToken(authData.access_token);
       console.log('✅ Token armazenado com sucesso');
+
+      // Garantir que usuários de barbearia tenham o barbearia_id carregado
+      if (authData.role === 'BARBEARIA' && !authData.barbearia_id) {
+        try {
+          const profile = await authAPI.getProfile();
+          console.log('ℹ️ Perfil carregado após login:', profile);
+          return {
+            ...profile,
+            access_token: authData.access_token,
+          };
+        } catch (profileError) {
+          console.error('⚠️ Falha ao carregar perfil após login:', profileError);
+        }
+      }
+
       return authData;
     } catch (error: any) {
       console.error('❌ Erro no login:', error);

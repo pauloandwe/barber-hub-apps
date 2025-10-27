@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { authAPI } from "@/api/auth";
 import { appointmentsAPI } from "@/api/appointments";
 import { barbersAPI } from "@/api/barbers";
@@ -45,7 +45,7 @@ interface Barbeiro {
 
 const BarbeariaDashboard = () => {
   const navigate = useNavigate();
-  const { barbeariaId } = useUserRole();
+  const { barbeariaId, loading: roleLoading } = useUserRole();
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [servicos, setServicos] = useState<Servico[]>([]);
   const [barbeiros, setBarbeiros] = useState<Barbeiro[]>([]);
@@ -54,18 +54,28 @@ const BarbeariaDashboard = () => {
   const [servicoDialogOpen, setServicoDialogOpen] = useState(false);
   const [barbeiroDialogOpen, setBarbeiroDialogOpen] = useState(false);
   const [selectedBarbeiroId, setSelectedBarbeiroId] = useState<string>("");
+  const hasWarnedWithoutBarbearia = useRef(false);
 
   useEffect(() => {
-    if (barbeariaId) {
-      fetchData();
+    if (roleLoading) return;
+
+    if (!barbeariaId) {
+      if (!hasWarnedWithoutBarbearia.current) {
+        toast.error("Não foi possível encontrar uma barbearia vinculada ao seu usuário.");
+        hasWarnedWithoutBarbearia.current = true;
+      }
+      setLoading(false);
+      return;
     }
-  }, [barbeariaId]);
+    hasWarnedWithoutBarbearia.current = false;
 
-  const fetchData = async () => {
-    if (!barbeariaId) return;
+    fetchData(barbeariaId);
+  }, [barbeariaId, roleLoading]);
 
+  const fetchData = async (targetBarbeariaId: string | number) => {
     try {
-      const barbeariaIdNum = typeof barbeariaId === 'string' ? parseInt(barbeariaId) : barbeariaId;
+      const barbeariaIdNum =
+        typeof targetBarbeariaId === "string" ? parseInt(targetBarbeariaId, 10) : targetBarbeariaId;
 
       // Buscar info da barbearia
       const business = await businessAPI.getById(barbeariaIdNum);

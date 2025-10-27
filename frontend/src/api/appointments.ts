@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient } from "./client";
 
 export interface Appointment {
   id: number;
@@ -7,8 +7,8 @@ export interface Appointment {
   clienteId: number;
   data_inicio: string;
   data_fim: string;
-  status: 'pendente' | 'confirmado' | 'cancelado';
-  origem: 'web' | 'whatsapp';
+  status: "pendente" | "confirmado" | "cancelado";
+  origem: "web" | "whatsapp";
   observacoes?: string;
   createdAt?: string;
 }
@@ -18,8 +18,8 @@ export interface CreateAppointmentRequest {
   clienteId: number;
   data_inicio: string;
   data_fim: string;
-  status?: 'pendente' | 'confirmado' | 'cancelado';
-  origem?: 'web' | 'whatsapp';
+  status?: "pendente" | "confirmado" | "cancelado";
+  origem?: "web" | "whatsapp";
   observacoes?: string;
 }
 
@@ -28,8 +28,8 @@ export interface UpdateAppointmentRequest {
   clienteId?: number;
   data_inicio?: string;
   data_fim?: string;
-  status?: 'pendente' | 'confirmado' | 'cancelado';
-  origem?: 'web' | 'whatsapp';
+  status?: "pendente" | "confirmado" | "cancelado";
+  origem?: "web" | "whatsapp";
   observacoes?: string;
 }
 
@@ -38,14 +38,14 @@ export const appointmentsAPI = {
     const response = await apiClient.get(
       `/appointments/${businessId}/appointments`
     );
-    return response.data.data || [];
+    return response?.data?.data?.data || response?.data?.data || [];
   },
 
   async getById(businessId: number, id: number): Promise<Appointment> {
     const response = await apiClient.get(
       `/appointments/${businessId}/appointments/${id}`
     );
-    return response.data.data;
+    return response?.data?.data;
   },
 
   async create(
@@ -56,7 +56,7 @@ export const appointmentsAPI = {
       `/appointments/${businessId}/appointments`,
       data
     );
-    return response.data.data;
+    return response?.data?.data;
   },
 
   async update(
@@ -68,7 +68,7 @@ export const appointmentsAPI = {
       `/appointments/${businessId}/appointments/${id}`,
       data
     );
-    return response.data.data;
+    return response?.data?.data;
   },
 
   async partialUpdate(
@@ -80,7 +80,7 @@ export const appointmentsAPI = {
       `/appointments/${businessId}/appointments/${id}`,
       data
     );
-    return response.data.data;
+    return response?.data?.data;
   },
 
   async delete(businessId: number, id: number): Promise<void> {
@@ -88,7 +88,7 @@ export const appointmentsAPI = {
   },
 
   async getSuggestions(data: any): Promise<any> {
-    const response = await apiClient.post('/appointments/suggest', data);
-    return response.data.data;
+    const response = await apiClient.post("/appointments/suggest", data);
+    return response?.data?.data;
   },
 };
