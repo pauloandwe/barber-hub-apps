@@ -7,12 +7,8 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get<UserRole[]>(
-      'roles',
-      context.getHandler(),
-    );
+    const requiredRoles = this.reflector.get<UserRole[]>('roles', context.getHandler());
 
-    // If no roles are required, allow access
     if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
@@ -24,7 +20,6 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
-    // Check if user has one of the required roles
     return requiredRoles.includes(user.role);
   }
 }

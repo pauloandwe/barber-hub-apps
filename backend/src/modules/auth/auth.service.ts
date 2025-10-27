@@ -48,15 +48,15 @@ export class AuthService {
     }
 
     // Hash password
-    const password_hash = await bcrypt.hash(registerDto.password, 10);
+    const passwordHash = await bcrypt.hash(registerDto.password, 10);
 
     // Create new user
     const newProfile = this.profileRepository.create({
       email: registerDto.email,
-      password_hash,
-      nome: registerDto.nome,
-      telefone: registerDto.telefone,
-      role: registerDto.role || UserRole.CLIENTE,
+      passwordHash,
+      name: registerDto.nome,
+      phone: registerDto.telefone ?? undefined,
+      role: registerDto.role || UserRole.CLIENT,
     });
 
     const savedProfile = await this.profileRepository.save(newProfile);
@@ -71,8 +71,8 @@ export class AuthService {
     return {
       id: savedProfile.id,
       email: savedProfile.email,
-      nome: savedProfile.nome,
-      telefone: savedProfile.telefone,
+      nome: savedProfile.name,
+      telefone: savedProfile.phone,
       role: savedProfile.role,
       access_token,
     };
@@ -89,7 +89,7 @@ export class AuthService {
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password_hash);
+    const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -105,8 +105,8 @@ export class AuthService {
     return {
       id: user.id,
       email: user.email,
-      nome: user.nome,
-      telefone: user.telefone,
+      nome: user.name,
+      telefone: user.phone,
       role: user.role,
       access_token,
     };
@@ -124,11 +124,11 @@ export class AuthService {
     return {
       id: user.id,
       email: user.email,
-      nome: user.nome,
-      telefone: user.telefone,
+      nome: user.name,
+      telefone: user.phone,
       role: user.role,
-      barbearia_id: user.barbearia_id,
-      created_at: user.created_at,
+      barbearia_id: user.businessId,
+      created_at: user.createdAt,
     };
   }
 

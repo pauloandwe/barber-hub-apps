@@ -16,23 +16,23 @@ export class CreateAppointmentDto {
 
   @IsNumber()
   @IsNotEmpty()
-  clienteId: number;
+  clientId: number;
 
   @IsDateString()
   @IsNotEmpty()
-  data_inicio: string; // ISO 8601 timestamp
+  startDate: string;
 
   @IsDateString()
   @IsNotEmpty()
-  data_fim: string; // ISO 8601 timestamp
+  endDate: string;
 
   @IsString()
   @IsOptional()
-  observacoes?: string;
+  notes?: string;
 
   @IsEnum(AppointmentOrigin)
   @IsOptional()
-  origem?: AppointmentOrigin;
+  source?: AppointmentOrigin;
 }
 
 export class UpdateAppointmentDto {
@@ -46,23 +46,23 @@ export class UpdateAppointmentDto {
 
   @IsNumber()
   @IsOptional()
-  clienteId?: number;
+  clientId?: number;
 
   @IsDateString()
   @IsOptional()
-  data_inicio?: string;
+  startDate?: string;
 
   @IsDateString()
   @IsOptional()
-  data_fim?: string;
+  endDate?: string;
 
   @IsString()
   @IsOptional()
-  observacoes?: string;
+  notes?: string;
 
   @IsEnum(AppointmentOrigin)
   @IsOptional()
-  origem?: AppointmentOrigin;
+  source?: AppointmentOrigin;
 }
 
 export class SuggestAppointmentDto {
@@ -80,7 +80,7 @@ export class SuggestAppointmentDto {
 
   @IsDateString()
   @IsOptional()
-  data_inicio?: string;
+  startDate?: string;
 }
 
 export class AppointmentResponseDto {
@@ -88,11 +88,11 @@ export class AppointmentResponseDto {
   businessId: number;
   serviceId: number;
   barberId: number;
-  clienteId: number;
-  data_inicio: Date;
-  data_fim: Date;
-  observacoes: string;
-  origem: string;
+  clientId: number;
+  startDate: Date;
+  endDate: Date;
+  notes: string;
+  source: string;
   status: string;
   createdAt: Date;
   updatedAt: Date;

@@ -6,7 +6,7 @@ interface UserProfile {
   id: number;
   email: string;
   nome: string;
-  role: "ADMIN" | "BARBEARIA" | "CLIENTE";
+  role: "ADMIN" | "BARBERSHOP" | "CLIENT";
   telefone?: string;
   barbearia_id?: number;
   access_token: string;
@@ -14,7 +14,7 @@ interface UserProfile {
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  requiredRole?: "ADMIN" | "BARBEARIA" | "CLIENTE";
+  requiredRole?: "ADMIN" | "BARBERSHOP" | "CLIENT";
 }
 
 export const AuthGuard = ({ children, requiredRole }: AuthGuardProps) => {
@@ -27,35 +27,35 @@ export const AuthGuard = ({ children, requiredRole }: AuthGuardProps) => {
       const storedUser = authAPI.getStoredUser();
 
       if (!storedUser) {
+        setUser(null);
+        setLoading(false);
         navigate("/login");
-        setLoading(false);
         return;
       }
 
-      setUser(storedUser as UserProfile);
-
-      if (!requiredRole) {
+      if (requiredRole && storedUser.role !== requiredRole) {
+        console.log("storedUser", storedUser.role);
+        setUser(null);
         setLoading(false);
-        return;
-      }
 
-      // Verificar se o usuário tem o role necessário
-      if (storedUser.role !== requiredRole) {
-        // Redirecionar para a página correta baseado no role
+        // Redirecionar para a página correta baseado no role cadastrado
         switch (storedUser.role) {
           case "ADMIN":
             navigate("/admin");
             break;
-          case "BARBEARIA":
+          case "BARBERSHOP":
             navigate("/barbearia");
             break;
-          case "CLIENTE":
+          case "CLIENT":
             navigate("/cliente");
             break;
           default:
             navigate("/login");
         }
+        return;
       }
+
+      setUser(storedUser as UserProfile);
       setLoading(false);
     };
 

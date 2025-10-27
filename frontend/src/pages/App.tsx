@@ -3,7 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { authAPI } from "@/api/auth";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
 import { LogOut, Calendar, Users, Scissors, Building2 } from "lucide-react";
 
@@ -41,7 +47,7 @@ const AppPage = () => {
     switch (profile?.role) {
       case "ADMIN":
         return "Administrador";
-      case "BARBEARIA":
+      case "BARBERSHOP":
         return "Gestor de Barbearia";
       default:
         return "Cliente";
@@ -52,7 +58,7 @@ const AppPage = () => {
     switch (profile?.role) {
       case "ADMIN":
         return <Building2 className="h-8 w-8" />;
-      case "BARBEARIA":
+      case "BARBERSHOP":
         return <Scissors className="h-8 w-8" />;
       default:
         return <Users className="h-8 w-8" />;
@@ -78,7 +84,9 @@ const AppPage = () => {
         <main className="container mx-auto p-4 py-8">
           <div className="mb-8">
             <h2 className="text-3xl font-bold">Bem-vindo, {profile?.nome}!</h2>
-            <p className="text-muted-foreground mt-2">Você está logado como {getRoleTitle()}</p>
+            <p className="text-muted-foreground mt-2">
+              Você está logado como {getRoleTitle()}
+            </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -93,14 +101,21 @@ const AppPage = () => {
               </CardHeader>
               <CardContent>
                 <CardDescription className="space-y-2">
-                  <p><strong>Email:</strong> {profile?.email || "Não informado"}</p>
-                  <p><strong>Telefone:</strong> {profile?.telefone || "Não informado"}</p>
-                  <p><strong>Tipo:</strong> {getRoleTitle()}</p>
+                  <p>
+                    <strong>Email:</strong> {profile?.email || "Não informado"}
+                  </p>
+                  <p>
+                    <strong>Telefone:</strong>{" "}
+                    {profile?.telefone || "Não informado"}
+                  </p>
+                  <p>
+                    <strong>Tipo:</strong> {getRoleTitle()}
+                  </p>
                 </CardDescription>
               </CardContent>
             </Card>
 
-            {profile?.role === "CLIENTE" && (
+            {profile?.role === "CLIENT" && (
               <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -121,7 +136,7 @@ const AppPage = () => {
               </Card>
             )}
 
-            {profile?.role !== "CLIENTE" && (
+            {profile?.role !== "CLIENT" && (
               <>
                 <Card className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader>

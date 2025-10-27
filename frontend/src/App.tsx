@@ -24,37 +24,37 @@ const App = () => (
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route 
-            path="/admin" 
+          <Route
+            path="/admin"
             element={
               <AuthGuard requiredRole="ADMIN">
                 <AdminDashboard />
               </AuthGuard>
-            } 
+            }
           />
-          <Route 
-            path="/barbearia" 
+          <Route
+            path="/barbearia"
             element={
-              <AuthGuard requiredRole="BARBEARIA">
+              <AuthGuard requiredRole="BARBERSHOP">
                 <BarbeariaDashboard />
               </AuthGuard>
-            } 
+            }
           />
-          <Route 
-            path="/cliente" 
+          <Route
+            path="/cliente"
             element={
-              <AuthGuard requiredRole="CLIENTE">
+              <AuthGuard requiredRole="CLIENT">
                 <ClienteDashboard />
               </AuthGuard>
-            } 
+            }
           />
-          <Route 
-            path="/perfil" 
+          <Route
+            path="/perfil"
             element={
               <AuthGuard>
                 <Perfil />
               </AuthGuard>
-            } 
+            }
           />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

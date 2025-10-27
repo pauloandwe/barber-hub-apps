@@ -64,15 +64,13 @@ export class AppointmentsService {
       throw new NotFoundException('Barber not found');
     }
 
-    // Check for conflicts based on time range
-    // data_inicio and data_fim should be full timestamps
-    const dataInicio = new Date(createAppointmentDto.data_inicio);
-    const dataFim = new Date(createAppointmentDto.data_fim);
+    const startDate = new Date(createAppointmentDto.startDate);
+    const endDate = new Date(createAppointmentDto.endDate);
 
     const existingAppointment = await this.appointmentRepository.findOne({
       where: {
         barberId: createAppointmentDto.barberId,
-        data_inicio: dataInicio,
+        startDate: startDate,
       },
     });
 
@@ -84,11 +82,11 @@ export class AppointmentsService {
       businessId: createAppointmentDto.businessId,
       serviceId: createAppointmentDto.serviceId,
       barberId: createAppointmentDto.barberId,
-      clienteId: createAppointmentDto.clienteId,
-      data_inicio: dataInicio,
-      data_fim: dataFim,
-      observacoes: createAppointmentDto.observacoes,
-      origem: createAppointmentDto.origem,
+      clientId: createAppointmentDto.clientId,
+      startDate: startDate,
+      endDate: endDate,
+      notes: createAppointmentDto.notes,
+      source: createAppointmentDto.source,
     });
 
     const savedAppointment = await this.appointmentRepository.save(appointment);
@@ -112,17 +110,16 @@ export class AppointmentsService {
       throw new NotFoundException('Appointment not found');
     }
 
-    // Validate time slot if date changed
-    if (updateAppointmentDto.data_inicio || updateAppointmentDto.data_fim) {
-      const newStartTime = updateAppointmentDto.data_inicio
-        ? new Date(updateAppointmentDto.data_inicio)
-        : appointment.data_inicio;
+    if (updateAppointmentDto.startDate || updateAppointmentDto.endDate) {
+      const newStartTime = updateAppointmentDto.startDate
+        ? new Date(updateAppointmentDto.startDate)
+        : appointment.startDate;
       const barberId = updateAppointmentDto.barberId || appointment.barberId;
 
       const conflict = await this.appointmentRepository.findOne({
         where: {
           barberId,
-          data_inicio: newStartTime,
+          startDate: newStartTime,
           id: appointmentId !== appointmentId ? appointmentId : undefined,
         },
       });
@@ -132,13 +129,12 @@ export class AppointmentsService {
       }
     }
 
-    // Convert date strings to Date objects if present
     const updateData = { ...updateAppointmentDto };
-    if (updateData.data_inicio) {
-      updateData.data_inicio = new Date(updateData.data_inicio) as any;
+    if (updateData.startDate) {
+      updateData.startDate = new Date(updateData.startDate) as any;
     }
-    if (updateData.data_fim) {
-      updateData.data_fim = new Date(updateData.data_fim) as any;
+    if (updateData.endDate) {
+      updateData.endDate = new Date(updateData.endDate) as any;
     }
 
     Object.assign(appointment, updateData);
@@ -170,16 +166,12 @@ export class AppointmentsService {
     await this.appointmentRepository.remove(appointment);
   }
 
-  async suggestAppointments(
-    suggestAppointmentDto: SuggestAppointmentDto,
-  ): Promise<{ data: any }> {
-    // This endpoint returns suggestions for completing the appointment draft
-    const { businessId, serviceId, barberId, data_inicio } = suggestAppointmentDto;
+  async suggestAppointments(suggestAppointmentDto: SuggestAppointmentDto): Promise<{ data: any }> {
+    const { businessId, serviceId, barberId, startDate } = suggestAppointmentDto;
 
     const suggestions: any = {};
 
-    if (businessId && !data_inicio) {
-      // Suggest available dates
+    if (businessId && !startDate) {
       const business = await this.businessRepository.findOne({
         where: { id: businessId },
         relations: ['workingHours'],
@@ -208,7 +200,6 @@ export class AppointmentsService {
     const dates: string[] = [];
     const today = new Date();
 
-    // Generate available dates for the next 30 days
     for (let i = 1; i <= 30; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() + i);
@@ -231,11 +222,11 @@ export class AppointmentsService {
       businessId: appointment.businessId,
       serviceId: appointment.serviceId,
       barberId: appointment.barberId,
-      clienteId: appointment.clienteId,
-      data_inicio: appointment.data_inicio,
-      data_fim: appointment.data_fim,
-      observacoes: appointment.observacoes,
-      origem: appointment.origem,
+      clientId: appointment.clientId,
+      startDate: appointment.startDate,
+      endDate: appointment.endDate,
+      notes: appointment.notes,
+      source: appointment.source,
       status: appointment.status,
       createdAt: appointment.createdAt,
       updatedAt: appointment.updatedAt,

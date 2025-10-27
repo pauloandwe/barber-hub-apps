@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { authAPI } from "@/api/auth";
 
-type AppRole = "ADMIN" | "BARBEARIA" | "CLIENTE" | null;
+type AppRole = "ADMIN" | "BARBERSHOP" | "CLIENT" | null;
 
 export const useUserRole = () => {
   const [role, setRole] = useState<AppRole>(null);
@@ -22,8 +22,8 @@ export const useUserRole = () => {
 
         setRole(user.role as AppRole);
 
-        // Se for BARBEARIA, usar o ID da barbearia vinculada
-        if (user.role === "BARBEARIA") {
+        // Se for BARBERSHOP, usar o ID da barbearia vinculada
+        if (user.role === "BARBERSHOP") {
           setBarbeariaId(user.barbearia_id?.toString() || null);
         } else {
           setBarbeariaId(null);

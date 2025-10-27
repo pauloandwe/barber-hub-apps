@@ -132,8 +132,8 @@ export class BusinessService {
           where: {
             businessId: business.id,
             barberId: In(barberIds),
-            data_inicio: Between(startOfDay, endOfDay),
-            status: In([AppointmentStatus.PENDENTE, AppointmentStatus.CONFIRMADO]),
+            startDate: Between(startOfDay, endOfDay),
+            status: In([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED]),
           },
         })
       : [];
@@ -149,7 +149,7 @@ export class BusinessService {
 
       for (const appointment of appointmentsForBarber) {
         const busyInterval = this.clampInterval(
-          { start: appointment.data_inicio, end: appointment.data_fim },
+          { start: appointment.startDate, end: appointment.endDate },
           startOfDay,
           endOfDay,
         );
@@ -201,13 +201,14 @@ export class BusinessService {
   }
 
   private generateToken(): string {
-    return 'TOKEN_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    return (
+      'TOKEN_' +
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15)
+    );
   }
 
-  async update(
-    id: number,
-    updateBusinessDto: UpdateBusinessDto,
-  ): Promise<BusinessEntity> {
+  async update(id: number, updateBusinessDto: UpdateBusinessDto): Promise<BusinessEntity> {
     await this.businessRepository.update(id, updateBusinessDto);
     return this.findById(id);
   }

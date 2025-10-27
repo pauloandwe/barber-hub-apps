@@ -2,10 +2,8 @@ import { DataSource } from 'typeorm';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
 
-// Use project root as base for entity and migration discovery
 const projectRoot = process.cwd();
 
-// Load environment variables
 dotenv.config();
 
 export const AppDataSource = new DataSource({

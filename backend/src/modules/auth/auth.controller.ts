@@ -12,6 +12,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from './auth.service';
 import { BusinessResponseDto } from 'src/common/dtos/business-response.dto';
 import { RegisterDto, LoginDto, AuthResponseDto, UserProfileDto } from 'src/common/dtos/auth.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -69,6 +70,7 @@ export class AuthController {
     status: 401,
     description: 'Unauthorized',
   })
+  @UseGuards(JwtAuthGuard)
   async getMe(@Request() req: any): Promise<UserProfileDto> {
     return this.authService.getProfile(req.user?.id);
   }

@@ -10,7 +10,7 @@ export class SettingsEntity {
   businessId: number;
 
   @Column({ type: 'simple-array', default: '24,2' })
-  reminderHours?: string[]; // Will be stored and retrieved as string array
+  reminderHours?: string[];
 
   @Column({ type: 'boolean', default: true })
   enableReminders: boolean;
@@ -36,7 +36,6 @@ export class SettingsEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
-  // Relations
   @OneToOne(() => BusinessEntity, (business) => business.settings, {
     onDelete: 'CASCADE',
   })

@@ -71,7 +71,7 @@ export class BusinessController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBEARIA)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new business' })
   async create(@Body() createBusinessDto: CreateBusinessDto) {
@@ -80,13 +80,10 @@ export class BusinessController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBEARIA)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a business' })
-  async update(
-    @Param('id') id: number,
-    @Body() updateBusinessDto: UpdateBusinessDto,
-  ) {
+  async update(@Param('id') id: number, @Body() updateBusinessDto: UpdateBusinessDto) {
     return await this.businessService.update(id, updateBusinessDto);
   }
 

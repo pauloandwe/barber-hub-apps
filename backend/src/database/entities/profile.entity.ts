@@ -13,8 +13,8 @@ import { AppointmentEntity } from './appointment.entity';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
-  BARBEARIA = 'BARBEARIA',
-  CLIENTE = 'CLIENTE',
+  BARBERSHOP = 'BARBERSHOP',
+  CLIENT = 'CLIENT',
 }
 
 @Entity('profiles')
@@ -23,38 +23,37 @@ export class ProfileEntity {
   id: number;
 
   @Column({ type: 'varchar', length: 255 })
-  nome: string;
+  name: string;
 
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
-  telefone: string;
+  phone: string;
 
   @Column({ type: 'varchar', length: 255 })
-  password_hash: string;
+  passwordHash: string;
 
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.CLIENTE,
+    default: UserRole.CLIENT,
   })
   role: UserRole;
 
   @Column({ type: 'int', nullable: true })
-  barbearia_id: number;
+  businessId: number;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 
-  // Relations
   @ManyToOne(() => BusinessEntity, { onDelete: 'SET NULL', nullable: true })
-  @JoinColumn({ name: 'barbearia_id' })
-  barbearia: BusinessEntity;
+  @JoinColumn({ name: 'businessId' })
+  business: BusinessEntity;
 
-  @OneToMany(() => AppointmentEntity, (appointment) => appointment.cliente)
+  @OneToMany(() => AppointmentEntity, (appointment) => appointment.client)
   appointments: AppointmentEntity[];
 }

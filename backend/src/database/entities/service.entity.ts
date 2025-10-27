@@ -1,11 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BusinessEntity } from './business.entity';
 import { AppointmentEntity } from './appointment.entity';
 
@@ -24,7 +17,7 @@ export class ServiceEntity {
   description: string;
 
   @Column({ type: 'int' })
-  duration: number; // in minutes
+  duration: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
@@ -35,7 +28,6 @@ export class ServiceEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  // Relations
   @ManyToOne(() => BusinessEntity, (business) => business.services, {
     onDelete: 'CASCADE',
   })

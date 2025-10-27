@@ -28,7 +28,6 @@ export class BloqueioEntity {
   @CreateDateColumn()
   created_at: Date;
 
-  // Relations
   @ManyToOne(() => BarberEntity, (barber) => barber.bloqueios, {
     onDelete: 'CASCADE',
   })

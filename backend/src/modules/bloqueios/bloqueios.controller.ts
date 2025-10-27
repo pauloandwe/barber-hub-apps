@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { BloqueiosService, CreateBloqueioDto, BloqueioResponseDto } from './bloqueios.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -21,7 +13,7 @@ export class BloqueiosController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBEARIA)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Create a new bloqueio (time block)',
@@ -47,9 +39,7 @@ export class BloqueiosController {
     description: 'Bloqueios retrieved',
     type: [BloqueioResponseDto],
   })
-  async findByBarbeiro(
-    @Param('barbeiro_id') barbeiro_id: string,
-  ): Promise<BloqueioResponseDto[]> {
+  async findByBarbeiro(@Param('barbeiro_id') barbeiro_id: string): Promise<BloqueioResponseDto[]> {
     return this.bloqueiosService.findByBarbeiro(parseInt(barbeiro_id));
   }
 
@@ -65,7 +55,7 @@ export class BloqueiosController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBEARIA)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Delete a bloqueio',

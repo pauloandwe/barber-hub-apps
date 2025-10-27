@@ -12,7 +12,7 @@ export class CreateServiceDto {
   description?: string;
 
   @IsNumber()
-  duration: number; // in minutes
+  duration: number;
 
   @IsNumber()
   price: number;

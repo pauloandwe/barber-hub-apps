@@ -5,7 +5,7 @@ export interface UserProfile {
   email: string;
   nome: string;
   telefone?: string;
-  role: "ADMIN" | "BARBEARIA" | "CLIENTE";
+  role: "ADMIN" | "BARBERSHOP" | "CLIENT";
   barbearia_id?: number;
   created_at?: string;
   updated_at?: string;
@@ -15,7 +15,7 @@ export interface UpdateUserRequest {
   email?: string;
   nome?: string;
   telefone?: string;
-  role?: "ADMIN" | "BARBEARIA" | "CLIENTE";
+  role?: "ADMIN" | "BARBERSHOP" | "CLIENT";
   barbearia_id?: number;
 }
 

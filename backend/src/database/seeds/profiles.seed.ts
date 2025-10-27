@@ -5,7 +5,6 @@ import { ProfileEntity, UserRole } from '../entities';
 export const seedProfiles = async (dataSource: DataSource) => {
   const profileRepository = dataSource.getRepository(ProfileEntity);
 
-  // Check if users already exist
   const existingAdmin = await profileRepository.findOne({
     where: { email: 'admin@barberhub.com' },
   });
@@ -15,52 +14,55 @@ export const seedProfiles = async (dataSource: DataSource) => {
     return;
   }
 
-  // Create sample users
-  const users = [
+  const users: Array<{
+    email: string;
+    name: string;
+    phone?: string;
+    role: UserRole;
+    businessId?: number;
+    password: string;
+  }> = [
     {
       email: 'admin@barberhub.com',
-      nome: 'Administrador',
-      telefone: '5511988888888',
+      name: 'Administrador',
+      phone: '5511988888888',
       role: UserRole.ADMIN,
-      barbearia_id: null,
       password: 'admin123',
     },
     {
       email: 'barbearia@barberhub.com',
-      nome: 'Barbearia BarberHub',
-      telefone: '5511999999999',
-      role: UserRole.BARBEARIA,
-      barbearia_id: 1, // Will be set after business is created
+      name: 'Barbearia BarberHub',
+      phone: '5511999999999',
+      role: UserRole.BARBERSHOP,
+      businessId: 1,
       password: 'barbearia123',
     },
     {
       email: 'cliente@barberhub.com',
-      nome: 'João Silva',
-      telefone: '5511987654321',
-      role: UserRole.CLIENTE,
-      barbearia_id: null,
+      name: 'João Silva',
+      phone: '5511987654321',
+      role: UserRole.CLIENT,
       password: 'cliente123',
     },
     {
       email: 'cliente2@barberhub.com',
-      nome: 'Maria Santos',
-      telefone: '5511987654322',
-      role: UserRole.CLIENTE,
-      barbearia_id: null,
+      name: 'Maria Santos',
+      phone: '5511987654322',
+      role: UserRole.CLIENT,
       password: 'cliente123',
     },
   ];
 
   for (const userData of users) {
-    const password_hash = await bcrypt.hash(userData.password, 10);
+    const passwordHash = await bcrypt.hash(userData.password, 10);
 
     const profile = profileRepository.create({
       email: userData.email,
-      nome: userData.nome,
-      telefone: userData.telefone,
+      name: userData.name,
+      phone: userData.phone,
       role: userData.role,
-      barbearia_id: userData.barbearia_id,
-      password_hash,
+      businessId: userData.businessId,
+      passwordHash,
     });
 
     await profileRepository.save(profile);

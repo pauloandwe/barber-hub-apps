@@ -1,11 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BusinessEntity } from './business.entity';
 import { AppointmentEntity } from './appointment.entity';
 import { BloqueioEntity } from './bloqueio.entity';
@@ -30,7 +23,6 @@ export class BarberEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  // Relations
   @ManyToOne(() => BusinessEntity, (business) => business.barbers, {
     onDelete: 'CASCADE',
   })

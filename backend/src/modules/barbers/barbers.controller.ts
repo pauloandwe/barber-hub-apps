@@ -74,7 +74,7 @@ export class BarbersController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBEARIA)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new barber' })
   @ApiResponse({
@@ -100,7 +100,7 @@ export class BarbersController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBEARIA)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a barber' })
   @ApiResponse({
@@ -108,10 +108,7 @@ export class BarbersController {
     description: 'Barber updated successfully',
     type: BarberResponseDto,
   })
-  async update(
-    @Param('id') id: string,
-    @Body() updateBarberDto: UpdateBarberDto,
-  ): Promise<any> {
+  async update(@Param('id') id: string, @Body() updateBarberDto: UpdateBarberDto): Promise<any> {
     const barber = await this.barbersService.update(parseInt(id), updateBarberDto);
     return {
       data: {
@@ -128,7 +125,7 @@ export class BarbersController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBEARIA)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a barber' })
   @ApiResponse({

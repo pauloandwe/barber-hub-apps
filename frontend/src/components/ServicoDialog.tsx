@@ -16,15 +16,15 @@ interface ServicoDialogProps {
 }
 
 export const ServicoDialog = ({ open, onOpenChange, barbeariaId, onSuccess }: ServicoDialogProps) => {
-  const [nome, setNome] = useState("");
-  const [preco, setPreco] = useState("");
-  const [duracao, setDuracao] = useState("");
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [duration, setDuration] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!nome || !preco || !duracao) {
+    if (!name || !price || !duration) {
       toast.error("Preencha todos os campos");
       return;
     }
@@ -34,11 +34,11 @@ export const ServicoDialog = ({ open, onOpenChange, barbeariaId, onSuccess }: Se
       const barbeariaIdNum = parseInt(barbeariaId);
       await servicesAPI.create({
         businessId: barbeariaIdNum,
-        nome,
-        descricao: undefined,
-        duracao: parseInt(duracao),
-        preco: parseFloat(preco),
-        ativo: true,
+        name,
+        description: undefined,
+        duration: parseInt(duration),
+        price: parseFloat(price),
+        active: true,
       });
 
       toast.success("Serviço cadastrado com sucesso!");
@@ -54,9 +54,9 @@ export const ServicoDialog = ({ open, onOpenChange, barbeariaId, onSuccess }: Se
   };
 
   const resetForm = () => {
-    setNome("");
-    setPreco("");
-    setDuracao("");
+    setName("");
+    setPrice("");
+    setDuration("");
   };
 
   return (
@@ -69,40 +69,40 @@ export const ServicoDialog = ({ open, onOpenChange, barbeariaId, onSuccess }: Se
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="nome">Nome do Serviço *</Label>
+            <Label htmlFor="name">Nome do Serviço *</Label>
             <Input
-              id="nome"
+              id="name"
               placeholder="Ex: Corte de Cabelo"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="preco">Preço (R$) *</Label>
+            <Label htmlFor="price">Preço (R$) *</Label>
             <Input
-              id="preco"
+              id="price"
               type="number"
               step="0.01"
               min="0"
               placeholder="Ex: 30.00"
-              value={preco}
-              onChange={(e) => setPreco(e.target.value)}
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="duracao">Duração (minutos) *</Label>
+            <Label htmlFor="duration">Duração (minutos) *</Label>
             <Input
-              id="duracao"
+              id="duration"
               type="number"
               min="5"
               step="5"
               placeholder="Ex: 30"
-              value={duracao}
-              onChange={(e) => setDuracao(e.target.value)}
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
               required
             />
           </div>

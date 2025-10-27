@@ -13,9 +13,9 @@ import { BarberEntity } from './barber.entity';
 import { ProfileEntity } from './profile.entity';
 
 export enum AppointmentStatus {
-  PENDENTE = 'pendente',
-  CONFIRMADO = 'confirmado',
-  CANCELADO = 'cancelado',
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELED = 'canceled',
 }
 
 export enum AppointmentOrigin {
@@ -38,18 +38,18 @@ export class AppointmentEntity {
   barberId: number;
 
   @Column({ type: 'int' })
-  clienteId: number;
+  clientId: number;
 
   @Column({ type: 'timestamp with time zone' })
-  data_inicio: Date;
+  startDate: Date;
 
   @Column({ type: 'timestamp with time zone' })
-  data_fim: Date;
+  endDate: Date;
 
   @Column({
     type: 'enum',
     enum: AppointmentStatus,
-    default: AppointmentStatus.PENDENTE,
+    default: AppointmentStatus.PENDING,
   })
   status: AppointmentStatus;
 
@@ -59,10 +59,10 @@ export class AppointmentEntity {
     default: AppointmentOrigin.WEB,
     nullable: true,
   })
-  origem: AppointmentOrigin;
+  source: AppointmentOrigin;
 
   @Column({ type: 'text', nullable: true })
-  observacoes: string;
+  notes: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -70,7 +70,6 @@ export class AppointmentEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // Relations
   @ManyToOne(() => BusinessEntity, (business) => business.appointments, {
     onDelete: 'CASCADE',
   })
@@ -92,6 +91,6 @@ export class AppointmentEntity {
   @ManyToOne(() => ProfileEntity, (profile) => profile.appointments, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'clienteId' })
-  cliente: ProfileEntity;
+  @JoinColumn({ name: 'clientId' })
+  client: ProfileEntity;
 }

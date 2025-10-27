@@ -3,11 +3,25 @@ import { businessAPI } from "@/api/business";
 import { usersAPI } from "@/api/users";
 import { authAPI } from "@/api/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Scissors, Plus, Building2, LogOut, Users, UserCog, User } from "lucide-react";
+import {
+  Scissors,
+  Plus,
+  Building2,
+  LogOut,
+  Users,
+  UserCog,
+  User,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Dialog,
@@ -132,7 +146,9 @@ const AdminDashboard = () => {
   const handleEditUser = (user: Usuario) => {
     setSelectedUser(user);
     setSelectedRole(user.role);
-    setSelectedBarbeariaId(user.barbearia_id ? user.barbearia_id.toString() : "");
+    setSelectedBarbeariaId(
+      user.barbearia_id ? user.barbearia_id.toString() : ""
+    );
     setUserDialogOpen(true);
   };
 
@@ -141,9 +157,9 @@ const AdminDashboard = () => {
 
     try {
       await usersAPI.update(selectedUser.id, {
-        role: selectedRole as "ADMIN" | "BARBEARIA" | "CLIENTE",
+        role: selectedRole as "ADMIN" | "BARBERSHOP" | "CLIENT",
         barbearia_id:
-          selectedRole === "BARBEARIA"
+          selectedRole === "BARBERSHOP"
             ? parseInt(selectedBarbeariaId) || undefined
             : undefined,
       });
@@ -179,16 +195,16 @@ const AdminDashboard = () => {
             <Scissors className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-bold">Painel Admin</h1>
           </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => navigate("/perfil")}>
-                <User className="mr-2 h-4 w-4" />
-                Perfil
-              </Button>
-              <Button variant="outline" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Sair
-              </Button>
-            </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate("/perfil")}>
+              <User className="mr-2 h-4 w-4" />
+              Perfil
+            </Button>
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -209,7 +225,9 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-3xl font-bold">Barbearias</h2>
-                <p className="text-muted-foreground">Gerencie todas as barbearias do sistema</p>
+                <p className="text-muted-foreground">
+                  Gerencie todas as barbearias do sistema
+                </p>
               </div>
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
@@ -231,7 +249,9 @@ const AdminDashboard = () => {
                       <Input
                         id="nome"
                         value={formData.nome}
-                        onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, nome: e.target.value })
+                        }
                         required
                       />
                     </div>
@@ -241,7 +261,9 @@ const AdminDashboard = () => {
                         id="email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -249,7 +271,9 @@ const AdminDashboard = () => {
                       <Input
                         id="telefone"
                         value={formData.telefone}
-                        onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, telefone: e.target.value })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -257,10 +281,14 @@ const AdminDashboard = () => {
                       <Input
                         id="endereco"
                         value={formData.endereco}
-                        onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, endereco: e.target.value })
+                        }
                       />
                     </div>
-                    <Button type="submit" className="w-full">Criar Barbearia</Button>
+                    <Button type="submit" className="w-full">
+                      Criar Barbearia
+                    </Button>
                   </form>
                 </DialogContent>
               </Dialog>
@@ -277,10 +305,14 @@ const AdminDashboard = () => {
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
                     {barbearia.phone && (
-                      <p className="text-muted-foreground">📱 {barbearia.phone}</p>
+                      <p className="text-muted-foreground">
+                        📱 {barbearia.phone}
+                      </p>
                     )}
                     {barbearia.type && (
-                      <p className="text-muted-foreground">🏪 {barbearia.type}</p>
+                      <p className="text-muted-foreground">
+                        🏪 {barbearia.type}
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -291,7 +323,9 @@ const AdminDashboard = () => {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-10">
                   <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">Nenhuma barbearia cadastrada ainda</p>
+                  <p className="text-muted-foreground">
+                    Nenhuma barbearia cadastrada ainda
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -300,7 +334,9 @@ const AdminDashboard = () => {
           <TabsContent value="usuarios" className="space-y-6">
             <div>
               <h2 className="text-3xl font-bold">Usuários</h2>
-              <p className="text-muted-foreground">Gerencie usuários e suas permissões</p>
+              <p className="text-muted-foreground">
+                Gerencie usuários e suas permissões
+              </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -309,11 +345,15 @@ const AdminDashboard = () => {
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <UserCog className="h-8 w-8 text-primary" />
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        usuario.role === 'ADMIN' ? 'bg-red-100 text-red-800' :
-                        usuario.role === 'BARBEARIA' ? 'bg-blue-100 text-blue-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${
+                          usuario.role === "ADMIN"
+                            ? "bg-red-100 text-red-800"
+                            : usuario.role === "BARBERSHOP"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
                         {usuario.role}
                       </span>
                     </div>
@@ -321,14 +361,18 @@ const AdminDashboard = () => {
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
                     {usuario.telefone && (
-                      <p className="text-muted-foreground">📱 {usuario.telefone}</p>
+                      <p className="text-muted-foreground">
+                        📱 {usuario.telefone}
+                      </p>
                     )}
                     {usuario.barbearia_nome && (
-                      <p className="text-muted-foreground">🏪 {usuario.barbearia_nome}</p>
+                      <p className="text-muted-foreground">
+                        🏪 {usuario.barbearia_nome}
+                      </p>
                     )}
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="w-full mt-2"
                       onClick={() => handleEditUser(usuario)}
                     >
@@ -343,7 +387,9 @@ const AdminDashboard = () => {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-10">
                   <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">Nenhum usuário cadastrado ainda</p>
+                  <p className="text-muted-foreground">
+                    Nenhum usuário cadastrado ainda
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -371,21 +417,27 @@ const AdminDashboard = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ADMIN">ADMIN</SelectItem>
-                    <SelectItem value="BARBEARIA">BARBEARIA</SelectItem>
-                    <SelectItem value="CLIENTE">CLIENTE</SelectItem>
+                    <SelectItem value="BARBERSHOP">BARBERSHOP</SelectItem>
+                    <SelectItem value="CLIENT">CLIENT</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              {selectedRole === "BARBEARIA" && (
+              {selectedRole === "BARBERSHOP" && (
                 <div className="space-y-2">
                   <Label htmlFor="barbearia">Barbearia</Label>
-                  <Select value={selectedBarbeariaId} onValueChange={setSelectedBarbeariaId}>
+                  <Select
+                    value={selectedBarbeariaId}
+                    onValueChange={setSelectedBarbeariaId}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione uma barbearia" />
                     </SelectTrigger>
                     <SelectContent>
                       {barbearias.map((barbearia) => (
-                        <SelectItem key={barbearia.id} value={barbearia.id.toString()}>
+                        <SelectItem
+                          key={barbearia.id}
+                          value={barbearia.id.toString()}
+                        >
                           {barbearia.name}
                         </SelectItem>
                       ))}

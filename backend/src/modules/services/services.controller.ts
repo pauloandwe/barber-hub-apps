@@ -17,7 +17,11 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../../database/entities/profile.entity';
-import { CreateServiceDto, UpdateServiceDto, ServiceResponseDto } from '../../common/dtos/service.dto';
+import {
+  CreateServiceDto,
+  UpdateServiceDto,
+  ServiceResponseDto,
+} from '../../common/dtos/service.dto';
 
 @ApiTags('Services')
 @Controller('services')
@@ -76,7 +80,7 @@ export class ServicesController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBEARIA)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new service' })
   @ApiResponse({
@@ -103,7 +107,7 @@ export class ServicesController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBEARIA)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a service' })
   @ApiResponse({
@@ -111,10 +115,7 @@ export class ServicesController {
     description: 'Service updated successfully',
     type: ServiceResponseDto,
   })
-  async update(
-    @Param('id') id: string,
-    @Body() updateServiceDto: UpdateServiceDto,
-  ): Promise<any> {
+  async update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto): Promise<any> {
     const service = await this.servicesService.update(parseInt(id), updateServiceDto);
     return {
       data: {
@@ -132,7 +133,7 @@ export class ServicesController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBEARIA)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a service' })
   @ApiResponse({

@@ -22,7 +22,7 @@ export class UsersService {
 
   async findAll(): Promise<UserResponseDto[]> {
     const users = await this.profileRepository.find({
-      order: { created_at: 'DESC' },
+      order: { createdAt: 'DESC' },
     });
 
     return users.map((u) => this.formatUserResponse(u));
@@ -55,7 +55,7 @@ export class UsersService {
   async findByRole(role: UserRole): Promise<UserResponseDto[]> {
     const users = await this.profileRepository.find({
       where: { role },
-      order: { created_at: 'DESC' },
+      order: { createdAt: 'DESC' },
     });
 
     return users.map((u) => this.formatUserResponse(u));
@@ -103,11 +103,11 @@ export class UsersService {
     return {
       id: user.id,
       email: user.email,
-      nome: user.nome,
-      telefone: user.telefone,
+      nome: user.name,
+      telefone: user.phone,
       role: user.role,
-      barbearia_id: user.barbearia_id,
-      created_at: user.created_at,
+      barbearia_id: user.businessId,
+      created_at: user.createdAt,
     };
   }
 }

@@ -4,7 +4,13 @@ import { authAPI } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
 import { Scissors } from "lucide-react";
 
@@ -37,16 +43,19 @@ const Login = () => {
         case "ADMIN":
           navigate("/admin");
           break;
-        case "BARBEARIA":
+        case "BARBERSHOP":
           navigate("/barbearia");
           break;
-        case "CLIENTE":
+        case "CLIENT":
         default:
           navigate("/cliente");
           break;
       }
     } catch (error: any) {
-      toast.error("Erro ao fazer login: " + (error.response?.data?.message || error.message));
+      toast.error(
+        "Erro ao fazer login: " +
+          (error.response?.data?.message || error.message)
+      );
     } finally {
       setLoading(false);
     }
@@ -98,7 +107,10 @@ const Login = () => {
           </form>
           <div className="mt-4 text-center text-sm">
             <span className="text-muted-foreground">Não tem uma conta? </span>
-            <Link to="/register" className="font-medium text-primary hover:underline">
+            <Link
+              to="/register"
+              className="font-medium text-primary hover:underline"
+            >
               Cadastre-se
             </Link>
           </div>

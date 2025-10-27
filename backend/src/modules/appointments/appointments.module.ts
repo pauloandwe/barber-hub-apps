@@ -9,6 +9,7 @@ import {
   BarberEntity,
   ProfileEntity,
 } from 'src/database/entities';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import {
     ]),
   ],
   controllers: [AppointmentsController],
-  providers: [AppointmentsService],
+  providers: [AppointmentsService, JwtService],
   exports: [AppointmentsService],
 })
 export class AppointmentsModule {}

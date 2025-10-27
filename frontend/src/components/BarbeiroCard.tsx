@@ -12,44 +12,44 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-interface Barbeiro {
+interface Barber {
   id: string;
-  nome: string;
+  name: string;
   bio: string | null;
-  ativo: boolean;
+  active: boolean;
 }
 
-interface Agendamento {
+interface Appointment {
   id: string;
-  data_inicio: string;
-  data_fim: string;
+  startDate: string;
+  endDate: string;
   status: string;
-  profiles: { nome: string };
-  servicos: { nome: string; duracao_min: number };
+  profile: { name: string };
+  service: { name: string; duration: number };
 }
 
-interface BarbeiroCardProps {
-  barbeiro: Barbeiro;
-  onViewSchedule?: (barbeiroId: string) => void;
+interface BarberCardProps {
+  barber: Barber;
+  onViewSchedule?: (barberId: string) => void;
 }
 
-export const BarbeiroCard = ({ barbeiro }: BarbeiroCardProps) => {
+export const BarbeiroCard = ({ barber }: BarberCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      fetchAgendamentos();
+      fetchAppointments();
     }
   }, [isOpen]);
 
-  const fetchAgendamentos = async () => {
+  const fetchAppointments = async () => {
     setLoading(true);
     try {
-      // TODO: Fetch appointments filtered by barbeiro_id from business context
+      // TODO: Fetch appointments filtered by barberId from business context
       // For now, loading empty list as we need business context
-      setAgendamentos([]);
+      setAppointments([]);
     } catch (error) {
       console.error("Erro ao buscar agendamentos:", error);
     } finally {
@@ -74,13 +74,13 @@ export const BarbeiroCard = ({ barbeiro }: BarbeiroCardProps) => {
             <div className="space-y-1">
               <CardTitle className="flex items-center gap-2">
                 <UserIcon className="h-5 w-5" />
-                {barbeiro.nome}
+                {barber.name}
               </CardTitle>
-              {barbeiro.bio && <CardDescription>{barbeiro.bio}</CardDescription>}
+              {barber.bio && <CardDescription>{barber.bio}</CardDescription>}
             </div>
             <div className="flex gap-2">
-              <span className={`text-xs px-2 py-1 rounded ${barbeiro.ativo ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
-                {barbeiro.ativo ? "Ativo" : "Inativo"}
+              <span className={`text-xs px-2 py-1 rounded ${barber.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
+                {barber.active ? "Ativo" : "Inativo"}
               </span>
             </div>
           </div>
@@ -97,32 +97,32 @@ export const BarbeiroCard = ({ barbeiro }: BarbeiroCardProps) => {
               <div className="flex justify-center py-4">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               </div>
-            ) : agendamentos.length === 0 ? (
+            ) : appointments.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">
                 Nenhum horário agendado
               </p>
             ) : (
               <div className="space-y-3">
-                {agendamentos.map((agendamento) => (
+                {appointments.map((appointment) => (
                   <div
-                    key={agendamento.id}
+                    key={appointment.id}
                     className="border rounded-lg p-3 space-y-2"
                   >
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
                         <p className="text-sm font-medium flex items-center gap-2">
                           <Calendar className="h-4 w-4" />
-                          {format(new Date(agendamento.data_inicio), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                          {format(new Date(appointment.startDate), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {agendamento.servicos?.nome || "Serviço não disponível"} • {agendamento.servicos?.duracao_min || 0} min
+                          {appointment.service?.name || "Serviço não disponível"} • {appointment.service?.duration || 0} min
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Cliente: {agendamento.profiles?.nome || "Cliente não disponível"}
+                          Cliente: {appointment.profile?.name || "Cliente não disponível"}
                         </p>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded ${getStatusColor(agendamento.status)}`}>
-                        {agendamento.status}
+                      <span className={`text-xs px-2 py-1 rounded ${getStatusColor(appointment.status)}`}>
+                        {appointment.status}
                       </span>
                     </div>
                   </div>

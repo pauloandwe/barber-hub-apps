@@ -1,10 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BusinessEntity } from './business.entity';
 
 @Entity('working_hours')
@@ -16,24 +10,23 @@ export class WorkingHoursEntity {
   businessId: number;
 
   @Column({ type: 'int' })
-  dayOfWeek: number; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  dayOfWeek: number;
 
   @Column({ type: 'varchar', length: 5 })
-  openTime: string; // Format: HH:MM
+  openTime: string;
 
   @Column({ type: 'varchar', length: 5 })
-  closeTime: string; // Format: HH:MM
+  closeTime: string;
 
   @Column({ type: 'varchar', length: 5, nullable: true })
-  breakStart: string; // Format: HH:MM
+  breakStart: string;
 
   @Column({ type: 'varchar', length: 5, nullable: true })
-  breakEnd: string; // Format: HH:MM
+  breakEnd: string;
 
   @Column({ type: 'boolean', default: false })
   closed: boolean;
 
-  // Relations
   @ManyToOne(() => BusinessEntity, (business) => business.workingHours, {
     onDelete: 'CASCADE',
   })

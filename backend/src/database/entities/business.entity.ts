@@ -37,7 +37,6 @@ export class BusinessEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // Relations
   @OneToMany(() => WorkingHoursEntity, (workingHours) => workingHours.business, {
     cascade: true,
     eager: true,

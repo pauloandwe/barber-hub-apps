@@ -17,14 +17,14 @@ interface BarbeiroDialogProps {
 }
 
 export const BarbeiroDialog = ({ open, onOpenChange, barbeariaId, onSuccess }: BarbeiroDialogProps) => {
-  const [nome, setNome] = useState("");
+  const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!nome) {
+    if (!name) {
       toast.error("Preencha o nome do barbeiro");
       return;
     }
@@ -34,9 +34,9 @@ export const BarbeiroDialog = ({ open, onOpenChange, barbeariaId, onSuccess }: B
       const barbeariaIdNum = parseInt(barbeariaId);
       await barbersAPI.create({
         businessId: barbeariaIdNum,
-        nome,
-        especialidades: [],
-        ativo: true,
+        name,
+        specialties: [],
+        active: true,
       });
 
       toast.success("Barbeiro cadastrado com sucesso!");
@@ -52,7 +52,7 @@ export const BarbeiroDialog = ({ open, onOpenChange, barbeariaId, onSuccess }: B
   };
 
   const resetForm = () => {
-    setNome("");
+    setName("");
     setBio("");
   };
 
@@ -66,12 +66,12 @@ export const BarbeiroDialog = ({ open, onOpenChange, barbeariaId, onSuccess }: B
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="nome">Nome do Barbeiro *</Label>
+            <Label htmlFor="name">Nome do Barbeiro *</Label>
             <Input
-              id="nome"
+              id="name"
               placeholder="Ex: João Silva"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
