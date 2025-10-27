@@ -1,10 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 import { BusinessEntity } from './business.entity';
 
 @Entity('settings')
@@ -16,7 +10,7 @@ export class SettingsEntity {
   businessId: number;
 
   @Column({ type: 'simple-array', default: '24,2' })
-  reminderHours: string[]; // Will be stored and retrieved as string array
+  reminderHours?: string[]; // Will be stored and retrieved as string array
 
   @Column({ type: 'boolean', default: true })
   enableReminders: boolean;

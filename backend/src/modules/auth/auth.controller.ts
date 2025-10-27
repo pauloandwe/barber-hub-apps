@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, BadRequestException, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  BadRequestException,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { BusinessResponseDto } from 'src/common/dtos/business-response.dto';
@@ -61,25 +70,10 @@ export class AuthController {
     description: 'Unauthorized',
   })
   async getMe(@Request() req: any): Promise<UserProfileDto> {
-    // JWT payload is attached to request by JwtAuthGuard
     return this.authService.getProfile(req.user?.id);
   }
 
   @Get(':businessId/:phone')
-  @ApiOperation({
-    summary: 'Get business information and authentication token',
-    description:
-      'Retrieves business details including working hours, services, barbers, and settings',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Business found and returned successfully',
-    type: BusinessResponseDto,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Business not found',
-  })
   async getBusiness(
     @Param('businessId') businessId: string,
     @Param('phone') phone: string,

@@ -4,13 +4,27 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BusinessService } from './business.service';
 import { BusinessController } from './business.controller';
-import { BusinessEntity } from '../../database/entities/business.entity';
+import {
+  BusinessEntity,
+  ServiceEntity,
+  BarberEntity,
+  WorkingHoursEntity,
+  AppointmentEntity,
+  BloqueioEntity,
+} from '../../database/entities';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BusinessEntity]),
+    TypeOrmModule.forFeature([
+      BusinessEntity,
+      ServiceEntity,
+      BarberEntity,
+      WorkingHoursEntity,
+      AppointmentEntity,
+      BloqueioEntity,
+    ]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

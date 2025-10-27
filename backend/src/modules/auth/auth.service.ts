@@ -20,8 +20,7 @@ export class AuthService {
   async getBusiness(businessId: string, phone: string): Promise<BusinessResponseDto> {
     const business = await this.businessRepository.findOne({
       where: {
-        id: parseInt(businessId),
-        phone,
+        phone: businessId,
       },
       relations: ['workingHours', 'services', 'barbers', 'settings'],
     });
@@ -40,7 +39,6 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
-    // Check if user already exists
     const existingUser = await this.profileRepository.findOne({
       where: { email: registerDto.email },
     });
@@ -136,12 +134,12 @@ export class AuthService {
 
   private formatBusinessResponse(business: BusinessEntity): BusinessDataDto {
     return {
-      id: business.id,
-      token: business.token,
-      name: business.name,
-      phone: business.phone,
-      type: business.type,
-      workingHours: business.workingHours.map((wh) => ({
+      id: business?.id,
+      token: business?.token,
+      name: business?.name,
+      phone: business?.phone,
+      type: business?.type,
+      workingHours: business?.workingHours?.map((wh) => ({
         dayOfWeek: wh.dayOfWeek,
         openTime: wh.openTime,
         closeTime: wh.closeTime,
@@ -149,7 +147,7 @@ export class AuthService {
         breakEnd: wh.breakEnd,
         closed: wh.closed,
       })),
-      services: business.services.map((service) => ({
+      services: business?.services?.map((service) => ({
         id: service.id.toString(),
         name: service.name,
         description: service.description,
@@ -157,22 +155,20 @@ export class AuthService {
         price: parseFloat(service.price.toString()),
         active: service.active,
       })),
-      barbers: business.barbers.map((barber) => ({
+      barbers: business?.barbers?.map((barber) => ({
         id: barber.id.toString(),
         name: barber.name,
         specialties: barber.specialties || [],
         active: barber.active,
       })),
       settings: {
-        reminderHours: business.settings.reminderHours.map((h) =>
-          parseInt(h),
-        ),
-        enableReminders: business.settings.enableReminders,
-        allowCancellation: business.settings.allowCancellation,
-        cancellationDeadlineHours: business.settings.cancellationDeadlineHours,
-        allowReschedule: business.settings.allowReschedule,
-        rescheduleDeadlineHours: business.settings.rescheduleDeadlineHours,
-        autoConfirmAppointments: business.settings.autoConfirmAppointments,
+        reminderHours: business?.settings?.reminderHours?.map((h) => parseInt(h)) || [],
+        enableReminders: business?.settings?.enableReminders,
+        allowCancellation: business?.settings?.allowCancellation,
+        cancellationDeadlineHours: business?.settings?.cancellationDeadlineHours,
+        allowReschedule: business?.settings?.allowReschedule,
+        rescheduleDeadlineHours: business?.settings?.rescheduleDeadlineHours,
+        autoConfirmAppointments: business?.settings?.autoConfirmAppointments,
       },
     };
   }

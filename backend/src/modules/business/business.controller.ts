@@ -7,6 +7,8 @@ import {
   Param,
   Body,
   UseGuards,
+  Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { BusinessService } from './business.service';
@@ -32,6 +34,39 @@ export class BusinessController {
   @ApiOperation({ summary: 'Get business by ID' })
   async findById(@Param('id') id: number) {
     return await this.businessService.findById(id);
+  }
+
+  @Get('phone/:phone/services')
+  @ApiOperation({ summary: 'Get services by business phone' })
+  async findServicesByPhone(@Param('phone') phone: string) {
+    return await this.businessService.findServicesByPhone(phone);
+  }
+
+  @Get('phone/:phone/barbers')
+  @ApiOperation({ summary: 'Get barbers by business phone' })
+  async findBarbersByPhone(@Param('phone') phone: string) {
+    return await this.businessService.findBarbersByPhone(phone);
+  }
+
+  @Get('phone/:phone/free-slots')
+  @ApiOperation({ summary: 'Get available slots for all barbers by business phone' })
+  async findAvailableSlotsByPhone(
+    @Param('phone') phone: string,
+    @Query('date') date?: string,
+    @Query('serviceId') serviceId?: string,
+  ) {
+    let parsedServiceId: number | undefined;
+    if (serviceId !== undefined) {
+      parsedServiceId = Number(serviceId);
+      if (Number.isNaN(parsedServiceId)) {
+        throw new BadRequestException('serviceId must be a valid number');
+      }
+    }
+
+    return await this.businessService.findAvailableSlotsByPhone(phone, {
+      date,
+      serviceId: parsedServiceId,
+    });
   }
 
   @Post()
