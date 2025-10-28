@@ -60,7 +60,6 @@ export const authAPI = {
       apiClient.setToken(authData.access_token);
       console.log("✅ Token armazenado com sucesso");
 
-      // Garantir que usuários de barbearia tenham o businessId carregado
       if (authData.role === "BARBERSHOP" && !authData.businessId) {
         try {
           const profile = await authAPI.getProfile();

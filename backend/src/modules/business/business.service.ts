@@ -192,7 +192,6 @@ export class BusinessService {
   }
 
   async create(createBusinessDto: CreateBusinessDto): Promise<BusinessEntity> {
-    // Generate a unique token if not provided
     if (!createBusinessDto.token) {
       createBusinessDto.token = this.generateToken();
     }

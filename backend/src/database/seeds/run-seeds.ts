@@ -4,7 +4,6 @@ import { DataSource } from 'typeorm';
 import { seedBusiness } from './business.seed';
 import { seedProfiles } from './profiles.seed';
 
-// Load env variables
 dotenv.config();
 
 async function runSeeds() {
@@ -24,7 +23,6 @@ async function runSeeds() {
     await dataSource.initialize();
     console.log('✓ Database connection established\n');
 
-    // Run seeds in order
     console.log('Running seeds...\n');
     await seedBusiness(dataSource);
     console.log();

@@ -14,10 +14,8 @@ class ApiClient {
       },
     });
 
-    // Load token from localStorage
     this.token = localStorage.getItem("access_token");
 
-    // Add JWT interceptor
     this.client.interceptors.request.use((config) => {
       if (this.token) {
         config.headers.Authorization = `Bearer ${this.token}`;
@@ -25,7 +23,6 @@ class ApiClient {
       return config;
     });
 
-    // Handle error responses
     this.client.interceptors.response.use(
       (response) => response,
       (error) => {

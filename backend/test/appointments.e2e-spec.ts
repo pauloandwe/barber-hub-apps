@@ -15,7 +15,6 @@ describe('Appointments (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
 
-    // Setup global pipes, filters, and interceptors
     app.useGlobalPipes(new ValidationPipe());
     app.useGlobalInterceptors(new ResponseInterceptor());
     app.useGlobalFilters(new HttpExceptionFilter());

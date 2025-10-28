@@ -71,7 +71,6 @@ export class UsersController {
     @Body() updateData: any,
     @Request() req: any,
   ): Promise<UserResponseDto> {
-    // Users can only update their own profile, unless they're admin
     if (req.user.id !== parseInt(id) && req.user.role !== UserRole.ADMIN) {
       throw new Error('Forbidden: Cannot update other users');
     }

@@ -70,7 +70,6 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // Don't allow changing email to an existing one
     if (updateData.email && updateData.email !== user.email) {
       const existingUser = await this.profileRepository.findOne({
         where: { email: updateData.email },

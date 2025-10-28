@@ -54,8 +54,6 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
   const fetchAppointments = async () => {
     setIsLoading(true);
     try {
-      // TODO: Implement appointments fetching filtered by barberId from business context
-      // For now, loading empty list as we need business context
       setAppointments([]);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {

@@ -29,7 +29,6 @@ export class BloqueiosService {
   ) {}
 
   async create(createBloqueioDto: CreateBloqueioDto): Promise<BloqueioResponseDto> {
-    // Validate barber exists
     const barber = await this.barberRepository.findOne({
       where: { id: createBloqueioDto.barbeiro_id },
     });
@@ -38,7 +37,6 @@ export class BloqueiosService {
       throw new NotFoundException('Barber not found');
     }
 
-    // Validate dates
     const dataInicio = new Date(createBloqueioDto.data_inicio);
     const dataFim = new Date(createBloqueioDto.data_fim);
 

@@ -47,10 +47,8 @@ export class AuthService {
       throw new BadRequestException('Email already registered');
     }
 
-    // Hash password
     const passwordHash = await bcrypt.hash(registerDto.password, 10);
 
-    // Create new user
     const newProfile = this.profileRepository.create({
       email: registerDto.email,
       passwordHash,
@@ -61,7 +59,6 @@ export class AuthService {
 
     const savedProfile = await this.profileRepository.save(newProfile);
 
-    // Generate JWT token
     const access_token = this.jwtService.sign({
       id: savedProfile.id,
       email: savedProfile.email,
@@ -79,7 +76,6 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-    // Find user by email
     const user = await this.profileRepository.findOne({
       where: { email: loginDto.email },
     });
@@ -88,14 +84,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Generate JWT token
     const access_token = this.jwtService.sign({
       id: user.id,
       email: user.email,

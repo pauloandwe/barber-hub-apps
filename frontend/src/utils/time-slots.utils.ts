@@ -40,7 +40,7 @@ export function getAvailableTimeSlots(
     const isConflict = bookedTimes.some((bookedTime) => {
       const [bookedHours, bookedMinutes] = bookedTime.split(":").map(Number);
       const bookedStart = bookedHours * 60 + bookedMinutes;
-      const bookedEnd = bookedStart + 30; // Assuming 30 min default for booked
+      const bookedEnd = bookedStart + 30;
 
       return !(slotEnd <= bookedStart || slotStart >= bookedEnd);
     });
