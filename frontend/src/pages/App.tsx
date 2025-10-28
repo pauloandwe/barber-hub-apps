@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { authAPI } from "@/api/auth";
 import { AuthGuard } from "@/components/AuthGuard";
@@ -12,58 +12,37 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { LogOut, Calendar, Users, Scissors, Building2 } from "lucide-react";
+import { UserRole, getRoleLabel } from "@/constants/roles";
+import { ROUTES } from "@/constants/routes";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 
-const AppPage = () => {
+export function Dashboard() {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const user = authAPI.getStoredUser();
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = () => {
-    const user = authAPI.getStoredUser();
-    if (user) {
-      setProfile(user);
-    }
-  };
-
-  const handleLogout = async () => {
-    authAPI.logout();
-    toast.success("Logout realizado com sucesso!");
-    navigate("/login");
-  };
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
-  }
-
-  const getRoleTitle = () => {
-    switch (profile?.role) {
-      case "ADMIN":
-        return "Administrador";
-      case "BARBERSHOP":
-        return "Gestor de Barbearia";
-      default:
-        return "Cliente";
-    }
-  };
-
-  const getRoleIcon = () => {
-    switch (profile?.role) {
-      case "ADMIN":
+  const roleIcon = useMemo(() => {
+    switch (user?.role) {
+      case UserRole.ADMIN:
         return <Building2 className="h-8 w-8" />;
-      case "BARBERSHOP":
+      case UserRole.BARBERSHOP_MANAGER:
         return <Scissors className="h-8 w-8" />;
+      case UserRole.CLIENT:
       default:
         return <Users className="h-8 w-8" />;
     }
+  }, [user?.role]);
+
+  const handleLogout = () => {
+    authAPI.logout();
+    toast.success("Logout successful!");
+    navigate(ROUTES.LOGIN);
   };
+
+  if (!user) {
+    return <LoadingSpinner fullPage />;
+  }
+
+  const isClient = user.role === UserRole.CLIENT;
 
   return (
     <AuthGuard>
@@ -76,72 +55,62 @@ const AppPage = () => {
             </div>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              Sair
+              Logout
             </Button>
           </div>
         </header>
 
         <main className="container mx-auto p-4 py-8">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold">Bem-vindo, {profile?.nome}!</h2>
+            <h2 className="text-3xl font-bold">
+              Welcome, {user.name || user.nome}!
+            </h2>
             <p className="text-muted-foreground mt-2">
-              Você está logado como {getRoleTitle()}
+              You are logged in as {getRoleLabel(user.role)}
             </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Profile Card */}
             <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Perfil</CardTitle>
+                  <CardTitle>Profile</CardTitle>
                   <div className="rounded-full bg-primary/10 p-3 text-primary">
-                    {getRoleIcon()}
+                    {roleIcon}
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <CardDescription className="space-y-2">
                   <p>
-                    <strong>Email:</strong> {profile?.email || "Não informado"}
+                    <strong>Email:</strong> {user.email || "Not provided"}
                   </p>
                   <p>
-                    <strong>Telefone:</strong>{" "}
-                    {profile?.telefone || "Não informado"}
+                    <strong>Phone:</strong>{" "}
+                    {user.phone || user.telefone || "Not provided"}
                   </p>
                   <p>
-                    <strong>Tipo:</strong> {getRoleTitle()}
+                    <strong>Type:</strong> {getRoleLabel(user.role)}
                   </p>
                 </CardDescription>
+                <Button
+                  variant="outline"
+                  className="mt-4 w-full"
+                  onClick={() => navigate(ROUTES.PROFILE)}
+                >
+                  Edit Profile
+                </Button>
               </CardContent>
             </Card>
 
-            {profile?.role === "CLIENT" && (
-              <Card className="shadow-md hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Agendar Serviço</CardTitle>
-                    <div className="rounded-full bg-accent/10 p-3 text-accent">
-                      <Calendar className="h-8 w-8" />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription>
-                    Agende um horário em uma de nossas barbearias parceiras
-                  </CardDescription>
-                  <Button className="mt-4 w-full" disabled>
-                    Em breve
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {profile?.role !== "CLIENT" && (
+            {/* Client Cards */}
+            {isClient && (
               <>
                 <Card className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle>Agendamentos</CardTitle>
+                      <CardTitle>Schedule Service</CardTitle>
                       <div className="rounded-full bg-accent/10 p-3 text-accent">
                         <Calendar className="h-8 w-8" />
                       </div>
@@ -149,10 +118,13 @@ const AppPage = () => {
                   </CardHeader>
                   <CardContent>
                     <CardDescription>
-                      Gerencie os agendamentos da sua barbearia
+                      Schedule a time at one of our partner barbershops
                     </CardDescription>
-                    <Button className="mt-4 w-full" disabled>
-                      Em breve
+                    <Button
+                      className="mt-4 w-full"
+                      onClick={() => navigate(ROUTES.CLIENT)}
+                    >
+                      Schedule Now
                     </Button>
                   </CardContent>
                 </Card>
@@ -160,7 +132,63 @@ const AppPage = () => {
                 <Card className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle>Barbeiros</CardTitle>
+                      <CardTitle>My Appointments</CardTitle>
+                      <div className="rounded-full bg-secondary/10 p-3 text-secondary">
+                        <Calendar className="h-8 w-8" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription>
+                      View and manage your scheduled appointments
+                    </CardDescription>
+                    <Button
+                      variant="outline"
+                      className="mt-4 w-full"
+                      onClick={() => navigate(ROUTES.CLIENT)}
+                    >
+                      View Appointments
+                    </Button>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {!isClient && (
+              <>
+                <Card className="shadow-md hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Appointments</CardTitle>
+                      <div className="rounded-full bg-accent/10 p-3 text-accent">
+                        <Calendar className="h-8 w-8" />
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription>
+                      Manage your barbershop appointments
+                    </CardDescription>
+                    <Button
+                      variant="outline"
+                      className="mt-4 w-full"
+                      onClick={() =>
+                        navigate(
+                          user.role === UserRole.ADMIN
+                            ? ROUTES.ADMIN
+                            : ROUTES.BARBERSHOP
+                        )
+                      }
+                    >
+                      Manage
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-md hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Barbers</CardTitle>
                       <div className="rounded-full bg-secondary/10 p-3 text-secondary">
                         <Users className="h-8 w-8" />
                       </div>
@@ -168,10 +196,20 @@ const AppPage = () => {
                   </CardHeader>
                   <CardContent>
                     <CardDescription>
-                      Cadastre e gerencie seus barbeiros
+                      Register and manage your barber team
                     </CardDescription>
-                    <Button className="mt-4 w-full" disabled>
-                      Em breve
+                    <Button
+                      variant="outline"
+                      className="mt-4 w-full"
+                      onClick={() =>
+                        navigate(
+                          user.role === UserRole.ADMIN
+                            ? ROUTES.ADMIN
+                            : ROUTES.BARBERSHOP
+                        )
+                      }
+                    >
+                      Manage
                     </Button>
                   </CardContent>
                 </Card>
@@ -182,6 +220,6 @@ const AppPage = () => {
       </div>
     </AuthGuard>
   );
-};
+}
 
-export default AppPage;
+export default Dashboard;

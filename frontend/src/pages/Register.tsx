@@ -4,58 +4,107 @@ import { authAPI } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
 import { Scissors } from "lucide-react";
+import { getDashboardRoute } from "@/utils/navigation.utils";
+import { ROUTES } from "@/constants/routes";
+import { UserRole } from "@/constants/roles";
 
-const Register = () => {
+interface RegisterFormData {
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+  confirmPassword: string;
+}
+
+const INITIAL_FORM_STATE: RegisterFormData = {
+  name: "",
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+};
+
+export function Register() {
   const navigate = useNavigate();
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] =
+    useState<RegisterFormData>(INITIAL_FORM_STATE);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = (): boolean => {
+    if (!formData.name || !formData.email || !formData.password) {
+      toast.error("Please fill in all required fields");
+      return false;
+    }
+
+    if (formData.name.length < 3) {
+      toast.error("Name must be at least 3 characters");
+      return false;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      toast.error("Please enter a valid email");
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return false;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!nome || !email || !password) {
-      toast.error("Por favor, preencha todos os campos obrigatórios");
+    if (!validateForm()) {
       return;
     }
 
-    if (password !== confirmPassword) {
-      toast.error("As senhas não coincidem");
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error("A senha deve ter no mínimo 6 caracteres");
-      return;
-    }
-
-    setLoading(true);
+    setIsLoading(true);
 
     try {
       const user = await authAPI.register({
-        nome,
-        email,
-        password,
-        telefone: telefone || undefined,
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone || undefined,
       });
 
-      // Store user in localStorage
       authAPI.setStoredUser(user);
 
-      toast.success("Conta criada com sucesso! Você será redirecionado...");
+      toast.success("Account created successfully! Redirecting...");
 
-      // Redirecionar para dashboard do cliente
-      navigate("/cliente");
+      const dashboardRoute = getDashboardRoute(UserRole.CLIENT);
+      navigate(dashboardRoute);
     } catch (error: any) {
-      toast.error("Erro ao criar conta: " + (error.response?.data?.message || error.message));
+      const errorMessage =
+        error.response?.data?.message || error.message || "Registration failed";
+      toast.error(`Error creating account: ${errorMessage}`);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -67,23 +116,24 @@ const Register = () => {
             <Scissors className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-3xl">Criar Conta</CardTitle>
+            <CardTitle className="text-3xl">Create Account</CardTitle>
             <CardDescription className="mt-2">
-              Comece a gerenciar seus agendamentos hoje
+              Start managing your appointments today
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="nome">Nome Completo</Label>
+              <Label htmlFor="name">Full Name</Label>
               <Input
-                id="nome"
+                id="name"
                 type="text"
-                placeholder="João Silva"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                disabled={loading}
+                name="name"
+                placeholder="John Doe"
+                value={formData.name}
+                onChange={handleInputChange}
+                disabled={isLoading}
                 required
               />
             </div>
@@ -92,62 +142,71 @@ const Register = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
+                name="email"
+                placeholder="your@email.com"
+                value={formData.email}
+                onChange={handleInputChange}
+                disabled={isLoading}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="telefone">Telefone (opcional)</Label>
+              <Label htmlFor="phone">Phone (optional)</Label>
               <Input
-                id="telefone"
+                id="phone"
                 type="tel"
+                name="phone"
                 placeholder="(11) 99999-9999"
-                value={telefone}
-                onChange={(e) => setTelefone(e.target.value)}
-                disabled={loading}
+                value={formData.phone}
+                onChange={handleInputChange}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
+                name="password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
+                value={formData.password}
+                onChange={handleInputChange}
+                disabled={isLoading}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
               <Input
                 id="confirmPassword"
                 type="password"
+                name="confirmPassword"
                 placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={loading}
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                disabled={isLoading}
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Criando conta..." : "Criar Conta"}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Create Account"}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            <span className="text-muted-foreground">Já tem uma conta? </span>
-            <Link to="/login" className="font-medium text-primary hover:underline">
-              Faça login
+            <span className="text-muted-foreground">
+              Already have an account?{" "}
+            </span>
+            <Link
+              to={ROUTES.LOGIN}
+              className="font-medium text-primary hover:underline"
+            >
+              Sign in
             </Link>
           </div>
         </CardContent>
       </Card>
     </div>
   );
-};
+}
 
 export default Register;

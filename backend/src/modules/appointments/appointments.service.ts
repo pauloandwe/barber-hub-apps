@@ -30,6 +30,32 @@ export class AppointmentsService {
     private profileRepository: Repository<ProfileEntity>,
   ) {}
 
+  async findByBusinessId(businessId: number): Promise<AppointmentResponseDto[]> {
+    const appointments = await this.appointmentRepository.find({
+      where: { businessId },
+      relations: ['barber', 'client', 'service'],
+      order: { startDate: 'DESC' },
+    });
+
+    return appointments.map((appointment) => this.formatAppointmentResponse(appointment));
+  }
+
+  async findById(appointmentId: number, businessId: number): Promise<AppointmentResponseDto> {
+    const appointment = await this.appointmentRepository.findOne({
+      where: {
+        id: appointmentId,
+        businessId,
+      },
+      relations: ['barber', 'client', 'service'],
+    });
+
+    if (!appointment) {
+      throw new NotFoundException('Appointment not found');
+    }
+
+    return this.formatAppointmentResponse(appointment);
+  }
+
   async create(createAppointmentDto: CreateAppointmentDto): Promise<AppointmentResponseDto> {
     // Validate business exists
     const business = await this.businessRepository.findOne({
@@ -230,6 +256,28 @@ export class AppointmentsService {
       status: appointment.status,
       createdAt: appointment.createdAt,
       updatedAt: appointment.updatedAt,
+      barber: appointment.barber
+        ? { id: appointment.barber.id, name: appointment.barber.name }
+        : undefined,
+      client: appointment.client
+        ? { id: appointment.client.id, name: appointment.client.name }
+        : undefined,
+      service: appointment.service
+        ? {
+            id: appointment.service.id,
+            name: appointment.service.name,
+            duration: appointment.service.duration,
+          }
+        : undefined,
+      data_inicio: appointment.startDate,
+      data_fim: appointment.endDate,
+      observacoes: appointment.notes,
+      origem: appointment.source,
+      barbers: appointment.barber ? { nome: appointment.barber.name } : undefined,
+      profiles: appointment.client ? { nome: appointment.client.name } : undefined,
+      servicos: appointment.service
+        ? { nome: appointment.service.name, duracao_min: appointment.service.duration }
+        : undefined,
     };
   }
 }

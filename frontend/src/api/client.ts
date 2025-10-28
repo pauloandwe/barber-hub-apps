@@ -1,6 +1,6 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 class ApiClient {
   private client: AxiosInstance;
@@ -10,12 +10,12 @@ class ApiClient {
     this.client = axios.create({
       baseURL: API_URL,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
     // Load token from localStorage
-    this.token = localStorage.getItem('access_token');
+    this.token = localStorage.getItem("access_token");
 
     // Add JWT interceptor
     this.client.interceptors.request.use((config) => {
@@ -25,17 +25,29 @@ class ApiClient {
       return config;
     });
 
-    // Handle 401 responses
+    // Handle error responses
     this.client.interceptors.response.use(
       (response) => response,
       (error) => {
-        if (error.response?.status === 401) {
-          // Clear token and redirect to login
-          this.setToken(null);
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
+        const status = error.response?.status;
+
+        if (status === 401) {
+          const isTokenExpired =
+            error.response?.data?.message?.includes("expired") ||
+            error.response?.data?.message?.includes("Invalid");
+
+          if (isTokenExpired) {
+            this.setToken(null);
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("user");
+            window.location.href = "/login";
+          }
         }
+
+        if (status === 403) {
+          console.error("[API] Forbidden error:", error.response?.data);
+        }
+
         return Promise.reject(error);
       }
     );
@@ -44,9 +56,9 @@ class ApiClient {
   setToken(token: string | null): void {
     this.token = token;
     if (token) {
-      localStorage.setItem('access_token', token);
+      localStorage.setItem("access_token", token);
     } else {
-      localStorage.removeItem('access_token');
+      localStorage.removeItem("access_token");
     }
   }
 

@@ -6,11 +6,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
-import BarbeariaDashboard from "./pages/BarbeariaDashboard";
-import ClienteDashboard from "./pages/ClienteDashboard";
-import Perfil from "./pages/Perfil";
+import BarbershopDashboard from "./pages/BarbershopDashboard";
+import ClientDashboard from "./pages/ClientDashboard";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { AuthGuard } from "./components/AuthGuard";
+import { ROUTES } from "@/constants/routes";
+import { UserRole } from "@/constants/roles";
 
 const queryClient = new QueryClient();
 
@@ -21,43 +23,42 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path={ROUTES.HOME} element={<Navigate to={ROUTES.LOGIN} replace />} />
+          <Route path={ROUTES.LOGIN} element={<Login />} />
+          <Route path={ROUTES.REGISTER} element={<Register />} />
           <Route
-            path="/admin"
+            path={ROUTES.ADMIN}
             element={
-              <AuthGuard requiredRole="ADMIN">
+              <AuthGuard requiredRole={UserRole.ADMIN}>
                 <AdminDashboard />
               </AuthGuard>
             }
           />
           <Route
-            path="/barbearia"
+            path={ROUTES.BARBERSHOP}
             element={
-              <AuthGuard requiredRole="BARBERSHOP">
-                <BarbeariaDashboard />
+              <AuthGuard requiredRole={UserRole.BARBERSHOP_MANAGER}>
+                <BarbershopDashboard />
               </AuthGuard>
             }
           />
           <Route
-            path="/cliente"
+            path={ROUTES.CLIENT}
             element={
-              <AuthGuard requiredRole="CLIENT">
-                <ClienteDashboard />
+              <AuthGuard requiredRole={UserRole.CLIENT}>
+                <ClientDashboard />
               </AuthGuard>
             }
           />
           <Route
-            path="/perfil"
+            path={ROUTES.PROFILE}
             element={
               <AuthGuard>
-                <Perfil />
+                <Profile />
               </AuthGuard>
             }
           />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
+          <Route path={ROUTES.NOT_FOUND} element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

@@ -1,67 +1,53 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authAPI } from "@/api/auth";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { getDashboardRoute, hasRouteAccess } from "@/utils/navigation.utils";
+import { isValidRole, UserRole } from "@/constants/roles";
+import { ROUTES } from "@/constants/routes";
+import { WithChildren } from "@/types/shared.types";
 
-interface UserProfile {
-  id: number;
-  email: string;
-  nome: string;
-  role: "ADMIN" | "BARBERSHOP" | "CLIENT";
-  telefone?: string;
-  barbearia_id?: number;
-  access_token: string;
+interface AuthGuardProps extends WithChildren {
+  requiredRole?: UserRole;
 }
 
-interface AuthGuardProps {
-  children: React.ReactNode;
-  requiredRole?: "ADMIN" | "BARBERSHOP" | "CLIENT";
-}
-
-export const AuthGuard = ({ children, requiredRole }: AuthGuardProps) => {
+export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
   const navigate = useNavigate();
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuthAndRole = () => {
       const storedUser = authAPI.getStoredUser();
 
       if (!storedUser) {
-        setUser(null);
-        setLoading(false);
-        navigate("/login");
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        navigate(ROUTES.LOGIN);
+        return;
+      }
+      if (!isValidRole(storedUser.role)) {
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        navigate(ROUTES.LOGIN);
         return;
       }
 
-      if (requiredRole && storedUser.role !== requiredRole) {
-        console.log("storedUser", storedUser.role);
-        setUser(null);
-        setLoading(false);
+      if (!hasRouteAccess(storedUser.role, requiredRole)) {
+        setIsAuthenticated(false);
+        setIsLoading(false);
 
-        // Redirecionar para a página correta baseado no role cadastrado
-        switch (storedUser.role) {
-          case "ADMIN":
-            navigate("/admin");
-            break;
-          case "BARBERSHOP":
-            navigate("/barbearia");
-            break;
-          case "CLIENT":
-            navigate("/cliente");
-            break;
-          default:
-            navigate("/login");
-        }
+        const correctRoute = getDashboardRoute(storedUser.role);
+        navigate(correctRoute);
         return;
       }
 
-      setUser(storedUser as UserProfile);
-      setLoading(false);
+      setIsAuthenticated(true);
+      setIsLoading(false);
     };
 
     checkAuthAndRole();
 
-    // Listen for storage changes (when user logs in/out in another tab)
     const handleStorageChange = () => {
       checkAuthAndRole();
     };
@@ -73,13 +59,11 @@ export const AuthGuard = ({ children, requiredRole }: AuthGuardProps) => {
     };
   }, [navigate, requiredRole]);
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+  if (isLoading) {
+    return <LoadingSpinner fullPage />;
   }
 
-  return user ? <>{children}</> : null;
-};
+  return isAuthenticated ? <>{children}</> : null;
+}
+
+export default AuthGuard;

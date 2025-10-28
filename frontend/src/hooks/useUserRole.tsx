@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import { authAPI } from "@/api/auth";
+import { UserRole, isValidRole } from "@/constants/roles";
 
-type AppRole = "ADMIN" | "BARBERSHOP" | "CLIENT" | null;
+interface UseUserRoleReturn {
+  role: UserRole | null;
+  isLoading: boolean;
+  barbershopId: string | null;
+  error: string | null;
+}
 
-export const useUserRole = () => {
-  const [role, setRole] = useState<AppRole>(null);
-  const [loading, setLoading] = useState(true);
-  const [barbeariaId, setBarbeariaId] = useState<string | null>(null);
+export function useUserRole(): UseUserRoleReturn {
+  const [role, setRole] = useState<UserRole | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [barbershopId, setBarbershopId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadUserRole = () => {
@@ -15,32 +22,48 @@ export const useUserRole = () => {
 
         if (!user) {
           setRole(null);
-          setBarbeariaId(null);
-          setLoading(false);
+          setBarbershopId(null);
+          setIsLoading(false);
           return;
         }
 
-        setRole(user.role as AppRole);
-
-        // Se for BARBERSHOP, usar o ID da barbearia vinculada
-        if (user.role === "BARBERSHOP") {
-          setBarbeariaId(user.barbearia_id?.toString() || null);
-        } else {
-          setBarbeariaId(null);
+        if (!isValidRole(user.role)) {
+          setError("Invalid user role");
+          setRole(null);
+          setBarbershopId(null);
+          setIsLoading(false);
+          return;
         }
 
-        setLoading(false);
-      } catch (error) {
-        console.error("Erro ao buscar dados do usuário:", error);
+        setRole(user.role);
+
+        if (user.role === UserRole.BARBERSHOP_MANAGER) {
+          setBarbershopId(
+            user.barbearia_id?.toString() ||
+              user.barbershop_id?.toString() ||
+              null
+          );
+        } else {
+          setBarbershopId(null);
+        }
+
+        setError(null);
+        setIsLoading(false);
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Error loading user role";
+        if (process.env.NODE_ENV === "development") {
+          console.error("Error loading user data:", err);
+        }
+        setError(message);
         setRole(null);
-        setBarbeariaId(null);
-        setLoading(false);
+        setBarbershopId(null);
+        setIsLoading(false);
       }
     };
 
     loadUserRole();
 
-    // Listen for storage changes (when user logs in/out in another tab)
     const handleStorageChange = () => {
       loadUserRole();
     };
@@ -52,5 +75,5 @@ export const useUserRole = () => {
     };
   }, []);
 
-  return { role, loading, barbeariaId };
-};
+  return { role, isLoading, barbershopId, error };
+}

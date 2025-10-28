@@ -13,51 +13,85 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Scissors } from "lucide-react";
+import {
+  getDashboardRoute,
+  hasRouteAccess,
+  getRequiredRoleForRoute,
+} from "@/utils/navigation.utils";
+import { isValidRole } from "@/constants/roles";
+import { ROUTES } from "@/constants/routes";
 
-const Login = () => {
+interface LoginFormData {
+  email: string;
+  password: string;
+}
+
+export function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: "",
+    password: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = (): boolean => {
+    if (!formData.email || !formData.password) {
+      toast.error("Please fill in all fields");
+      return false;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      toast.error("Please enter a valid email");
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      toast.error("Por favor, preencha todos os campos");
+    if (!validateForm()) {
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
 
     try {
-      const user = await authAPI.login({ email, password });
+      const user = await authAPI.login({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      // Store user in localStorage
+      if (!isValidRole(user.role)) {
+        throw new Error("Invalid user role");
+      }
+
       authAPI.setStoredUser(user);
 
-      toast.success("Login realizado com sucesso!");
+      toast.success("Login successful!");
 
-      // Redirecionar baseado no role
-      switch (user.role) {
-        case "ADMIN":
-          navigate("/admin");
-          break;
-        case "BARBERSHOP":
-          navigate("/barbearia");
-          break;
-        case "CLIENT":
-        default:
-          navigate("/cliente");
-          break;
-      }
+      const dashboardRoute = getDashboardRoute(user.role);
+      navigate(dashboardRoute);
     } catch (error: any) {
-      toast.error(
-        "Erro ao fazer login: " +
-          (error.response?.data?.message || error.message)
-      );
+      const errorMessage =
+        error.response?.data?.message || error.message || "Login failed";
+      toast.error(`Login error: ${errorMessage}`);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -71,7 +105,7 @@ const Login = () => {
           <div>
             <CardTitle className="text-3xl">Barber Hub</CardTitle>
             <CardDescription className="mt-2">
-              Gerencie sua barbearia de forma profissional
+              Manage your barbershop professionally
             </CardDescription>
           </div>
         </CardHeader>
@@ -82,42 +116,46 @@ const Login = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
+                name="email"
+                placeholder="your@email.com"
+                value={formData.email}
+                onChange={handleInputChange}
+                disabled={isLoading}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
+                name="password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
+                value={formData.password}
+                onChange={handleInputChange}
+                disabled={isLoading}
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Entrando..." : "Entrar"}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            <span className="text-muted-foreground">Não tem uma conta? </span>
+            <span className="text-muted-foreground">
+              Don't have an account?{" "}
+            </span>
             <Link
-              to="/register"
+              to={ROUTES.REGISTER}
               className="font-medium text-primary hover:underline"
             >
-              Cadastre-se
+              Sign up
             </Link>
           </div>
         </CardContent>
       </Card>
     </div>
   );
-};
+}
 
 export default Login;

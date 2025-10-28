@@ -1,18 +1,18 @@
-import { useEffect, useState } from "react";
-import { businessAPI } from "@/api/business";
-import { usersAPI } from "@/api/users";
-import { authAPI } from "@/api/auth";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from 'react';
+import { businessAPI } from '@/api/business';
+import { usersAPI } from '@/api/users';
+import { authAPI } from '@/api/auth';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 import {
   Scissors,
   Plus,
@@ -21,8 +21,8 @@ import {
   Users,
   UserCog,
   User,
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -30,126 +30,135 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
+import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { RoleBadge } from '@/components/shared/RoleBadge';
+import { UserRole } from '@/constants/roles';
+import { ROUTES } from '@/constants/routes';
 
-interface Barbearia {
+interface Barbershop {
   id: number;
   name: string;
   phone: string;
-  type?: string;
-  token?: string;
+  email?: string;
+  address?: string;
 }
 
-interface Usuario {
+interface User {
   id: number;
-  nome: string;
+  name: string;
   email: string;
-  telefone: string | null;
-  barbearia_id: number | null;
+  phone: string | null;
+  barbershopId: number | null;
   role: string;
-  barbearia_nome?: string;
+  barbershopName?: string;
 }
 
-const AdminDashboard = () => {
+export function AdminDashboard() {
   const navigate = useNavigate();
-  const [barbearias, setBarbearias] = useState<Barbearia[]>([]);
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
-  const [userDialogOpen, setUserDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
-  const [selectedRole, setSelectedRole] = useState<string>("");
-  const [selectedBarbeariaId, setSelectedBarbeariaId] = useState<string>("");
+  const [barbershops, setBarbershops] = useState<Barbershop[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string>('');
+  const [selectedBarbershopId, setSelectedBarbershopId] = useState<string>('');
   const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    telefone: "",
-    endereco: "",
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
   });
 
   useEffect(() => {
-    fetchBarbearias();
-    fetchUsuarios();
+    fetchBarbershops();
+    fetchUsers();
   }, []);
 
-  const fetchBarbearias = async () => {
+  const fetchBarbershops = async () => {
     try {
       const businesses = await businessAPI.getAll();
-      setBarbearias(
-        businesses.map((b) => ({
+      setBarbershops(
+        businesses.map((b: any) => ({
           id: b.id,
           name: b.name,
           phone: b.phone,
-          type: b.type,
-          token: b.token,
+          email: b.email,
+          address: b.address,
         }))
       );
     } catch (error) {
-      console.error("Erro ao buscar barbearias:", error);
-      toast.error("Erro ao carregar barbearias");
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching barbershops:', error);
+      }
+      toast.error('Error loading barbershops');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleCreateBarbearia = async (e: React.FormEvent) => {
+  const handleCreateBarbershop = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       await businessAPI.create({
-        name: formData.nome,
-        phone: formData.telefone,
-        type: formData.email,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
       });
 
-      toast.success("Barbearia criada com sucesso!");
-      setOpen(false);
-      setFormData({ nome: "", email: "", telefone: "", endereco: "" });
-      fetchBarbearias();
+      toast.success('Barbershop created successfully!');
+      setIsCreateDialogOpen(false);
+      setFormData({ name: '', email: '', phone: '', address: '' });
+      fetchBarbershops();
     } catch (error) {
-      console.error("Erro ao criar barbearia:", error);
-      toast.error("Erro ao criar barbearia");
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error creating barbershop:', error);
+      }
+      toast.error('Error creating barbershop');
     }
   };
 
-  const fetchUsuarios = async () => {
+  const fetchUsers = async () => {
     try {
-      const users = await usersAPI.getAll();
-      const usuariosComRoles: Usuario[] = users.map((user: any) => ({
-        id: user.id,
-        nome: user.nome,
-        email: user.email,
-        telefone: user.telefone,
-        barbearia_id: user.barbearia_id,
-        role: user.role,
-        barbearia_nome: undefined,
-      }));
-
-      console.log(`Total de usuários carregados: ${usuariosComRoles.length}`);
-      setUsuarios(usuariosComRoles);
+      const allUsers = await usersAPI.getAll();
+      setUsers(
+        allUsers.map((user: any) => ({
+          id: user.id,
+          name: user.name || user.nome,
+          email: user.email,
+          phone: user.phone || user.telefone,
+          barbershopId: user.barbearia_id || user.barbershopId,
+          role: user.role,
+          barbershopName: undefined,
+        }))
+      );
     } catch (error) {
-      console.error("Erro ao buscar usuários:", error);
-      toast.error("Erro ao carregar usuários");
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching users:', error);
+      }
+      toast.error('Error loading users');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleEditUser = (user: Usuario) => {
+  const handleEditUser = (user: User) => {
     setSelectedUser(user);
     setSelectedRole(user.role);
-    setSelectedBarbeariaId(
-      user.barbearia_id ? user.barbearia_id.toString() : ""
-    );
-    setUserDialogOpen(true);
+    setSelectedBarbershopId(user.barbershopId ? user.barbershopId.toString() : '');
+    setIsEditUserDialogOpen(true);
   };
 
   const handleUpdateUser = async () => {
@@ -157,34 +166,30 @@ const AdminDashboard = () => {
 
     try {
       await usersAPI.update(selectedUser.id, {
-        role: selectedRole as "ADMIN" | "BARBERSHOP" | "CLIENT",
+        role: selectedRole as 'ADMIN' | 'BARBERSHOP' | 'CLIENT',
         barbearia_id:
-          selectedRole === "BARBERSHOP"
-            ? parseInt(selectedBarbeariaId) || undefined
-            : undefined,
+          selectedRole === 'BARBERSHOP' ? parseInt(selectedBarbershopId) || undefined : undefined,
       });
 
-      toast.success("Usuário atualizado com sucesso!");
-      setUserDialogOpen(false);
+      toast.success('User updated successfully!');
+      setIsEditUserDialogOpen(false);
       setSelectedUser(null);
-      fetchUsuarios();
+      fetchUsers();
     } catch (error) {
-      console.error("Erro ao atualizar usuário:", error);
-      toast.error("Erro ao atualizar usuário");
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error updating user:', error);
+      }
+      toast.error('Error updating user');
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     authAPI.logout();
-    navigate("/login");
+    navigate(ROUTES.LOGIN);
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+  if (isLoading) {
+    return <LoadingSpinner fullPage />;
   }
 
   return (
@@ -193,65 +198,60 @@ const AdminDashboard = () => {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <Scissors className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">Painel Admin</h1>
+            <h1 className="text-xl font-bold">Admin Panel</h1>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate("/perfil")}>
+            <Button variant="outline" onClick={() => navigate(ROUTES.PROFILE)}>
               <User className="mr-2 h-4 w-4" />
-              Perfil
+              Profile
             </Button>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              Sair
+              Logout
             </Button>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto p-4 md:p-6 space-y-6">
-        <Tabs defaultValue="barbearias" className="w-full">
+        <Tabs defaultValue="barbershops" className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="barbearias">
+            <TabsTrigger value="barbershops">
               <Building2 className="mr-2 h-4 w-4" />
-              Barbearias
+              Barbershops
             </TabsTrigger>
-            <TabsTrigger value="usuarios">
+            <TabsTrigger value="users">
               <Users className="mr-2 h-4 w-4" />
-              Usuários
+              Users
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="barbearias" className="space-y-6">
+          <TabsContent value="barbershops" className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold">Barbearias</h2>
-                <p className="text-muted-foreground">
-                  Gerencie todas as barbearias do sistema
-                </p>
+                <h2 className="text-3xl font-bold">Barbershops</h2>
+                <p className="text-muted-foreground">Manage all barbershops in the system</p>
               </div>
-              <Dialog open={open} onOpenChange={setOpen}>
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="mr-2 h-4 w-4" />
-                    Nova Barbearia
+                    New Barbershop
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Criar Nova Barbearia</DialogTitle>
-                    <DialogDescription>
-                      Preencha os dados da nova barbearia
-                    </DialogDescription>
+                    <DialogTitle>Create New Barbershop</DialogTitle>
+                    <DialogDescription>Fill in the barbershop details</DialogDescription>
                   </DialogHeader>
-                  <form onSubmit={handleCreateBarbearia} className="space-y-4">
+                  <form onSubmit={handleCreateBarbershop} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="nome">Nome *</Label>
+                      <Label htmlFor="name">Name *</Label>
                       <Input
-                        id="nome"
-                        value={formData.nome}
-                        onChange={(e) =>
-                          setFormData({ ...formData, nome: e.target.value })
-                        }
+                        id="name"
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
                       />
                     </div>
@@ -261,33 +261,29 @@ const AdminDashboard = () => {
                         id="email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="telefone">Telefone</Label>
+                      <Label htmlFor="phone">Phone</Label>
                       <Input
-                        id="telefone"
-                        value={formData.telefone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, telefone: e.target.value })
-                        }
+                        id="phone"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="endereco">Endereço</Label>
+                      <Label htmlFor="address">Address</Label>
                       <Input
-                        id="endereco"
-                        value={formData.endereco}
-                        onChange={(e) =>
-                          setFormData({ ...formData, endereco: e.target.value })
-                        }
+                        id="address"
+                        type="text"
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       />
                     </div>
                     <Button type="submit" className="w-full">
-                      Criar Barbearia
+                      Create Barbershop
                     </Button>
                   </form>
                 </DialogContent>
@@ -295,150 +291,115 @@ const AdminDashboard = () => {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {barbearias.map((barbearia) => (
-                <Card key={barbearia.id}>
+              {barbershops.map((barbershop) => (
+                <Card key={barbershop.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <Building2 className="h-8 w-8 text-primary" />
                     </div>
-                    <CardTitle>{barbearia.name}</CardTitle>
+                    <CardTitle>{barbershop.name}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
-                    {barbearia.phone && (
-                      <p className="text-muted-foreground">
-                        📱 {barbearia.phone}
-                      </p>
+                    {barbershop.email && (
+                      <p className="text-muted-foreground">📧 {barbershop.email}</p>
                     )}
-                    {barbearia.type && (
-                      <p className="text-muted-foreground">
-                        🏪 {barbearia.type}
-                      </p>
+                    {barbershop.phone && (
+                      <p className="text-muted-foreground">📱 {barbershop.phone}</p>
+                    )}
+                    {barbershop.address && (
+                      <p className="text-muted-foreground">📍 {barbershop.address}</p>
                     )}
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            {barbearias.length === 0 && (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-10">
-                  <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">
-                    Nenhuma barbearia cadastrada ainda
-                  </p>
-                </CardContent>
-              </Card>
+            {barbershops.length === 0 && (
+              <EmptyState
+                title="No barbershops registered"
+                description="Start by creating your first barbershop"
+                icon="🏪"
+              />
             )}
           </TabsContent>
 
-          <TabsContent value="usuarios" className="space-y-6">
+          <TabsContent value="users" className="space-y-6">
             <div>
-              <h2 className="text-3xl font-bold">Usuários</h2>
-              <p className="text-muted-foreground">
-                Gerencie usuários e suas permissões
-              </p>
+              <h2 className="text-3xl font-bold">Users</h2>
+              <p className="text-muted-foreground">Manage users and their permissions</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {usuarios.map((usuario) => (
-                <Card key={usuario.id}>
+              {users.map((user) => (
+                <Card key={user.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <UserCog className="h-8 w-8 text-primary" />
-                      <span
-                        className={`text-xs px-2 py-1 rounded ${
-                          usuario.role === "ADMIN"
-                            ? "bg-red-100 text-red-800"
-                            : usuario.role === "BARBERSHOP"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {usuario.role}
-                      </span>
+                      <RoleBadge role={user.role as UserRole} />
                     </div>
-                    <CardTitle>{usuario.nome}</CardTitle>
+                    <CardTitle>{user.name}</CardTitle>
+                    <CardDescription>{user.email}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
-                    {usuario.telefone && (
-                      <p className="text-muted-foreground">
-                        📱 {usuario.telefone}
-                      </p>
-                    )}
-                    {usuario.barbearia_nome && (
-                      <p className="text-muted-foreground">
-                        🏪 {usuario.barbearia_nome}
-                      </p>
-                    )}
+                    {user.phone && <p className="text-muted-foreground">📱 {user.phone}</p>}
                     <Button
                       variant="outline"
                       size="sm"
                       className="w-full mt-2"
-                      onClick={() => handleEditUser(usuario)}
+                      onClick={() => handleEditUser(user)}
                     >
-                      Editar Permissões
+                      Edit Permissions
                     </Button>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            {usuarios.length === 0 && (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-10">
-                  <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">
-                    Nenhum usuário cadastrado ainda
-                  </p>
-                </CardContent>
-              </Card>
+            {users.length === 0 && (
+              <EmptyState
+                title="No users registered"
+                description="Users will appear here once they sign up"
+                icon="👥"
+              />
             )}
           </TabsContent>
         </Tabs>
 
-        <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
+        <Dialog open={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Editar Usuário</DialogTitle>
-              <DialogDescription>
-                Altere o role e vincule uma barbearia ao usuário
-              </DialogDescription>
+              <DialogTitle>Edit User</DialogTitle>
+              <DialogDescription>Change the role and link a barbershop to the user</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Usuário</Label>
-                <Input value={selectedUser?.nome || ""} disabled />
+                <Label>User</Label>
+                <Input value={selectedUser?.name || ''} disabled />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um role" />
+                    <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ADMIN">ADMIN</SelectItem>
-                    <SelectItem value="BARBERSHOP">BARBERSHOP</SelectItem>
-                    <SelectItem value="CLIENT">CLIENT</SelectItem>
+                    <SelectItem value="ADMIN">Administrator</SelectItem>
+                    <SelectItem value="BARBERSHOP">Barbershop Manager</SelectItem>
+                    <SelectItem value="CLIENT">Client</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              {selectedRole === "BARBERSHOP" && (
+              {selectedRole === 'BARBERSHOP' && (
                 <div className="space-y-2">
-                  <Label htmlFor="barbearia">Barbearia</Label>
-                  <Select
-                    value={selectedBarbeariaId}
-                    onValueChange={setSelectedBarbeariaId}
-                  >
+                  <Label htmlFor="barbershop">Barbershop</Label>
+                  <Select value={selectedBarbershopId} onValueChange={setSelectedBarbershopId}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma barbearia" />
+                      <SelectValue placeholder="Select a barbershop" />
                     </SelectTrigger>
                     <SelectContent>
-                      {barbearias.map((barbearia) => (
-                        <SelectItem
-                          key={barbearia.id}
-                          value={barbearia.id.toString()}
-                        >
-                          {barbearia.name}
+                      {barbershops.map((barbershop) => (
+                        <SelectItem key={barbershop.id} value={barbershop.id.toString()}>
+                          {barbershop.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -446,7 +407,7 @@ const AdminDashboard = () => {
                 </div>
               )}
               <Button onClick={handleUpdateUser} className="w-full">
-                Salvar Alterações
+                Save Changes
               </Button>
             </div>
           </DialogContent>
@@ -454,6 +415,6 @@ const AdminDashboard = () => {
       </main>
     </div>
   );
-};
+}
 
 export default AdminDashboard;
