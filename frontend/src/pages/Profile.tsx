@@ -81,8 +81,8 @@ export function Profile() {
 
       setUserId(storedUser.id.toString());
 
-      setValue("name", storedUser.name || storedUser.nome || "");
-      setValue("phone", storedUser.phone || storedUser.telefone || "");
+      setValue("name", storedUser.name || "");
+      setValue("phone", storedUser.phone || "");
       setValue("email", storedUser.email || "");
     } catch (error) {
       if (process.env.NODE_ENV === "development") {

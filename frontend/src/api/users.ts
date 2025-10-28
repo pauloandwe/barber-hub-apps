@@ -3,20 +3,20 @@ import { apiClient } from "./client";
 export interface UserProfile {
   id: number;
   email: string;
-  nome: string;
-  telefone?: string;
+  name: string;
+  phone?: string;
   role: "ADMIN" | "BARBERSHOP" | "CLIENT";
-  barbearia_id?: number;
-  created_at?: string;
-  updated_at?: string;
+  businessId?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface UpdateUserRequest {
   email?: string;
-  nome?: string;
-  telefone?: string;
+  name?: string;
+  phone?: string;
   role?: "ADMIN" | "BARBERSHOP" | "CLIENT";
-  barbearia_id?: number;
+  businessId?: number;
 }
 
 export const usersAPI = {

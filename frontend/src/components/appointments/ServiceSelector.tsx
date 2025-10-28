@@ -45,9 +45,9 @@ export function ServiceSelector({
       setServices(
         data.map((s: any) => ({
           id: s.id.toString(),
-          name: s.nome || s.name,
-          durationMin: s.duracao || s.durationMin,
-          priceCents: Math.round((s.preco || 0) * 100),
+          name: s.name,
+          durationMin: s.duration,
+          priceCents: s.price,
         }))
       );
     } catch (error) {

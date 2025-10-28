@@ -57,8 +57,8 @@ interface User {
   id: number;
   name: string;
   email: string;
-  phone: string | null;
-  barbershopId: number | null;
+  phone?: string;
+  businessId?: number;
   role: string;
   barbershopName?: string;
 }
@@ -136,10 +136,10 @@ export function AdminDashboard() {
       setUsers(
         allUsers.map((user: any) => ({
           id: user.id,
-          name: user.name || user.nome,
+          name: user.name,
           email: user.email,
-          phone: user.phone || user.telefone,
-          barbershopId: user.barbearia_id || user.barbershopId,
+          phone: user.phone,
+          businessId: user.businessId,
           role: user.role,
           barbershopName: undefined,
         }))
@@ -157,7 +157,7 @@ export function AdminDashboard() {
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
     setSelectedRole(user.role);
-    setSelectedBarbershopId(user.barbershopId ? user.barbershopId.toString() : '');
+    setSelectedBarbershopId(user.businessId ? user.businessId.toString() : '');
     setIsEditUserDialogOpen(true);
   };
 
@@ -167,7 +167,7 @@ export function AdminDashboard() {
     try {
       await usersAPI.update(selectedUser.id, {
         role: selectedRole as 'ADMIN' | 'BARBERSHOP' | 'CLIENT',
-        barbearia_id:
+        businessId:
           selectedRole === 'BARBERSHOP' ? parseInt(selectedBarbershopId) || undefined : undefined,
       });
 

@@ -1,49 +1,49 @@
-import { useEffect, useRef, useState } from 'react';
-import { authAPI } from '@/api/auth';
-import { appointmentsAPI } from '@/api/appointments';
-import { Barber, barbersAPI } from '@/api/barbers';
-import { servicesAPI } from '@/api/services';
-import { businessAPI } from '@/api/business';
-import { Button } from '@/components/ui/button';
+import { useEffect, useRef, useState } from "react";
+import { authAPI } from "@/api/auth";
+import { appointmentsAPI } from "@/api/appointments";
+import { Barber, barbersAPI } from "@/api/barbers";
+import { servicesAPI } from "@/api/services";
+import { businessAPI } from "@/api/business";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
-import { Scissors, Calendar, User, LogOut, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useUserRole } from '@/hooks/useUserRole';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { ServiceDialog } from '@/components/ServiceDialog';
-import { BarberDialog } from '@/components/BarberDialog';
-import { BarberCard } from '@/components/BarberCard';
-import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
-import { EmptyState } from '@/components/shared/EmptyState';
-import { StatusBadge } from '@/components/shared/StatusBadge';
-import { ROUTES } from '@/constants/routes';
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { Scissors, Calendar, User, LogOut, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useUserRole } from "@/hooks/useUserRole";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { ServiceDialog } from "@/components/ServiceDialog";
+import { BarberDialog } from "@/components/BarberDialog";
+import { BarberCard } from "@/components/BarberCard";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { ROUTES } from "@/constants/routes";
 
 interface Appointment {
-  id: string;
-  data_inicio: string;
-  data_fim: string;
+  id: number;
+  startDate: string;
+  endDate: string;
   status: string;
-  observacoes: string | null;
-  barbers: { nome: string };
-  profiles: { nome: string };
-  services: { nome: string; duracao_min: number };
+  notes?: string;
+  barber?: { name: string };
+  client?: { name: string };
+  service?: { name: string; duration: number };
 }
 
 interface Service {
-  id: string;
-  nome: string;
-  preco_centavos: number;
-  duracao_min: number;
-  ativo: boolean;
+  id: number;
+  name: string;
+  price: number;
+  duration: number;
+  active: boolean;
 }
 
 export function BarbershopDashboard() {
@@ -53,10 +53,13 @@ export function BarbershopDashboard() {
   const [services, setServices] = useState<Service[]>([]);
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [barbershopInfo, setBarbershopInfo] = useState<{ name?: string; nome?: string } | null>(null);
+  const [barbershopInfo, setBarbershopInfo] = useState<{
+    name?: string;
+    nome?: string;
+  } | null>(null);
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [isBarberDialogOpen, setIsBarberDialogOpen] = useState(false);
-  const [selectedBarberId, setSelectedBarberId] = useState<string>('');
+  const [selectedBarberId, setSelectedBarberId] = useState<string>("");
   const hasWarnedWithoutBarbershop = useRef(false);
 
   useEffect(() => {
@@ -64,7 +67,7 @@ export function BarbershopDashboard() {
 
     if (!barbershopId) {
       if (!hasWarnedWithoutBarbershop.current) {
-        toast.error('Could not find a barbershop linked to your user');
+        toast.error("Could not find a barbershop linked to your user");
         hasWarnedWithoutBarbershop.current = true;
       }
       setIsLoading(false);
@@ -78,13 +81,17 @@ export function BarbershopDashboard() {
   const fetchData = async (targetBarbershopId: string | number) => {
     try {
       const barbershopIdNum =
-        typeof targetBarbershopId === 'string' ? parseInt(targetBarbershopId, 10) : targetBarbershopId;
+        typeof targetBarbershopId === "string"
+          ? parseInt(targetBarbershopId, 10)
+          : targetBarbershopId;
 
       const business = await businessAPI.getById(barbershopIdNum);
       setBarbershopInfo(business);
 
       const appts = await appointmentsAPI.getAll(barbershopIdNum);
-      const futureAppointments = appts.filter((apt: any) => new Date(apt.data_inicio) >= new Date());
+      const futureAppointments = appts.filter(
+        (apt: any) => new Date(apt.startDate) >= new Date()
+      );
       setAppointments(futureAppointments);
 
       const svcs = await servicesAPI.getAll(barbershopIdNum);
@@ -93,10 +100,10 @@ export function BarbershopDashboard() {
       const brbs = await barbersAPI.getAll(barbershopIdNum);
       setBarbers(brbs);
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching data:', error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error fetching data:", error);
       }
-      toast.error('Error loading data');
+      toast.error("Error loading data");
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +125,7 @@ export function BarbershopDashboard() {
           <div className="flex items-center gap-2">
             <Scissors className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-bold">
-              {barbershopInfo?.name || barbershopInfo?.nome || 'My Barbershop'}
+              {barbershopInfo?.name || "My Barbershop"}
             </h1>
           </div>
           <div className="flex gap-2">
@@ -158,13 +165,18 @@ export function BarbershopDashboard() {
                       <div className="space-y-1 flex-1">
                         <CardTitle className="flex items-center gap-2">
                           <Calendar className="h-5 w-5" />
-                          {format(new Date(appointment.data_inicio), "dd/MM/yyyy 'at' HH:mm", {
-                            locale: ptBR,
-                          })}
+                          {format(
+                            new Date(appointment.startDate),
+                            "dd/MM/yyyy 'at' HH:mm",
+                            {
+                              locale: ptBR,
+                            }
+                          )}
                         </CardTitle>
                         <CardDescription>
-                          {appointment.services?.nome || 'Service not available'} •{' '}
-                          {appointment.services?.duracao_min || 0} min
+                          {appointment.service?.name ||
+                            "Service not available"}{" "}
+                          • {appointment.service?.duration || 0} min
                         </CardDescription>
                       </div>
                       <StatusBadge status={appointment.status as any} />
@@ -174,16 +186,21 @@ export function BarbershopDashboard() {
                     <div className="flex items-center gap-2 text-sm">
                       <User className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">Client:</span>
-                      <span>{appointment.profiles?.nome || 'Client not available'}</span>
+                      <span>
+                        {appointment.client?.name || "Client not available"}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Scissors className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">Barber:</span>
-                      <span>{appointment.barbers?.nome || 'Barber not available'}</span>
+                      <span>
+                        {appointment.barber?.name || "Barber not available"}
+                      </span>
                     </div>
-                    {appointment.observacoes && (
+                    {appointment.notes && (
                       <div className="text-sm text-muted-foreground mt-2 pt-2 border-t">
-                        <span className="font-medium">Notes:</span> {appointment.observacoes}
+                        <span className="font-medium">Notes:</span>{" "}
+                        {appointment.notes}
                       </div>
                     )}
                   </CardContent>
@@ -216,16 +233,21 @@ export function BarbershopDashboard() {
               {services.map((service) => (
                 <Card key={service.id}>
                   <CardHeader>
-                    <CardTitle>{service.nome}</CardTitle>
+                    <CardTitle>{service.name}</CardTitle>
                     <CardDescription>
-                      ${(service.preco_centavos / 100).toFixed(2)} • {service.duracao_min} min
+                      ${(service.price / 100).toFixed(2)} •{" "}
+                      {service.duration} min
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      service.ativo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {service.ativo ? 'Active' : 'Inactive'}
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        service.active
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {service.active ? "Active" : "Inactive"}
                     </span>
                   </CardContent>
                 </Card>
@@ -245,7 +267,9 @@ export function BarbershopDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold">Barbers</h2>
-                <p className="text-muted-foreground">Manage your team and schedules</p>
+                <p className="text-muted-foreground">
+                  Manage your team and schedules
+                </p>
               </div>
               <Button onClick={() => setIsBarberDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -279,15 +303,15 @@ export function BarbershopDashboard() {
       <ServiceDialog
         open={isServiceDialogOpen}
         onOpenChange={setIsServiceDialogOpen}
-        barbershopId={barbershopId || ''}
-        onSuccess={() => fetchData(barbershopId || '')}
+        barbershopId={barbershopId || ""}
+        onSuccess={() => fetchData(barbershopId || "")}
       />
 
       <BarberDialog
         open={isBarberDialogOpen}
         onOpenChange={setIsBarberDialogOpen}
-        barbershopId={barbershopId || ''}
-        onSuccess={() => fetchData(barbershopId || '')}
+        barbershopId={barbershopId || ""}
+        onSuccess={() => fetchData(barbershopId || "")}
       />
     </div>
   );

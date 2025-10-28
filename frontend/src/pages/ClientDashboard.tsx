@@ -35,13 +35,13 @@ interface Barbershop {
 
 interface Appointment {
   id: string;
-  data_inicio: string;
-  data_fim: string;
+  startDate: string;
+  endDate: string;
   status: string;
-  observacoes: string | null;
-  barbers: { nome: string };
-  services: { nome: string; duracao_min: number };
-  barbershops: { nome: string };
+  notes?: string;
+  barber?: { name: string };
+  service?: { name: string; duration: number };
+  barbershop?: { name: string };
 }
 
 export function ClientDashboard() {
@@ -88,18 +88,18 @@ export function ClientDashboard() {
         const appointments = await appointmentsAPI.getAll(business.id);
         const userAppointments = appointments.filter(
           (apt) =>
-            apt.clienteId === user.id && new Date(apt.data_inicio) >= new Date()
+            apt.clientId === user.id && new Date(apt.startDate) >= new Date()
         );
         allAppointments.push(
           ...userAppointments.map((apt) => ({
             id: apt.id.toString(),
-            data_inicio: apt.data_inicio,
-            data_fim: apt.data_fim,
+            startDate: apt.startDate,
+            endDate: apt.endDate,
             status: apt.status,
-            observacoes: apt.observacoes || null,
-            barbers: { nome: apt.barbers?.nome || "Barber not available" },
-            services: { nome: apt.services?.nome || "Service not available", duracao_min: apt.services?.duracao_min || 30 },
-            barbershops: { nome: business.name },
+            notes: apt.notes,
+            barber: apt.barber,
+            service: apt.service,
+            barbershop: { name: business.name },
           }))
         );
       }
@@ -205,14 +205,14 @@ export function ClientDashboard() {
                       <CardTitle className="flex items-center gap-2">
                         <Calendar className="h-5 w-5" />
                         {format(
-                          new Date(appointment.data_inicio),
+                          new Date(appointment.startDate),
                           "dd/MM/yyyy 'at' HH:mm",
                           { locale: ptBR }
                         )}
                       </CardTitle>
                       <CardDescription>
-                        {appointment.services?.nome || "Service not available"}{" "}
-                        • {appointment.services?.duracao_min || 0} min
+                        {appointment.service?.name || "Service not available"}{" "}
+                        • {appointment.service?.duration || 0} min
                       </CardDescription>
                     </div>
                     <StatusBadge status={appointment.status as any} />
@@ -223,7 +223,7 @@ export function ClientDashboard() {
                     <Building2 className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">Barbershop:</span>
                     <span>
-                      {appointment.barbershops?.nome ||
+                      {appointment.barbershop?.name ||
                         "Barbershop not available"}
                     </span>
                   </div>
@@ -231,13 +231,13 @@ export function ClientDashboard() {
                     <Scissors className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">Barber:</span>
                     <span>
-                      {appointment.barbers?.nome || "Barber not available"}
+                      {appointment.barber?.name || "Barber not available"}
                     </span>
                   </div>
-                  {appointment.observacoes && (
+                  {appointment.notes && (
                     <div className="text-sm text-muted-foreground mt-2 pt-2 border-t">
                       <span className="font-medium">Notes:</span>{" "}
-                      {appointment.observacoes}
+                      {appointment.notes}
                     </div>
                   )}
                 </CardContent>

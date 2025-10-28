@@ -6,11 +6,11 @@ import { ProfileEntity, UserRole } from 'src/database/entities';
 export class UserResponseDto {
   id: number;
   email: string;
-  nome: string;
-  telefone: string;
+  name: string;
+  phone: string;
   role: UserRole;
-  barbearia_id?: number;
-  created_at: Date;
+  businessId?: number;
+  createdAt: Date;
 }
 
 @Injectable()
@@ -103,11 +103,11 @@ export class UsersService {
     return {
       id: user.id,
       email: user.email,
-      nome: user.name,
-      telefone: user.phone,
+      name: user.name,
+      phone: user.phone,
       role: user.role,
-      barbearia_id: user.businessId,
-      created_at: user.createdAt,
+      businessId: user.businessId,
+      createdAt: user.createdAt,
     };
   }
 }

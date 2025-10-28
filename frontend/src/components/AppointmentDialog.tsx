@@ -108,12 +108,12 @@ export function AppointmentDialog({
 
       await appointmentsAPI.create(barbershopIdNum, {
         barberId: parseInt(selectedBarber, 10),
-        clienteId: user.id,
-        data_inicio: startDateTime.toISOString(),
-        data_fim: endDateTime.toISOString(),
-        observacoes: notes || undefined,
-        status: 'pendente',
-        origem: 'web',
+        clientId: user.id,
+        startDate: startDateTime.toISOString(),
+        endDate: endDateTime.toISOString(),
+        notes: notes || undefined,
+        status: 'pending',
+        source: 'web',
       });
 
       toast.success('Appointment created successfully!');

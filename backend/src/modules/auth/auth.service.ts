@@ -54,8 +54,8 @@ export class AuthService {
     const newProfile = this.profileRepository.create({
       email: registerDto.email,
       passwordHash,
-      name: registerDto.nome,
-      phone: registerDto.telefone ?? undefined,
+      name: registerDto.name,
+      phone: registerDto.phone ?? undefined,
       role: registerDto.role || UserRole.CLIENT,
     });
 
@@ -71,8 +71,8 @@ export class AuthService {
     return {
       id: savedProfile.id,
       email: savedProfile.email,
-      nome: savedProfile.name,
-      telefone: savedProfile.phone,
+      name: savedProfile.name,
+      phone: savedProfile.phone,
       role: savedProfile.role,
       access_token,
     };
@@ -105,8 +105,8 @@ export class AuthService {
     return {
       id: user.id,
       email: user.email,
-      nome: user.name,
-      telefone: user.phone,
+      name: user.name,
+      phone: user.phone,
       role: user.role,
       access_token,
     };
@@ -124,11 +124,11 @@ export class AuthService {
     return {
       id: user.id,
       email: user.email,
-      nome: user.name,
-      telefone: user.phone,
+      name: user.name,
+      phone: user.phone,
       role: user.role,
-      barbearia_id: user.businessId,
-      created_at: user.createdAt,
+      businessId: user.businessId,
+      createdAt: user.createdAt,
     };
   }
 

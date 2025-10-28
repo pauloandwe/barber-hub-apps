@@ -3,8 +3,8 @@ import { apiClient } from "./client";
 export interface RegisterRequest {
   email: string;
   password: string;
-  nome: string;
-  telefone?: string;
+  name: string;
+  phone?: string;
 }
 
 export interface LoginRequest {
@@ -15,21 +15,21 @@ export interface LoginRequest {
 export interface AuthResponse {
   id: number;
   email: string;
-  nome: string;
-  telefone: string;
+  name: string;
+  phone: string;
   role: "ADMIN" | "BARBERSHOP" | "CLIENT";
-  barbearia_id?: number;
+  businessId?: number;
   access_token: string;
 }
 
 export interface UserProfile {
   id: number;
   email: string;
-  nome: string;
-  telefone: string;
+  name: string;
+  phone: string;
   role: "ADMIN" | "BARBERSHOP" | "CLIENT";
-  barbearia_id?: number;
-  created_at: string;
+  businessId?: number;
+  createdAt: string;
 }
 
 export const authAPI = {
@@ -60,8 +60,8 @@ export const authAPI = {
       apiClient.setToken(authData.access_token);
       console.log("✅ Token armazenado com sucesso");
 
-      // Garantir que usuários de barbearia tenham o barbearia_id carregado
-      if (authData.role === "BARBERSHOP" && !authData.barbearia_id) {
+      // Garantir que usuários de barbearia tenham o businessId carregado
+      if (authData.role === "BARBERSHOP" && !authData.businessId) {
         try {
           const profile = await authAPI.getProfile();
           console.log("ℹ️ Perfil carregado após login:", profile);

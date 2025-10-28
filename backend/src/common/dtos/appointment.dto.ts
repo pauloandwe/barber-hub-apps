@@ -99,11 +99,4 @@ export class AppointmentResponseDto {
   barber?: { id: number; name: string };
   client?: { id: number; name: string };
   service?: { id: number; name: string; duration: number };
-  data_inicio?: Date;
-  data_fim?: Date;
-  observacoes?: string;
-  origem?: string;
-  barbers?: { nome: string };
-  profiles?: { nome: string };
-  servicos?: { nome: string; duracao_min: number };
 }

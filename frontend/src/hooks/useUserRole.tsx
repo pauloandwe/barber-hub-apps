@@ -39,8 +39,7 @@ export function useUserRole(): UseUserRoleReturn {
 
         if (user.role === UserRole.BARBERSHOP_MANAGER) {
           setBarbershopId(
-            user.barbearia_id?.toString() ||
-              user.barbershop_id?.toString() ||
+            user.businessId?.toString() ||
               null
           );
         } else {

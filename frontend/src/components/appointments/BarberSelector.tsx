@@ -43,7 +43,7 @@ export function BarberSelector({
       setBarbers(
         data.map((b: any) => ({
           id: b.id.toString(),
-          name: b.nome || b.name,
+          name: b.name,
         }))
       );
     } catch (error) {

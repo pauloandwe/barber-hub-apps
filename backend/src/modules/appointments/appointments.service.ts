@@ -269,15 +269,6 @@ export class AppointmentsService {
             duration: appointment.service.duration,
           }
         : undefined,
-      data_inicio: appointment.startDate,
-      data_fim: appointment.endDate,
-      observacoes: appointment.notes,
-      origem: appointment.source,
-      barbers: appointment.barber ? { nome: appointment.barber.name } : undefined,
-      profiles: appointment.client ? { nome: appointment.client.name } : undefined,
-      servicos: appointment.service
-        ? { nome: appointment.service.name, duracao_min: appointment.service.duration }
-        : undefined,
     };
   }
 }

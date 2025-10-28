@@ -10,11 +10,11 @@ export class RegisterDto {
   password: string;
 
   @IsString()
-  nome: string;
+  name: string;
 
   @IsString()
   @IsOptional()
-  telefone?: string;
+  phone?: string;
 
   @IsEnum(UserRole)
   @IsOptional()
@@ -32,8 +32,8 @@ export class LoginDto {
 export class AuthResponseDto {
   id: number;
   email: string;
-  nome: string;
-  telefone: string;
+  name: string;
+  phone: string;
   role: UserRole;
   access_token: string;
 }
@@ -41,9 +41,9 @@ export class AuthResponseDto {
 export class UserProfileDto {
   id: number;
   email: string;
-  nome: string;
-  telefone: string;
+  name: string;
+  phone: string;
   role: UserRole;
-  barbearia_id?: number;
-  created_at: Date;
+  businessId?: number;
+  createdAt: Date;
 }

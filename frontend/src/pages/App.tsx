@@ -63,7 +63,7 @@ export function Dashboard() {
         <main className="container mx-auto p-4 py-8">
           <div className="mb-8">
             <h2 className="text-3xl font-bold">
-              Welcome, {user.name || user.nome}!
+              Welcome, {user.name}!
             </h2>
             <p className="text-muted-foreground mt-2">
               You are logged in as {getRoleLabel(user.role)}
@@ -88,7 +88,7 @@ export function Dashboard() {
                   </p>
                   <p>
                     <strong>Phone:</strong>{" "}
-                    {user.phone || user.telefone || "Not provided"}
+                    {user.phone || "Not provided"}
                   </p>
                   <p>
                     <strong>Type:</strong> {getRoleLabel(user.role)}

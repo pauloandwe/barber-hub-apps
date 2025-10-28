@@ -4,33 +4,36 @@ export interface Appointment {
   id: number;
   businessId: number;
   barberId?: number;
-  clienteId: number;
-  data_inicio: string;
-  data_fim: string;
-  status: "pendente" | "confirmado" | "cancelado";
-  origem: "web" | "whatsapp";
-  observacoes?: string;
+  clientId: number;
+  startDate: string;
+  endDate: string;
+  status: "pending" | "confirmed" | "cancelled";
+  source: "web" | "whatsapp";
+  notes?: string;
   createdAt?: string;
+  barber?: { name: string };
+  client?: { name: string };
+  service?: { name: string; duration: number };
 }
 
 export interface CreateAppointmentRequest {
   barberId?: number;
-  clienteId: number;
-  data_inicio: string;
-  data_fim: string;
-  status?: "pendente" | "confirmado" | "cancelado";
-  origem?: "web" | "whatsapp";
-  observacoes?: string;
+  clientId: number;
+  startDate: string;
+  endDate: string;
+  status?: "pending" | "confirmed" | "cancelled";
+  source?: "web" | "whatsapp";
+  notes?: string;
 }
 
 export interface UpdateAppointmentRequest {
   barberId?: number;
-  clienteId?: number;
-  data_inicio?: string;
-  data_fim?: string;
-  status?: "pendente" | "confirmado" | "cancelado";
-  origem?: "web" | "whatsapp";
-  observacoes?: string;
+  clientId?: number;
+  startDate?: string;
+  endDate?: string;
+  status?: "pending" | "confirmed" | "cancelled";
+  source?: "web" | "whatsapp";
+  notes?: string;
 }
 
 export const appointmentsAPI = {
