@@ -105,7 +105,6 @@ export class AppointmentsController {
     @Body(new ValidationPipe()) createAppointmentDto: CreateAppointmentDto,
   ): Promise<AppointmentResponseDto> {
     try {
-      // Ensure businessId matches
       if (parseInt(businessId) !== createAppointmentDto.businessId) {
         throw new BadRequestException('Business ID mismatch');
       }

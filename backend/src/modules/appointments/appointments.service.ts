@@ -57,7 +57,6 @@ export class AppointmentsService {
   }
 
   async create(createAppointmentDto: CreateAppointmentDto): Promise<AppointmentResponseDto> {
-    // Validate business exists
     const business = await this.businessRepository.findOne({
       where: { id: createAppointmentDto.businessId },
     });
@@ -66,7 +65,6 @@ export class AppointmentsService {
       throw new NotFoundException('Business not found');
     }
 
-    // Validate service exists
     const service = await this.serviceRepository.findOne({
       where: {
         id: createAppointmentDto.serviceId,
@@ -78,7 +76,6 @@ export class AppointmentsService {
       throw new NotFoundException('Service not found');
     }
 
-    // Validate barber exists
     const barber = await this.barberRepository.findOne({
       where: {
         id: createAppointmentDto.barberId,
@@ -209,7 +206,6 @@ export class AppointmentsService {
     }
 
     if (businessId && serviceId) {
-      // Suggest service duration
       const service = await this.serviceRepository.findOne({
         where: { id: serviceId },
       });
