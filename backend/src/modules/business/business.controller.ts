@@ -69,6 +69,33 @@ export class BusinessController {
     });
   }
 
+  @Get('phone/:phone/barbers/:barberId/free-slots')
+  @ApiOperation({ summary: 'Get available slots for a specific barber by business phone' })
+  async findBarberSlotsByPhone(
+    @Param('phone') phone: string,
+    @Param('barberId') barberId: string,
+    @Query('date') date?: string,
+    @Query('serviceId') serviceId?: string,
+  ) {
+    const parsedBarberId = Number(barberId);
+    if (Number.isNaN(parsedBarberId)) {
+      throw new BadRequestException('barberId must be a valid number');
+    }
+
+    let parsedServiceId: number | undefined;
+    if (serviceId !== undefined) {
+      parsedServiceId = Number(serviceId);
+      if (Number.isNaN(parsedServiceId)) {
+        throw new BadRequestException('serviceId must be a valid number');
+      }
+    }
+
+    return await this.businessService.findBarberSlotsByPhone(phone, parsedBarberId, {
+      date,
+      serviceId: parsedServiceId,
+    });
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)

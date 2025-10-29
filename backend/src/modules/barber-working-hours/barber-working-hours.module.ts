@@ -2,31 +2,15 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BusinessService } from './business.service';
-import { BusinessController } from './business.controller';
-import {
-  BusinessEntity,
-  ServiceEntity,
-  BarberEntity,
-  WorkingHoursEntity,
-  AppointmentEntity,
-  BloqueioEntity,
-  BarberWorkingHoursEntity,
-} from '../../database/entities';
+import { BarberWorkingHoursController } from './barber-working-hours.controller';
+import { BarberWorkingHoursService } from './barber-working-hours.service';
+import { BarberEntity, BarberWorkingHoursEntity } from '../../database/entities';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      BusinessEntity,
-      ServiceEntity,
-      BarberEntity,
-      WorkingHoursEntity,
-      AppointmentEntity,
-      BloqueioEntity,
-      BarberWorkingHoursEntity,
-    ]),
+    TypeOrmModule.forFeature([BarberWorkingHoursEntity, BarberEntity]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -37,8 +21,9 @@ import { RolesGuard } from '../../common/guards/roles.guard';
       }),
     }),
   ],
-  providers: [BusinessService, JwtAuthGuard, RolesGuard],
-  controllers: [BusinessController],
-  exports: [BusinessService],
+  controllers: [BarberWorkingHoursController],
+  providers: [BarberWorkingHoursService, JwtAuthGuard, RolesGuard],
+  exports: [BarberWorkingHoursService],
 })
-export class BusinessModule {}
+export class BarberWorkingHoursModule {}
+

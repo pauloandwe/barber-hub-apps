@@ -6,3 +6,4 @@ export { SettingsEntity } from './settings.entity';
 export { AppointmentEntity, AppointmentStatus, AppointmentOrigin } from './appointment.entity';
 export { ProfileEntity, UserRole } from './profile.entity';
 export { BloqueioEntity } from './bloqueio.entity';
+export { BarberWorkingHoursEntity } from './barber-working-hours.entity';

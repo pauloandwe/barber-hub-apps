@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -9,12 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
-import { addMinutes, startOfDay, setHours, setMinutes, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-const OPENING_HOUR = 8;
-const CLOSING_HOUR = 18;
-const TIME_SLOT_INTERVAL_MINUTES = 30;
 
 interface DateTimePickerProps {
   selectedDate: Date | undefined;

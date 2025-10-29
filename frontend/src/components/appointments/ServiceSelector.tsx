@@ -22,6 +22,7 @@ interface ServiceSelectorProps {
   value: string;
   onChange: (serviceId: string) => void;
   disabled?: boolean;
+  onLoaded?: (services: Service[]) => void;
 }
 
 export function ServiceSelector({
@@ -29,6 +30,7 @@ export function ServiceSelector({
   value,
   onChange,
   disabled,
+  onLoaded,
 }: ServiceSelectorProps) {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,14 +44,15 @@ export function ServiceSelector({
     try {
       const barbershopIdNum = parseInt(barbershopId, 10);
       const data = await servicesAPI.getAll(barbershopIdNum);
-      setServices(
-        data.map((s: any) => ({
-          id: s.id.toString(),
-          name: s.name,
-          durationMin: s.duration,
-          priceCents: s.price,
-        }))
-      );
+      const mapped = data.map((s: any) => ({
+        id: s.id.toString(),
+        name: s.name,
+        durationMin: s.duration,
+        priceCents: s.price,
+      }));
+
+      setServices(mapped);
+      onLoaded?.(mapped);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Error fetching services:', error);

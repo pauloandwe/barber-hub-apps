@@ -21,6 +21,7 @@ import {
   Users,
   UserCog,
   User,
+  Loader2,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -79,6 +80,15 @@ export function AdminDashboard() {
     phone: '',
     address: '',
   });
+  const [isEditBarbershopDialogOpen, setIsEditBarbershopDialogOpen] = useState(false);
+  const [barbershopToEdit, setBarbershopToEdit] = useState<Barbershop | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+  });
+  const [isUpdatingBarbershop, setIsUpdatingBarbershop] = useState(false);
 
   useEffect(() => {
     fetchBarbershops();
@@ -127,6 +137,50 @@ export function AdminDashboard() {
         console.error('Error creating barbershop:', error);
       }
       toast.error('Error creating barbershop');
+    }
+  };
+
+  const openEditBarbershopDialog = (barbershop: Barbershop) => {
+    setBarbershopToEdit(barbershop);
+    setEditFormData({
+      name: barbershop.name || '',
+      email: barbershop.email || '',
+      phone: barbershop.phone || '',
+      address: barbershop.address || '',
+    });
+    setIsEditBarbershopDialogOpen(true);
+  };
+
+  const resetEditBarbershopState = () => {
+    setBarbershopToEdit(null);
+    setEditFormData({ name: '', email: '', phone: '', address: '' });
+    setIsUpdatingBarbershop(false);
+  };
+
+  const handleUpdateBarbershop = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!barbershopToEdit) return;
+
+    setIsUpdatingBarbershop(true);
+    try {
+      await businessAPI.update(barbershopToEdit.id, {
+        name: editFormData.name,
+        email: editFormData.email || undefined,
+        phone: editFormData.phone || undefined,
+        address: editFormData.address || undefined,
+      });
+
+      toast.success('Barbershop updated successfully!');
+      setIsEditBarbershopDialogOpen(false);
+      resetEditBarbershopState();
+      fetchBarbershops();
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error updating barbershop:', error);
+      }
+      toast.error('Error updating barbershop');
+    } finally {
+      setIsUpdatingBarbershop(false);
     }
   };
 
@@ -294,8 +348,15 @@ export function AdminDashboard() {
               {barbershops.map((barbershop) => (
                 <Card key={barbershop.id}>
                   <CardHeader>
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-2">
                       <Building2 className="h-8 w-8 text-primary" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEditBarbershopDialog(barbershop)}
+                      >
+                        Edit
+                      </Button>
                     </div>
                     <CardTitle>{barbershop.name}</CardTitle>
                   </CardHeader>
@@ -321,6 +382,83 @@ export function AdminDashboard() {
                 icon="🏪"
               />
             )}
+
+            <Dialog
+              open={isEditBarbershopDialogOpen}
+              onOpenChange={(open) => {
+                setIsEditBarbershopDialogOpen(open);
+                if (!open) {
+                  resetEditBarbershopState();
+                }
+              }}
+            >
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit Barbershop</DialogTitle>
+                  <DialogDescription>
+                    Update the barbershop information below
+                  </DialogDescription>
+                </DialogHeader>
+
+                <form onSubmit={handleUpdateBarbershop} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-name">Name *</Label>
+                    <Input
+                      id="edit-name"
+                      type="text"
+                      value={editFormData.name}
+                      onChange={(e) =>
+                        setEditFormData((prev) => ({ ...prev, name: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-email">Email</Label>
+                    <Input
+                      id="edit-email"
+                      type="email"
+                      value={editFormData.email}
+                      onChange={(e) =>
+                        setEditFormData((prev) => ({ ...prev, email: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-phone">Phone *</Label>
+                    <Input
+                      id="edit-phone"
+                      type="tel"
+                      value={editFormData.phone}
+                      onChange={(e) =>
+                        setEditFormData((prev) => ({ ...prev, phone: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-address">Address</Label>
+                    <Input
+                      id="edit-address"
+                      type="text"
+                      value={editFormData.address}
+                      onChange={(e) =>
+                        setEditFormData((prev) => ({ ...prev, address: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isUpdatingBarbershop}>
+                    {isUpdatingBarbershop ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                      </>
+                    ) : (
+                      'Save changes'
+                    )}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="users" className="space-y-6">

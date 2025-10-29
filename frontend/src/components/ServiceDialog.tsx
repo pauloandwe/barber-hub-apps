@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { servicesAPI } from "@/api/services";
+import { useEffect, useState } from "react";
+import { Service, servicesAPI } from "@/api/services";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ import { DialogProps } from "@/types/shared.types";
 interface ServiceDialogProps extends DialogProps {
   barbershopId: string;
   onSuccess: () => void;
+  service?: Service | null;
 }
 
 interface ServiceFormData {
@@ -36,9 +37,11 @@ export function ServiceDialog({
   onOpenChange,
   barbershopId,
   onSuccess,
+  service,
 }: ServiceDialogProps) {
   const [formData, setFormData] = useState<ServiceFormData>(INITIAL_FORM_STATE);
   const [isLoading, setIsLoading] = useState(false);
+  const isEditMode = Boolean(service);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -78,25 +81,34 @@ export function ServiceDialog({
 
     setIsLoading(true);
     try {
-      const barbershopIdNum = parseInt(barbershopId, 10);
-      await servicesAPI.create({
-        businessId: barbershopIdNum,
+      const payload = {
         name: formData.name,
         description: undefined,
         duration: parseInt(formData.duration, 10),
         price: parseFloat(formData.price),
-        active: true,
-      });
+      };
 
-      toast.success("Service created successfully!");
+      if (isEditMode && service) {
+        await servicesAPI.update(service.id, payload);
+        toast.success("Service updated successfully!");
+      } else {
+        const barbershopIdNum = parseInt(barbershopId, 10);
+        await servicesAPI.create({
+          businessId: barbershopIdNum,
+          ...payload,
+          active: true,
+        });
+        toast.success("Service created successfully!");
+      }
+
       onSuccess();
       onOpenChange(false);
       resetForm();
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error("Error creating service:", error);
+        console.error(isEditMode ? "Error updating service:" : "Error creating service:", error);
       }
-      toast.error("Error creating service");
+      toast.error(isEditMode ? "Error updating service" : "Error creating service");
     } finally {
       setIsLoading(false);
     }
@@ -106,13 +118,34 @@ export function ServiceDialog({
     setFormData(INITIAL_FORM_STATE);
   };
 
+  useEffect(() => {
+    if (open && isEditMode && service) {
+      setFormData({
+        name: service.name ?? "",
+        price:
+          typeof service.price === "number"
+            ? (service.price / 100).toFixed(2)
+            : "",
+        duration:
+          service.duration !== undefined ? String(service.duration) : "",
+      });
+    }
+    if (!open) {
+      resetForm();
+    }
+  }, [open, isEditMode, service]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New Service</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? "Edit Service" : "New Service"}
+          </DialogTitle>
           <DialogDescription>
-            Create a new service for your barbershop
+            {isEditMode
+              ? "Update the service details below"
+              : "Create a new service for your barbershop"}
           </DialogDescription>
         </DialogHeader>
 
@@ -174,7 +207,7 @@ export function ServiceDialog({
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create
+              {isEditMode ? "Save changes" : "Create"}
             </Button>
           </div>
         </form>

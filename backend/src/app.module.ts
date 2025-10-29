@@ -18,7 +18,9 @@ import {
   AppointmentEntity,
   ProfileEntity,
   BloqueioEntity,
+  BarberWorkingHoursEntity,
 } from './database/entities';
+import { BarberWorkingHoursModule } from './modules/barber-working-hours/barber-working-hours.module';
 
 @Module({
   imports: [
@@ -40,6 +42,7 @@ import {
       AppointmentEntity,
       ProfileEntity,
       BloqueioEntity,
+      BarberWorkingHoursEntity,
     ]),
     AuthModule,
     AppointmentsModule,
@@ -48,6 +51,7 @@ import {
     BusinessModule,
     BarbersModule,
     ServicesModule,
+    BarberWorkingHoursModule,
   ],
 })
 export class AppModule {}

@@ -31,7 +31,7 @@ export class AppointmentsController {
   constructor(private appointmentsService: AppointmentsService) {}
 
   @Get(':businessId/appointments')
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP, UserRole.CLIENT)
   @ApiOperation({
     summary: 'Get all appointments for a business',
     description: 'Returns all appointments for a specific business',
@@ -48,7 +48,7 @@ export class AppointmentsController {
   }
 
   @Get(':businessId/appointments/:appointmentId')
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP, UserRole.CLIENT)
   @ApiOperation({
     summary: 'Get a specific appointment',
     description: 'Returns details of a specific appointment',
@@ -70,7 +70,7 @@ export class AppointmentsController {
   }
 
   @Post('suggest')
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP, UserRole.CLIENT)
   @ApiOperation({
     summary: 'Get appointment suggestions',
     description: 'Returns suggestions for completing the appointment draft',
@@ -86,7 +86,7 @@ export class AppointmentsController {
   }
 
   @Post(':businessId/appointments')
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP, UserRole.CLIENT)
   @ApiOperation({
     summary: 'Create a new appointment',
     description: 'Creates a new appointment for a business',
@@ -116,7 +116,7 @@ export class AppointmentsController {
   }
 
   @Put(':businessId/appointments/:appointmentId')
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP, UserRole.CLIENT)
   @ApiOperation({
     summary: 'Update an appointment completely',
     description: 'Updates all fields of an appointment',
@@ -147,7 +147,7 @@ export class AppointmentsController {
   }
 
   @Patch(':businessId/appointments/:appointmentId')
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP, UserRole.CLIENT)
   @ApiOperation({
     summary: 'Partially update an appointment',
     description: 'Updates only provided fields of an appointment',
@@ -178,7 +178,7 @@ export class AppointmentsController {
   }
 
   @Delete(':businessId/appointments/:appointmentId')
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP, UserRole.CLIENT)
   @ApiOperation({
     summary: 'Delete an appointment',
     description: 'Deletes an appointment by ID',

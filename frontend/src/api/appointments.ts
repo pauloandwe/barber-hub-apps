@@ -3,12 +3,13 @@ import { apiClient } from "./client";
 export interface Appointment {
   id: number;
   businessId: number;
+  serviceId: number;
   barberId?: number;
   clientId: number;
   startDate: string;
   endDate: string;
-  status: "pending" | "confirmed" | "cancelled";
-  source: "web" | "whatsapp";
+  status: "pending" | "confirmed" | "cancelled" | "canceled";
+  source: "web" | "whatsapp" | null;
   notes?: string;
   createdAt?: string;
   barber?: { name: string };
@@ -17,21 +18,22 @@ export interface Appointment {
 }
 
 export interface CreateAppointmentRequest {
-  barberId?: number;
+  businessId: number;
+  serviceId: number;
+  barberId: number;
   clientId: number;
   startDate: string;
   endDate: string;
-  status?: "pending" | "confirmed" | "cancelled";
-  source?: "web" | "whatsapp";
   notes?: string;
+  source?: "web" | "whatsapp";
 }
 
 export interface UpdateAppointmentRequest {
+  serviceId?: number;
   barberId?: number;
   clientId?: number;
   startDate?: string;
   endDate?: string;
-  status?: "pending" | "confirmed" | "cancelled";
   source?: "web" | "whatsapp";
   notes?: string;
 }

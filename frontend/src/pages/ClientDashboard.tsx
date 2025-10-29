@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { authAPI } from "@/api/auth";
 import { businessAPI } from "@/api/business";
-import { appointmentsAPI } from "@/api/appointments";
+import { Appointment as AppointmentModel, appointmentsAPI } from "@/api/appointments";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,24 +33,22 @@ interface Barbershop {
   name: string;
 }
 
-interface Appointment {
-  id: string;
-  startDate: string;
-  endDate: string;
-  status: string;
-  notes?: string;
-  barber?: { name: string };
-  service?: { name: string; duration: number };
-  barbershop?: { name: string };
-}
+type DashboardAppointment = AppointmentModel & { barbershopName?: string };
 
 export function ClientDashboard() {
   const navigate = useNavigate();
   const [barbershops, setBarbershops] = useState<Barbershop[]>([]);
   const [selectedBarbershop, setSelectedBarbershop] = useState<string>("");
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointments, setAppointments] = useState<DashboardAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false);
+  const [appointmentBeingEdited, setAppointmentBeingEdited] = useState<
+    DashboardAppointment | null
+  >(null);
+
+  const dialogBarbershopId = appointmentBeingEdited
+    ? appointmentBeingEdited.businessId.toString()
+    : selectedBarbershop;
 
   useEffect(() => {
     fetchBarbershops();
@@ -82,26 +80,30 @@ export function ClientDashboard() {
       if (!user) return;
 
       const businesses = await businessAPI.getAll();
-      const allAppointments: Appointment[] = [];
+      const allAppointments: DashboardAppointment[] = [];
 
       for (const business of businesses) {
-        const appointments = await appointmentsAPI.getAll(business.id);
-        const userAppointments = appointments.filter(
+        const businessId =
+          typeof business.id === "string"
+            ? parseInt(business.id, 10)
+            : business.id;
+
+        if (Number.isNaN(businessId)) {
+          continue;
+        }
+
+        const businessAppointments = await appointmentsAPI.getAll(businessId);
+        const userAppointments = businessAppointments.filter(
           (apt) =>
             apt.clientId === user.id && new Date(apt.startDate) >= new Date()
         );
-        allAppointments.push(
-          ...userAppointments.map((apt) => ({
-            id: apt.id.toString(),
-            startDate: apt.startDate,
-            endDate: apt.endDate,
-            status: apt.status,
-            notes: apt.notes,
-            barber: apt.barber,
-            service: apt.service,
-            barbershop: { name: business.name },
-          }))
-        );
+
+        userAppointments.forEach((apt) => {
+          allAppointments.push({
+            ...apt,
+            barbershopName: business.name,
+          });
+        });
       }
 
       setAppointments(allAppointments);
@@ -111,6 +113,11 @@ export function ClientDashboard() {
       }
       toast.error("Error loading appointments");
     }
+  };
+
+  const handleEditAppointment = (appointment: DashboardAppointment) => {
+    setAppointmentBeingEdited(appointment);
+    setIsAppointmentDialogOpen(true);
   };
 
   const handleLogout = () => {
@@ -181,7 +188,10 @@ export function ClientDashboard() {
               {selectedBarbershop && (
                 <Button
                   className="w-full mt-4"
-                  onClick={() => setIsAppointmentDialogOpen(true)}
+                  onClick={() => {
+                    setAppointmentBeingEdited(null);
+                    setIsAppointmentDialogOpen(true);
+                  }}
                 >
                   Schedule Appointment
                 </Button>
@@ -215,7 +225,16 @@ export function ClientDashboard() {
                         • {appointment.service?.duration || 0} min
                       </CardDescription>
                     </div>
-                    <StatusBadge status={appointment.status as any} />
+                    <div className="flex flex-col items-end gap-2">
+                      <StatusBadge status={appointment.status as any} />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditAppointment(appointment)}
+                      >
+                        Edit
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -223,8 +242,7 @@ export function ClientDashboard() {
                     <Building2 className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">Barbershop:</span>
                     <span>
-                      {appointment.barbershop?.name ||
-                        "Barbershop not available"}
+                      {appointment.barbershopName || "Barbershop not available"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
@@ -257,9 +275,15 @@ export function ClientDashboard() {
 
       <AppointmentDialog
         open={isAppointmentDialogOpen}
-        onOpenChange={setIsAppointmentDialogOpen}
-        barbershopId={selectedBarbershop}
+        onOpenChange={(open) => {
+          setIsAppointmentDialogOpen(open);
+          if (!open) {
+            setAppointmentBeingEdited(null);
+          }
+        }}
+        barbershopId={dialogBarbershopId}
         onSuccess={fetchMyAppointments}
+        appointment={appointmentBeingEdited}
       />
     </div>
   );

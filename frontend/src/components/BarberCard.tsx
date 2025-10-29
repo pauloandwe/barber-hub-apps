@@ -18,13 +18,22 @@ import {
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { Barber as BarberModel } from "@/api/barbers";
+import {
+  barberWorkingHoursAPI,
+  BarberWorkingHour,
+} from "@/api/barberWorkingHours";
+import { appointmentsAPI } from "@/api/appointments";
 
-export interface Barber {
-  id: string;
-  name: string;
-  bio?: string | null;
-  active: boolean;
-}
+const DAY_LABELS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
 
 export interface BarberAppointment {
   id: string;
@@ -36,14 +45,23 @@ export interface BarberAppointment {
 }
 
 interface BarberCardProps {
-  barber: Barber;
-  onViewSchedule?: (barberId: string) => void;
+  barber: BarberModel;
+  onViewSchedule?: (barber: BarberModel) => void;
+  onEdit?: (barber: BarberModel) => void;
+  scheduleVersion?: number;
 }
 
-export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
+export function BarberCard({
+  barber,
+  onViewSchedule,
+  onEdit,
+  scheduleVersion = 0,
+}: BarberCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [appointments, setAppointments] = useState<BarberAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [workingHours, setWorkingHours] = useState<BarberWorkingHour[]>([]);
+  const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -51,10 +69,51 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    loadWorkingHours();
+  }, [barber.id, scheduleVersion]);
+
   const fetchAppointments = async () => {
     setIsLoading(true);
     try {
       setAppointments([]);
+
+      if (!barber.businessId) {
+        setAppointments([]);
+        return;
+      }
+
+      const data = await appointmentsAPI.getAll(barber.businessId);
+      const filteredAppointments = data.filter(
+        (appointment) => appointment.barberId === barber.id
+      );
+
+      const normalizedAppointments: BarberAppointment[] =
+        filteredAppointments.map((appointment) => ({
+          id: String(appointment.id),
+          startDate: appointment.startDate,
+          endDate: appointment.endDate,
+          status: appointment.status,
+          profile: {
+            name:
+              appointment.client?.name ||
+              appointment.barber?.name ||
+              "Client not available",
+          },
+          service: appointment.service
+            ? {
+                name: appointment.service.name,
+                duration: appointment.service.duration,
+              }
+            : { name: "Service not available", duration: 0 },
+        }));
+
+      normalizedAppointments.sort(
+        (a, b) =>
+          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+      );
+
+      setAppointments(normalizedAppointments);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.error("Error fetching appointments:", error);
@@ -64,9 +123,47 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
     }
   };
 
+  const loadWorkingHours = async () => {
+    setIsLoadingSchedule(true);
+    try {
+      const data = await barberWorkingHoursAPI.getAll(barber.id);
+      setWorkingHours(Array.isArray(data) ? data : []);
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error fetching working hours:", error);
+      }
+    } finally {
+      setIsLoadingSchedule(false);
+    }
+  };
+
+  const workingHoursByDay = DAY_LABELS.map((label, index) => {
+    const record = workingHours.find((item) => item.dayOfWeek === index);
+
+    if (!record) {
+      return { label, text: "Not configured" };
+    }
+
+    if (record.closed) {
+      return { label, text: "Closed" };
+    }
+
+    const range = `${record.openTime ?? "--:--"} – ${
+      record.closeTime ?? "--:--"
+    }`;
+    if (record.breakStart && record.breakEnd) {
+      return {
+        label,
+        text: `${range} (break ${record.breakStart}–${record.breakEnd})`,
+      };
+    }
+
+    return { label, text: range };
+  });
+
   const handleViewSchedule = () => {
     if (onViewSchedule) {
-      onViewSchedule(barber.id);
+      onViewSchedule(barber);
     }
   };
 
@@ -80,9 +177,13 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
                 <UserIcon className="h-5 w-5" />
                 {barber.name}
               </CardTitle>
-              {barber.bio && <CardDescription>{barber.bio}</CardDescription>}
+              {barber.specialties && barber.specialties.length > 0 && (
+                <CardDescription>
+                  {barber.specialties.join(", ")}
+                </CardDescription>
+              )}
             </div>
-            <div className="flex gap-2 ml-4">
+            <div className="flex gap-2 ml-4 items-center">
               <span
                 className={`text-xs px-2 py-1 rounded whitespace-nowrap ${
                   barber.active
@@ -92,14 +193,50 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
               >
                 {barber.active ? "Active" : "Inactive"}
               </span>
+              {onEdit && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit(barber)}
+                >
+                  Edit
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleViewSchedule}
+                disabled={!onViewSchedule}
+              >
+                Manage schedule
+              </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+              Working hours
+            </p>
+            {isLoadingSchedule ? (
+              <LoadingSpinner size="small" />
+            ) : (
+              <div className="grid gap-1 text-sm sm:grid-cols-2">
+                {workingHoursByDay.map((entry) => (
+                  <div key={entry.label} className="flex justify-between gap-3">
+                    <span className="font-medium">{entry.label}</span>
+                    <span className="text-muted-foreground text-right">
+                      {entry.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <CollapsibleTrigger asChild>
             <Button variant="outline" className="w-full">
               <Clock className="mr-2 h-4 w-4" />
-              {isOpen ? "Hide Schedule" : "View Schedule"}
+              {isOpen ? "Hide Appointments" : "View Appointments"}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-4">

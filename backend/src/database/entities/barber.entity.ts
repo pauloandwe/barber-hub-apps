@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMan
 import { BusinessEntity } from './business.entity';
 import { AppointmentEntity } from './appointment.entity';
 import { BloqueioEntity } from './bloqueio.entity';
+import { BarberWorkingHoursEntity } from './barber-working-hours.entity';
 
 @Entity('barbers')
 export class BarberEntity {
@@ -34,4 +35,9 @@ export class BarberEntity {
 
   @OneToMany(() => BloqueioEntity, (bloqueio) => bloqueio.barbeiro)
   bloqueios: BloqueioEntity[];
+
+  @OneToMany(() => BarberWorkingHoursEntity, (workingHour) => workingHour.barber, {
+    cascade: ['remove'],
+  })
+  workingHours: BarberWorkingHoursEntity[];
 }

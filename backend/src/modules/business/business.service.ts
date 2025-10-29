@@ -8,6 +8,7 @@ import {
   AppointmentEntity,
   AppointmentStatus,
   WorkingHoursEntity,
+  BarberWorkingHoursEntity,
 } from '../../database/entities';
 import { CreateBusinessDto } from '../../common/dtos/create-business.dto';
 import { UpdateBusinessDto } from '../../common/dtos/update-business.dto';
@@ -29,6 +30,17 @@ export interface AvailabilityResponse {
   slotDurationMinutes: number;
   barbers: BarberAvailability[];
 }
+
+export interface SingleBarberAvailabilityResponse {
+  date: string;
+  slotDurationMinutes: number;
+  barber: BarberAvailability;
+}
+
+type WorkingHoursLike = Pick<
+  WorkingHoursEntity,
+  'openTime' | 'closeTime' | 'breakStart' | 'breakEnd'
+> & { closed?: boolean };
 
 const DEFAULT_SLOT_DURATION_MINUTES = 30;
 
@@ -96,7 +108,7 @@ export class BusinessService {
 
     const barbers = await this.barberRepository.find({
       where: { businessId: business.id, active: true },
-      relations: ['bloqueios'],
+      relations: ['bloqueios', 'workingHours'],
       order: { name: 'ASC' },
     });
 
@@ -108,22 +120,10 @@ export class BusinessService {
       };
     }
 
-    const workingDay = business.workingHours?.find(
-      (wh) => wh.dayOfWeek === startOfDay.getDay() && !wh.closed,
+    const dayOfWeek = startOfDay.getDay();
+    const businessWorkingDay = business.workingHours?.find(
+      (wh) => wh.dayOfWeek === dayOfWeek,
     );
-
-    if (!workingDay) {
-      return {
-        date: this.formatDate(startOfDay),
-        slotDurationMinutes,
-        barbers: barbers.map((barber) => ({
-          id: barber.id,
-          name: barber.name,
-          specialties: barber.specialties ?? null,
-          slots: [],
-        })),
-      };
-    }
 
     const barberIds = barbers.map((barber) => barber.id);
 
@@ -138,56 +138,86 @@ export class BusinessService {
         })
       : [];
 
-    const baseIntervals = this.buildBaseIntervals(startOfDay, workingDay);
+    const appointmentsByBarber = appointments.reduce<Map<number, AppointmentEntity[]>>(
+      (acc, appointment) => {
+        const list = acc.get(appointment.barberId) ?? [];
+        list.push(appointment);
+        acc.set(appointment.barberId, list);
+        return acc;
+      },
+      new Map(),
+    );
 
-    const availability: BarberAvailability[] = barbers.map((barber) => {
-      let availableIntervals = this.cloneIntervals(baseIntervals);
-
-      const appointmentsForBarber = appointments.filter(
-        (appointment) => appointment.barberId === barber.id,
-      );
-
-      for (const appointment of appointmentsForBarber) {
-        const busyInterval = this.clampInterval(
-          { start: appointment.startDate, end: appointment.endDate },
-          startOfDay,
-          endOfDay,
-        );
-        if (busyInterval) {
-          availableIntervals = this.subtractInterval(availableIntervals, busyInterval);
-        }
-      }
-
-      const bloqueios = barber.bloqueios ?? [];
-      for (const bloqueio of bloqueios) {
-        const blockedInterval = this.clampInterval(
-          { start: bloqueio.data_inicio, end: bloqueio.data_fim },
-          startOfDay,
-          endOfDay,
-        );
-        if (blockedInterval) {
-          availableIntervals = this.subtractInterval(availableIntervals, blockedInterval);
-        }
-      }
-
-      const slots = this.splitIntoSlots(availableIntervals, slotDurationMinutes);
-      const futureSlots = this.filterPastSlots(slots, startOfDay).map((slot) => ({
-        start: this.formatTime(slot.start),
-        end: this.formatTime(slot.end),
-      }));
-
-      return {
-        id: barber.id,
-        name: barber.name,
-        specialties: barber.specialties ?? null,
-        slots: futureSlots,
-      };
-    });
+    const availability: BarberAvailability[] = barbers.map((barber) =>
+      this.calculateAvailabilityForBarber({
+        barber,
+        businessWorkingDay: businessWorkingDay ?? null,
+        dayOfWeek,
+        startOfDay,
+        endOfDay,
+        slotDurationMinutes,
+        appointments: appointmentsByBarber.get(barber.id) ?? [],
+      }),
+    );
 
     return {
       date: this.formatDate(startOfDay),
       slotDurationMinutes,
       barbers: availability,
+    };
+  }
+
+  async findBarberSlotsByPhone(
+    phone: string,
+    barberId: number,
+    options: { date?: string; serviceId?: number } = {},
+  ): Promise<SingleBarberAvailabilityResponse> {
+    const { date, serviceId } = options;
+    const business = await this.getBusinessByPhoneOrThrow(phone, ['workingHours']);
+    const targetDate = this.resolveTargetDate(date);
+    const startOfDay = new Date(targetDate);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const slotDurationMinutes = await this.resolveSlotDuration(serviceId, business.id);
+
+    const barber = await this.barberRepository.findOne({
+      where: { id: barberId, businessId: business.id, active: true },
+      relations: ['bloqueios', 'workingHours'],
+    });
+
+    if (!barber) {
+      throw new NotFoundException('Barber not found for this business');
+    }
+
+    const dayOfWeek = startOfDay.getDay();
+    const businessWorkingDay = business.workingHours?.find(
+      (wh) => wh.dayOfWeek === dayOfWeek,
+    );
+
+    const appointments = await this.appointmentRepository.find({
+      where: {
+        businessId: business.id,
+        barberId: barber.id,
+        startDate: Between(startOfDay, endOfDay),
+        status: In([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED]),
+      },
+    });
+
+    const barberAvailability = this.calculateAvailabilityForBarber({
+      barber,
+      businessWorkingDay: businessWorkingDay ?? null,
+      dayOfWeek,
+      startOfDay,
+      endOfDay,
+      slotDurationMinutes,
+      appointments,
+    });
+
+    return {
+      date: this.formatDate(startOfDay),
+      slotDurationMinutes,
+      barber: barberAvailability,
     };
   }
 
@@ -272,7 +302,125 @@ export class BusinessService {
     return service.duration;
   }
 
-  private buildBaseIntervals(date: Date, workingDay: WorkingHoursEntity): TimeInterval[] {
+  private calculateAvailabilityForBarber({
+    barber,
+    businessWorkingDay,
+    dayOfWeek,
+    startOfDay,
+    endOfDay,
+    slotDurationMinutes,
+    appointments,
+  }: {
+    barber: BarberEntity;
+    businessWorkingDay: WorkingHoursEntity | null;
+    dayOfWeek: number;
+    startOfDay: Date;
+    endOfDay: Date;
+    slotDurationMinutes: number;
+    appointments: AppointmentEntity[];
+  }): BarberAvailability {
+    const workingDay = this.resolveWorkingHoursForBarber(
+      barber.workingHours ?? [],
+      businessWorkingDay,
+      dayOfWeek,
+    );
+
+    if (!workingDay) {
+      return {
+        id: barber.id,
+        name: barber.name,
+        specialties: barber.specialties ?? null,
+        slots: [],
+      };
+    }
+
+    const baseIntervals = this.buildBaseIntervals(startOfDay, workingDay);
+
+    if (!baseIntervals.length) {
+      return {
+        id: barber.id,
+        name: barber.name,
+        specialties: barber.specialties ?? null,
+        slots: [],
+      };
+    }
+
+    let availableIntervals = this.cloneIntervals(baseIntervals);
+
+    for (const appointment of appointments ?? []) {
+      const busyInterval = this.clampInterval(
+        { start: appointment.startDate, end: appointment.endDate },
+        startOfDay,
+        endOfDay,
+      );
+      if (busyInterval) {
+        availableIntervals = this.subtractInterval(availableIntervals, busyInterval);
+      }
+    }
+
+    const bloqueios = barber.bloqueios ?? [];
+    for (const bloqueio of bloqueios) {
+      const blockedInterval = this.clampInterval(
+        { start: bloqueio.data_inicio, end: bloqueio.data_fim },
+        startOfDay,
+        endOfDay,
+      );
+      if (blockedInterval) {
+        availableIntervals = this.subtractInterval(availableIntervals, blockedInterval);
+      }
+    }
+
+    const slots = this.splitIntoSlots(availableIntervals, slotDurationMinutes);
+    const futureSlots = this.filterPastSlots(slots, startOfDay).map((slot) => ({
+      start: this.formatTime(slot.start),
+      end: this.formatTime(slot.end),
+    }));
+
+    return {
+      id: barber.id,
+      name: barber.name,
+      specialties: barber.specialties ?? null,
+      slots: futureSlots,
+    };
+  }
+
+  private resolveWorkingHoursForBarber(
+    barberWorkingHours: BarberWorkingHoursEntity[],
+    businessWorkingDay: WorkingHoursEntity | null,
+    dayOfWeek: number,
+  ): WorkingHoursLike | null {
+    const barberDay = barberWorkingHours.find((wh) => wh.dayOfWeek === dayOfWeek);
+
+    if (barberDay) {
+      if (barberDay.closed) {
+        return null;
+      }
+
+      if (!barberDay.openTime || !barberDay.closeTime) {
+        return null;
+      }
+
+      return {
+        openTime: barberDay.openTime,
+        closeTime: barberDay.closeTime,
+        breakStart: barberDay.breakStart ?? undefined,
+        breakEnd: barberDay.breakEnd ?? undefined,
+        closed: barberDay.closed,
+      };
+    }
+
+    if (!businessWorkingDay || businessWorkingDay.closed) {
+      return null;
+    }
+
+    return businessWorkingDay;
+  }
+
+  private buildBaseIntervals(date: Date, workingDay: WorkingHoursLike): TimeInterval[] {
+    if (!workingDay.openTime || !workingDay.closeTime) {
+      return [];
+    }
+
     const open = this.combineDateTime(date, workingDay.openTime);
     const close = this.combineDateTime(date, workingDay.closeTime);
 
