@@ -2,7 +2,11 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ServiceEntity } from '../../database/entities/service.entity';
-import { CreateServiceDto, UpdateServiceDto, ServiceResponseDto } from '../../common/dtos/service.dto';
+import {
+  CreateServiceDto,
+  UpdateServiceDto,
+  ServiceResponseDto,
+} from '../../common/dtos/service.dto';
 
 @Injectable()
 export class ServicesService {
@@ -11,13 +15,26 @@ export class ServicesService {
     private readonly serviceRepository: Repository<ServiceEntity>,
   ) {}
 
-  async findAll(businessId?: number): Promise<ServiceEntity[]> {
+  async findAll({
+    businessId,
+    businessPhone,
+  }: {
+    businessId?: number;
+    businessPhone?: string;
+  }): Promise<ServiceEntity[]> {
     if (businessId) {
       return this.serviceRepository.find({
         where: { businessId },
         order: { name: 'ASC' },
       });
+    } else if (businessPhone) {
+      return this.serviceRepository.find({
+        where: { business: { phone: businessPhone } },
+        order: { name: 'ASC' },
+        relations: ['business'],
+      });
     }
+
     return this.serviceRepository.find({
       order: { name: 'ASC' },
     });

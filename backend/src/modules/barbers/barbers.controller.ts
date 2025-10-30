@@ -31,10 +31,15 @@ export class BarbersController {
     description: 'List of barbers',
     type: [BarberResponseDto],
   })
-  async findAll(@Query('businessId') businessId?: string): Promise<any> {
-    const barbers = await this.barbersService.findAll(
-      businessId ? parseInt(businessId) : undefined,
-    );
+  async findAll(
+    @Query('businessId') businessId?: string,
+    @Query('businessPhone') businessPhone?: string,
+  ): Promise<any> {
+    const barbers = await this.barbersService.findAll({
+      businessId: businessId ? parseInt(businessId) : undefined,
+      businessPhone,
+    });
+
     return {
       data: {
         data: barbers.map((b) => ({

@@ -35,10 +35,14 @@ export class ServicesController {
     description: 'List of services',
     type: [ServiceResponseDto],
   })
-  async findAll(@Query('businessId') businessId?: string): Promise<any> {
-    const services = await this.servicesService.findAll(
-      businessId ? parseInt(businessId) : undefined,
-    );
+  async findAll(
+    @Query('businessId') businessId?: string,
+    @Query('businessPhone') businessPhone?: string,
+  ): Promise<any> {
+    const services = await this.servicesService.findAll({
+      businessId: businessId ? parseInt(businessId, 10) : undefined,
+      businessPhone,
+    });
     return {
       data: {
         data: services.map((s) => ({
@@ -63,18 +67,9 @@ export class ServicesController {
     type: ServiceResponseDto,
   })
   async findById(@Param('id') id: string): Promise<any> {
-    const service = await this.servicesService.findById(parseInt(id));
+    const service = await this.servicesService.findById(parseInt(id, 10));
     return {
-      data: {
-        id: service.id,
-        businessId: service.businessId,
-        name: service.name,
-        description: service.description,
-        duration: service.duration,
-        price: Number(service.price),
-        active: service.active,
-        createdAt: service.createdAt,
-      },
+      data: service,
     };
   }
 
@@ -92,16 +87,7 @@ export class ServicesController {
   async create(@Body() createServiceDto: CreateServiceDto): Promise<any> {
     const service = await this.servicesService.create(createServiceDto);
     return {
-      data: {
-        id: service.id,
-        businessId: service.businessId,
-        name: service.name,
-        description: service.description,
-        duration: service.duration,
-        price: Number(service.price),
-        active: service.active,
-        createdAt: service.createdAt,
-      },
+      data: service,
     };
   }
 
@@ -116,18 +102,9 @@ export class ServicesController {
     type: ServiceResponseDto,
   })
   async update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto): Promise<any> {
-    const service = await this.servicesService.update(parseInt(id), updateServiceDto);
+    const service = await this.servicesService.update(parseInt(id, 10), updateServiceDto);
     return {
-      data: {
-        id: service.id,
-        businessId: service.businessId,
-        name: service.name,
-        description: service.description,
-        duration: service.duration,
-        price: Number(service.price),
-        active: service.active,
-        createdAt: service.createdAt,
-      },
+      data: service,
     };
   }
 
@@ -141,7 +118,7 @@ export class ServicesController {
     description: 'Service deleted successfully',
   })
   async delete(@Param('id') id: string): Promise<{ message: string }> {
-    await this.servicesService.delete(parseInt(id));
+    await this.servicesService.delete(parseInt(id, 10));
     return { message: 'Service deleted successfully' };
   }
 }

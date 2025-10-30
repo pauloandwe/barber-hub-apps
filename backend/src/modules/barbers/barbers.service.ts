@@ -11,11 +11,23 @@ export class BarbersService {
     private readonly barberRepository: Repository<BarberEntity>,
   ) {}
 
-  async findAll(businessId?: number): Promise<BarberEntity[]> {
+  async findAll({
+    businessId,
+    businessPhone,
+  }: {
+    businessId?: number;
+    businessPhone?: string;
+  }): Promise<BarberEntity[]> {
     if (businessId) {
       return this.barberRepository.find({
         where: { businessId },
         order: { name: 'ASC' },
+      });
+    } else if (businessPhone) {
+      return this.barberRepository.find({
+        where: { business: { phone: businessPhone } },
+        order: { name: 'ASC' },
+        relations: ['business'],
       });
     }
     return this.barberRepository.find({
