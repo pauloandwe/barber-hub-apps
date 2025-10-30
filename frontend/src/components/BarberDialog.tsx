@@ -68,12 +68,12 @@ export function BarberDialog({
 
   const validateForm = (): boolean => {
     if (!formData.name || formData.name.trim().length === 0) {
-      toast.error("Please enter barber name");
+      toast.error("Por favor, digite o nome do barbeiro");
       return false;
     }
 
     if (formData.name.trim().length < 3) {
-      toast.error("Name must be at least 3 characters");
+      toast.error("O nome deve ter pelo menos 3 caracteres");
       return false;
     }
 
@@ -97,14 +97,14 @@ export function BarberDialog({
 
       if (isEditMode && barber) {
         await barbersAPI.update(barber.id, payload);
-        toast.success("Barber updated successfully!");
+        toast.success("Barbeiro atualizado com sucesso!");
       } else {
         const barbershopIdNum = parseInt(barbershopId, 10);
         await barbersAPI.create({
           businessId: barbershopIdNum,
           ...payload,
         });
-        toast.success("Barber created successfully!");
+        toast.success("Barbeiro criado com sucesso!");
       }
 
       onSuccess();
@@ -112,9 +112,14 @@ export function BarberDialog({
       resetForm();
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error(isEditMode ? "Error updating barber:" : "Error creating barber:", error);
+        console.error(
+          isEditMode ? "Error updating barber:" : "Error creating barber:",
+          error
+        );
       }
-      toast.error(isEditMode ? "Error updating barber" : "Error creating barber");
+      toast.error(
+        isEditMode ? "Erro ao atualizar barbeiro" : "Erro ao criar barbeiro"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -143,22 +148,24 @@ export function BarberDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditMode ? "Edit Barber" : "New Barber"}</DialogTitle>
+          <DialogTitle>
+            {isEditMode ? "Editar Barbeiro" : "Novo Barbeiro"}
+          </DialogTitle>
           <DialogDescription>
             {isEditMode
-              ? "Update the barber information below"
-              : "Register a new barber for your barbershop"}
+              ? "Atualize as informações do barbeiro abaixo"
+              : "Registre um novo barbeiro para sua barbearia"}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Barber Name *</Label>
+            <Label htmlFor="name">Nome do Barbeiro *</Label>
             <Input
               id="name"
               type="text"
               name="name"
-              placeholder="Ex: John Doe"
+              placeholder="Ex: João Silva"
               value={formData.name}
               onChange={handleInputChange}
               disabled={isLoading}
@@ -167,11 +174,11 @@ export function BarberDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="specialties">Specialties (optional)</Label>
+            <Label htmlFor="specialties">Especialidades (opcional)</Label>
             <Textarea
               id="specialties"
               name="specialties"
-              placeholder="Separate each specialty with a comma"
+              placeholder="Separe cada especialidade com uma vírgula"
               value={formData.specialties}
               onChange={handleInputChange}
               disabled={isLoading}
@@ -181,9 +188,9 @@ export function BarberDialog({
 
           <div className="flex items-center justify-between rounded border p-3">
             <div className="space-y-0.5">
-              <Label htmlFor="active">Active</Label>
+              <Label htmlFor="active">Ativo</Label>
               <p className="text-sm text-muted-foreground">
-                Toggle to activate or deactivate this barber
+                Ativar ou desativar este barbeiro
               </p>
             </div>
             <Switch
@@ -203,11 +210,11 @@ export function BarberDialog({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditMode ? "Save changes" : "Create"}
+              {isEditMode ? "Salvar mudanças" : "Criar"}
             </Button>
           </div>
         </form>

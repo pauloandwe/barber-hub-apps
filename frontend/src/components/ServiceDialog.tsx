@@ -53,19 +53,19 @@ export function ServiceDialog({
 
   const validateForm = (): boolean => {
     if (!formData.name || !formData.price || !formData.duration) {
-      toast.error("Please fill in all fields");
+      toast.error("Por favor, preencha todos os campos");
       return false;
     }
 
     const price = parseFloat(formData.price);
     if (isNaN(price) || price < 0) {
-      toast.error("Please enter a valid price");
+      toast.error("Por favor, digite um preço válido");
       return false;
     }
 
     const duration = parseInt(formData.duration, 10);
     if (isNaN(duration) || duration < 5) {
-      toast.error("Duration must be at least 5 minutes");
+      toast.error("A duração deve ser de pelo menos 5 minutos");
       return false;
     }
 
@@ -90,7 +90,7 @@ export function ServiceDialog({
 
       if (isEditMode && service) {
         await servicesAPI.update(service.id, payload);
-        toast.success("Service updated successfully!");
+        toast.success("Serviço atualizado com sucesso!");
       } else {
         const barbershopIdNum = parseInt(barbershopId, 10);
         await servicesAPI.create({
@@ -98,7 +98,7 @@ export function ServiceDialog({
           ...payload,
           active: true,
         });
-        toast.success("Service created successfully!");
+        toast.success("Serviço criado com sucesso!");
       }
 
       onSuccess();
@@ -106,9 +106,14 @@ export function ServiceDialog({
       resetForm();
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error(isEditMode ? "Error updating service:" : "Error creating service:", error);
+        console.error(
+          isEditMode ? "Error updating service:" : "Error creating service:",
+          error
+        );
       }
-      toast.error(isEditMode ? "Error updating service" : "Error creating service");
+      toast.error(
+        isEditMode ? "Erro ao atualizar serviço" : "Erro ao criar serviço"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -140,23 +145,23 @@ export function ServiceDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {isEditMode ? "Edit Service" : "New Service"}
+            {isEditMode ? "Editar Serviço" : "Novo Serviço"}
           </DialogTitle>
           <DialogDescription>
             {isEditMode
-              ? "Update the service details below"
-              : "Create a new service for your barbershop"}
+              ? "Atualize os detalhes do serviço abaixo"
+              : "Crie um novo serviço para sua barbearia"}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Service Name *</Label>
+            <Label htmlFor="name">Nome do Serviço *</Label>
             <Input
               id="name"
               type="text"
               name="name"
-              placeholder="Ex: Haircut"
+              placeholder="Ex: Corte de Cabelo"
               value={formData.name}
               onChange={handleInputChange}
               disabled={isLoading}
@@ -165,7 +170,7 @@ export function ServiceDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price">Price (USD) *</Label>
+            <Label htmlFor="price">Preço (R$) *</Label>
             <Input
               id="price"
               type="number"
@@ -181,7 +186,7 @@ export function ServiceDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="duration">Duration (minutes) *</Label>
+            <Label htmlFor="duration">Duração (minutos) *</Label>
             <Input
               id="duration"
               type="number"
@@ -203,11 +208,11 @@ export function ServiceDialog({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isEditMode ? "Save changes" : "Create"}
+              {isEditMode ? "Salvar mudanças" : "Criar"}
             </Button>
           </div>
         </form>

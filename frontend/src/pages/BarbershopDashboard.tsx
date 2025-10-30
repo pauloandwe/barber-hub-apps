@@ -23,7 +23,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Scissors, Calendar, User, LogOut, Plus, Building2, Loader2 } from "lucide-react";
+import {
+  Scissors,
+  Calendar,
+  User,
+  LogOut,
+  Plus,
+  Building2,
+  Loader2,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { format } from "date-fns";
@@ -60,7 +68,8 @@ export function BarbershopDashboard() {
   >(null);
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [isBarberDialogOpen, setIsBarberDialogOpen] = useState(false);
-  const [serviceDialogData, setServiceDialogData] = useState<ServiceModel | null>(null);
+  const [serviceDialogData, setServiceDialogData] =
+    useState<ServiceModel | null>(null);
   const [barberDialogData, setBarberDialogData] = useState<Barber | null>(null);
   const [isBusinessDialogOpen, setIsBusinessDialogOpen] = useState(false);
   const [businessForm, setBusinessForm] = useState({ name: "", phone: "" });
@@ -77,7 +86,9 @@ export function BarbershopDashboard() {
 
     if (!barbershopId) {
       if (!hasWarnedWithoutBarbershop.current) {
-        toast.error("Could not find a barbershop linked to your user");
+        toast.error(
+          "Não foi possível encontrar uma barbearia vinculada ao seu usuário"
+        );
         hasWarnedWithoutBarbershop.current = true;
       }
       setIsLoading(false);
@@ -113,7 +124,7 @@ export function BarbershopDashboard() {
       if (process.env.NODE_ENV === "development") {
         console.error("Error fetching data:", error);
       }
-      toast.error("Error loading data");
+      toast.error("Erro ao carregar dados");
     } finally {
       setIsLoading(false);
     }
@@ -140,13 +151,13 @@ export function BarbershopDashboard() {
     e.preventDefault();
 
     if (!barbershopId) {
-      toast.error("No barbershop associated with this account");
+      toast.error("Nenhuma barbearia associada a esta conta");
       return;
     }
 
     const barbershopIdNum = parseInt(barbershopId, 10);
     if (Number.isNaN(barbershopIdNum)) {
-      toast.error("Invalid barbershop identifier");
+      toast.error("Identificador de barbearia inválido");
       return;
     }
 
@@ -157,7 +168,7 @@ export function BarbershopDashboard() {
         phone: businessForm.phone || undefined,
       });
 
-      toast.success("Barbershop updated successfully!");
+      toast.success("Barbearia atualizada com sucesso!");
       setIsBusinessDialogOpen(false);
       resetBusinessForm();
       fetchData(barbershopIdNum);
@@ -165,7 +176,7 @@ export function BarbershopDashboard() {
       if (process.env.NODE_ENV === "development") {
         console.error("Error updating barbershop:", error);
       }
-      toast.error("Error updating barbershop");
+      toast.error("Erro ao atualizar barbearia");
     } finally {
       setIsSavingBusiness(false);
     }
@@ -196,9 +207,7 @@ export function BarbershopDashboard() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <Scissors className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">
-              {barbershopDisplayName}
-            </h1>
+            <h1 className="text-xl font-bold">{barbershopDisplayName}</h1>
           </div>
           <div className="flex gap-2">
             <Button
@@ -207,15 +216,15 @@ export function BarbershopDashboard() {
               disabled={!barbershopInfo}
             >
               <Building2 className="mr-2 h-4 w-4" />
-              Edit Barbershop
+              Editar Barbearia
             </Button>
             <Button variant="outline" onClick={() => navigate(ROUTES.PROFILE)}>
               <User className="mr-2 h-4 w-4" />
-              Profile
+              Perfil
             </Button>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              Sair
             </Button>
           </div>
         </div>
@@ -224,16 +233,16 @@ export function BarbershopDashboard() {
       <main className="container mx-auto p-4 md:p-6 space-y-6">
         <Tabs defaultValue="appointments" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="appointments">Appointments</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
-            <TabsTrigger value="barbers">Barbers</TabsTrigger>
+            <TabsTrigger value="appointments">Agendamentos</TabsTrigger>
+            <TabsTrigger value="services">Serviços</TabsTrigger>
+            <TabsTrigger value="barbers">Barbeiros</TabsTrigger>
           </TabsList>
 
           <TabsContent value="appointments" className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Appointments</h2>
-                <p className="text-muted-foreground">Scheduled times</p>
+                <h2 className="text-2xl font-bold">Agendamentos</h2>
+                <p className="text-muted-foreground">Horários agendados</p>
               </div>
             </div>
 
@@ -255,7 +264,7 @@ export function BarbershopDashboard() {
                         </CardTitle>
                         <CardDescription>
                           {appointment.service?.name ||
-                            "Service not available"}{" "}
+                            "Serviço não disponível"}{" "}
                           • {appointment.service?.duration || 0} min
                         </CardDescription>
                       </div>
@@ -265,21 +274,21 @@ export function BarbershopDashboard() {
                   <CardContent className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Client:</span>
+                      <span className="font-medium">Cliente:</span>
                       <span>
-                        {appointment.client?.name || "Client not available"}
+                        {appointment.client?.name || "Cliente não disponível"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Scissors className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Barber:</span>
+                      <span className="font-medium">Barbeiro:</span>
                       <span>
-                        {appointment.barber?.name || "Barber not available"}
+                        {appointment.barber?.name || "Barbeiro não disponível"}
                       </span>
                     </div>
                     {appointment.notes && (
                       <div className="text-sm text-muted-foreground mt-2 pt-2 border-t">
-                        <span className="font-medium">Notes:</span>{" "}
+                        <span className="font-medium">Observações:</span>{" "}
                         {appointment.notes}
                       </div>
                     )}
@@ -290,8 +299,8 @@ export function BarbershopDashboard() {
 
             {appointments.length === 0 && (
               <EmptyState
-                title="No future appointments"
-                description="Appointments will appear here once they are scheduled"
+                title="Nenhum agendamento futuro"
+                description="Os agendamentos aparecerão aqui quando forem programados"
                 icon="📅"
               />
             )}
@@ -300,12 +309,12 @@ export function BarbershopDashboard() {
           <TabsContent value="services" className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Services</h2>
-                <p className="text-muted-foreground">Manage your services</p>
+                <h2 className="text-2xl font-bold">Serviços</h2>
+                <p className="text-muted-foreground">Gerencie seus serviços</p>
               </div>
               <Button onClick={() => openServiceDialog()}>
                 <Plus className="mr-2 h-4 w-4" />
-                New Service
+                Novo Serviço
               </Button>
             </div>
 
@@ -317,7 +326,7 @@ export function BarbershopDashboard() {
                       <div>
                         <CardTitle>{service.name}</CardTitle>
                         <CardDescription>
-                          ${(service.price / 100).toFixed(2)} •{" "}
+                          R$ {(service.price / 100).toFixed(2)} •{" "}
                           {service.duration} min
                         </CardDescription>
                       </div>
@@ -326,7 +335,7 @@ export function BarbershopDashboard() {
                         size="sm"
                         onClick={() => openServiceDialog(service)}
                       >
-                        Edit
+                        Editar
                       </Button>
                     </div>
                   </CardHeader>
@@ -338,7 +347,7 @@ export function BarbershopDashboard() {
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {service.active ? "Active" : "Inactive"}
+                      {service.active ? "Ativo" : "Inativo"}
                     </span>
                   </CardContent>
                 </Card>
@@ -347,8 +356,8 @@ export function BarbershopDashboard() {
 
             {services.length === 0 && (
               <EmptyState
-                title="No services registered"
-                description="Create your first service to get started"
+                title="Nenhum serviço registrado"
+                description="Crie seu primeiro serviço para começar"
                 icon="✂️"
               />
             )}
@@ -357,14 +366,14 @@ export function BarbershopDashboard() {
           <TabsContent value="barbers" className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Barbers</h2>
+                <h2 className="text-2xl font-bold">Barbeiros</h2>
                 <p className="text-muted-foreground">
-                  Manage your team and schedules
+                  Gerencie sua equipe e horários
                 </p>
               </div>
               <Button onClick={() => openBarberDialog()}>
                 <Plus className="mr-2 h-4 w-4" />
-                New Barber
+                Novo Barbeiro
               </Button>
             </div>
 
@@ -385,14 +394,14 @@ export function BarbershopDashboard() {
 
             {barbers.length === 0 && (
               <EmptyState
-                title="No barbers registered"
-                description="Add your first barber to the team"
+                title="Nenhum barbeiro registrado"
+                description="Adicione seu primeiro barbeiro à equipe"
                 icon="👨‍💼"
               />
             )}
           </TabsContent>
-      </Tabs>
-    </main>
+        </Tabs>
+      </main>
 
       <Dialog
         open={isBusinessDialogOpen}
@@ -405,15 +414,15 @@ export function BarbershopDashboard() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Barbershop</DialogTitle>
+            <DialogTitle>Editar Barbearia</DialogTitle>
             <DialogDescription>
-              Update your barbershop information below
+              Atualize as informações de sua barbearia abaixo
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleUpdateBusiness} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="business-name">Name *</Label>
+              <Label htmlFor="business-name">Nome *</Label>
               <Input
                 id="business-name"
                 value={businessForm.name}
@@ -424,12 +433,15 @@ export function BarbershopDashboard() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="business-phone">Phone *</Label>
+              <Label htmlFor="business-phone">Telefone *</Label>
               <Input
                 id="business-phone"
                 value={businessForm.phone}
                 onChange={(e) =>
-                  setBusinessForm((prev) => ({ ...prev, phone: e.target.value }))
+                  setBusinessForm((prev) => ({
+                    ...prev,
+                    phone: e.target.value,
+                  }))
                 }
                 required
               />
@@ -445,13 +457,13 @@ export function BarbershopDashboard() {
                 }}
                 disabled={isSavingBusiness}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button type="submit" disabled={isSavingBusiness}>
                 {isSavingBusiness && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Save changes
+                Salvar mudanças
               </Button>
             </div>
           </form>

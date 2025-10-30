@@ -32,7 +32,7 @@ export function DateTimePicker({
   return (
     <>
       <div className="space-y-2">
-        <Label>Date *</Label>
+        <Label>Data *</Label>
         <Calendar
           mode="single"
           selected={selectedDate}
@@ -45,17 +45,17 @@ export function DateTimePicker({
 
       {selectedDate && (
         <div className="space-y-2">
-          <Label htmlFor="time">Time *</Label>
+          <Label htmlFor="time">Horário *</Label>
           {isLoadingTimes ? (
             <LoadingSpinner size="small" />
           ) : availableTimes.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No available times for this date
+              Sem horários disponíveis para esta data
             </p>
           ) : (
             <Select value={selectedTime} onValueChange={onTimeChange}>
               <SelectTrigger id="time">
-                <SelectValue placeholder="Select a time" />
+                <SelectValue placeholder="Selecione um horário" />
               </SelectTrigger>
               <SelectContent>
                 {availableTimes.map((time) => (

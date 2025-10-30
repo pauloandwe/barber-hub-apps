@@ -62,15 +62,15 @@ export function getAllStatusColors(): Record<string, StatusColorConfig> {
 
 export function formatStatus(status: AppointmentStatus): string {
   const statusLabels: Record<AppointmentStatus, string> = {
-    [APPOINTMENT_STATUS.PENDING]: "Pending",
-    [APPOINTMENT_STATUS.CONFIRMED]: "Confirmed",
-    [APPOINTMENT_STATUS.COMPLETED]: "Completed",
-    [APPOINTMENT_STATUS.CANCELLED]: "Cancelled",
+    [APPOINTMENT_STATUS.PENDING]: "Pendente",
+    [APPOINTMENT_STATUS.CONFIRMED]: "Confirmado",
+    [APPOINTMENT_STATUS.COMPLETED]: "Concluído",
+    [APPOINTMENT_STATUS.CANCELLED]: "Cancelado",
   };
 
-  return statusLabels[status] || "Unknown";
+  return statusLabels[status] || "Desconhecido";
 }
 
 export function formatActiveStatus(isActive: boolean): string {
-  return isActive ? "Active" : "Inactive";
+  return isActive ? "Ativo" : "Inativo";
 }

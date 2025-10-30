@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { servicesAPI } from '@/api/services';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect } from "react";
+import { servicesAPI } from "@/api/services";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 export interface Service {
   id: string;
@@ -54,10 +54,10 @@ export function ServiceSelector({
       setServices(mapped);
       onLoaded?.(mapped);
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching services:', error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error fetching services:", error);
       }
-      toast.error('Error loading services');
+      toast.error("Erro ao carregar serviços");
     } finally {
       setIsLoading(false);
     }
@@ -65,15 +65,19 @@ export function ServiceSelector({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="service">Service *</Label>
-      <Select value={value} onValueChange={onChange} disabled={disabled || isLoading}>
+      <Label htmlFor="service">Serviço *</Label>
+      <Select
+        value={value}
+        onValueChange={onChange}
+        disabled={disabled || isLoading}
+      >
         <SelectTrigger id="service">
-          <SelectValue placeholder="Select a service" />
+          <SelectValue placeholder="Selecione um serviço" />
         </SelectTrigger>
         <SelectContent>
           {services.map((service) => (
             <SelectItem key={service.id} value={service.id}>
-              {service.name} - ${(service.priceCents / 100).toFixed(2)} (
+              {service.name} - R$ {(service.priceCents / 100).toFixed(2)} (
               {service.durationMin} min)
             </SelectItem>
           ))}

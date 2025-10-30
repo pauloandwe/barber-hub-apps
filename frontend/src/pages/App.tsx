@@ -34,7 +34,7 @@ export function Dashboard() {
 
   const handleLogout = () => {
     authAPI.logout();
-    toast.success("Logout successful!");
+    toast.success("Logout bem-sucedido!");
     navigate(ROUTES.LOGIN);
   };
 
@@ -55,18 +55,16 @@ export function Dashboard() {
             </div>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              Sair
             </Button>
           </div>
         </header>
 
         <main className="container mx-auto p-4 py-8">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold">
-              Welcome, {user.name}!
-            </h2>
+            <h2 className="text-3xl font-bold">Bem-vindo, {user.name}!</h2>
             <p className="text-muted-foreground mt-2">
-              You are logged in as {getRoleLabel(user.role)}
+              Você está conectado como {getRoleLabel(user.role)}
             </p>
           </div>
 
@@ -75,7 +73,7 @@ export function Dashboard() {
             <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Profile</CardTitle>
+                  <CardTitle>Perfil</CardTitle>
                   <div className="rounded-full bg-primary/10 p-3 text-primary">
                     {roleIcon}
                   </div>
@@ -84,14 +82,13 @@ export function Dashboard() {
               <CardContent>
                 <CardDescription className="space-y-2">
                   <p>
-                    <strong>Email:</strong> {user.email || "Not provided"}
+                    <strong>Email:</strong> {user.email || "Não fornecido"}
                   </p>
                   <p>
-                    <strong>Phone:</strong>{" "}
-                    {user.phone || "Not provided"}
+                    <strong>Telefone:</strong> {user.phone || "Não fornecido"}
                   </p>
                   <p>
-                    <strong>Type:</strong> {getRoleLabel(user.role)}
+                    <strong>Tipo:</strong> {getRoleLabel(user.role)}
                   </p>
                 </CardDescription>
                 <Button
@@ -99,7 +96,7 @@ export function Dashboard() {
                   className="mt-4 w-full"
                   onClick={() => navigate(ROUTES.PROFILE)}
                 >
-                  Edit Profile
+                  Editar Perfil
                 </Button>
               </CardContent>
             </Card>
@@ -110,7 +107,7 @@ export function Dashboard() {
                 <Card className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle>Schedule Service</CardTitle>
+                      <CardTitle>Agendar Serviço</CardTitle>
                       <div className="rounded-full bg-accent/10 p-3 text-accent">
                         <Calendar className="h-8 w-8" />
                       </div>
@@ -118,13 +115,13 @@ export function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <CardDescription>
-                      Schedule a time at one of our partner barbershops
+                      Agende um horário em uma de nossas barbearias parceiras
                     </CardDescription>
                     <Button
                       className="mt-4 w-full"
                       onClick={() => navigate(ROUTES.CLIENT)}
                     >
-                      Schedule Now
+                      Agendar Agora
                     </Button>
                   </CardContent>
                 </Card>
@@ -132,7 +129,7 @@ export function Dashboard() {
                 <Card className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle>My Appointments</CardTitle>
+                      <CardTitle>Meus Agendamentos</CardTitle>
                       <div className="rounded-full bg-secondary/10 p-3 text-secondary">
                         <Calendar className="h-8 w-8" />
                       </div>
@@ -140,14 +137,14 @@ export function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <CardDescription>
-                      View and manage your scheduled appointments
+                      Visualize e gerencie seus agendamentos
                     </CardDescription>
                     <Button
                       variant="outline"
                       className="mt-4 w-full"
                       onClick={() => navigate(ROUTES.CLIENT)}
                     >
-                      View Appointments
+                      Ver Agendamentos
                     </Button>
                   </CardContent>
                 </Card>
@@ -159,7 +156,7 @@ export function Dashboard() {
                 <Card className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle>Appointments</CardTitle>
+                      <CardTitle>Agendamentos</CardTitle>
                       <div className="rounded-full bg-accent/10 p-3 text-accent">
                         <Calendar className="h-8 w-8" />
                       </div>
@@ -167,7 +164,7 @@ export function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <CardDescription>
-                      Manage your barbershop appointments
+                      Gerencie os agendamentos de sua barbearia
                     </CardDescription>
                     <Button
                       variant="outline"
@@ -180,7 +177,7 @@ export function Dashboard() {
                         )
                       }
                     >
-                      Manage
+                      Gerenciar
                     </Button>
                   </CardContent>
                 </Card>
@@ -188,7 +185,7 @@ export function Dashboard() {
                 <Card className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle>Barbers</CardTitle>
+                      <CardTitle>Barbeiros</CardTitle>
                       <div className="rounded-full bg-secondary/10 p-3 text-secondary">
                         <Users className="h-8 w-8" />
                       </div>
@@ -196,7 +193,7 @@ export function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <CardDescription>
-                      Register and manage your barber team
+                      Registre e gerencie sua equipe de barbeiros
                     </CardDescription>
                     <Button
                       variant="outline"
@@ -209,7 +206,7 @@ export function Dashboard() {
                         )
                       }
                     >
-                      Manage
+                      Gerenciar
                     </Button>
                   </CardContent>
                 </Card>

@@ -90,7 +90,7 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
                     : "bg-gray-100 text-gray-800"
                 }`}
               >
-                {barber.active ? "Active" : "Inactive"}
+                {barber.active ? "Ativo" : "Inativo"}
               </span>
             </div>
           </div>
@@ -99,7 +99,7 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
           <CollapsibleTrigger asChild>
             <Button variant="outline" className="w-full">
               <Clock className="mr-2 h-4 w-4" />
-              {isOpen ? "Hide Schedule" : "View Schedule"}
+              {isOpen ? "Ocultar Horário" : "Ver Horário"}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-4">
@@ -107,8 +107,8 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
               <LoadingSpinner size="small" />
             ) : appointments.length === 0 ? (
               <EmptyState
-                title="No scheduled appointments"
-                description="There are no appointments scheduled for this barber yet."
+                title="Nenhum agendamento programado"
+                description="Não há agendamentos programados para este barbeiro ainda."
               />
             ) : (
               <div className="space-y-3">
@@ -130,12 +130,14 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
                           )}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {appointment.service?.name || "Service not available"}{" "}
+                          {appointment.service?.name ||
+                            "Serviço não disponível"}{" "}
                           • {appointment.service?.duration || 0} min
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Client:{" "}
-                          {appointment.profile?.name || "Client not available"}
+                          Cliente:{" "}
+                          {appointment.profile?.name ||
+                            "Cliente não disponível"}
                         </p>
                       </div>
                       <StatusBadge status={appointment.status as any} />

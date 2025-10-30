@@ -33,13 +33,13 @@ interface AppointmentDialogProps extends DialogProps {
 }
 
 const DAY_LABELS = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
+  "Domingo",
+  "Segunda",
+  "Terça",
+  "Quarta",
+  "Quinta",
+  "Sexta",
+  "Sábado",
 ];
 
 type BarberScheduleItem = {
@@ -88,7 +88,9 @@ export function AppointmentDialog({
   useEffect(() => {
     if (open && isEditMode && appointment) {
       const start = originalStartDate ? new Date(originalStartDate) : null;
-      const serviceId = appointment.serviceId ? String(appointment.serviceId) : "";
+      const serviceId = appointment.serviceId
+        ? String(appointment.serviceId)
+        : "";
       const barberId = appointment.barberId ? String(appointment.barberId) : "";
       const appointmentTime = originalTime ?? "";
 
@@ -103,13 +105,7 @@ export function AppointmentDialog({
         );
       }
     }
-  }, [
-    open,
-    isEditMode,
-    appointment,
-    originalStartDate,
-    originalTime,
-  ]);
+  }, [open, isEditMode, appointment, originalStartDate, originalTime]);
 
   useEffect(() => {
     console.log("selectedBarber changed:", selectedBarber);
@@ -181,7 +177,7 @@ export function AppointmentDialog({
         if (process.env.NODE_ENV === "development") {
           console.error("Error fetching available times:", error);
         }
-        toast.error("Error loading available times");
+        toast.error("Erro ao carregar horários disponíveis");
       } finally {
         setIsLoadingTimes(false);
       }
@@ -224,7 +220,7 @@ export function AppointmentDialog({
         if (process.env.NODE_ENV === "development") {
           console.error("Error loading business info:", error);
         }
-        toast.error("Error loading business information");
+        toast.error("Erro ao carregar informações da barbearia");
       }
     };
 
@@ -252,7 +248,7 @@ export function AppointmentDialog({
         if (process.env.NODE_ENV === "development") {
           console.error("Error loading barber working hours:", error);
         }
-        toast.error("Error loading barber schedule");
+        toast.error("Erro ao carregar horário do barbeiro");
         setBarberWorkingHours([]);
       } finally {
         setIsLoadingBarberHours(false);
@@ -292,10 +288,9 @@ export function AppointmentDialog({
 
   const handleSubmit = async () => {
     if (!selectedService || !selectedBarber || !selectedDate || !selectedTime) {
-      toast.error("Please fill in all required fields");
+      toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
-
     setIsLoading(true);
     try {
       const user = authAPI.getStoredUser();
@@ -306,14 +301,14 @@ export function AppointmentDialog({
 
       const service = services.get(selectedService);
       if (!service) {
-        toast.error("Unable to load service information");
+        toast.error("Não foi possível carregar as informações do serviço");
         return;
       }
 
       const serviceIdNum = parseInt(selectedService, 10);
       const barberIdNum = parseInt(selectedBarber, 10);
       if (Number.isNaN(serviceIdNum) || Number.isNaN(barberIdNum)) {
-        toast.error("Invalid service or barber selected");
+        toast.error("Serviço ou barbeiro inválido selecionado");
         return;
       }
 
@@ -335,8 +330,8 @@ export function AppointmentDialog({
       const basePayload = {
         serviceId: serviceIdNum,
         barberId: barberIdNum,
-        startDate: startDateTime.toISOString(),  // "2024-11-20T14:30:00.000Z"
-        endDate: endDateTime.toISOString(),      // "2024-11-20T14:50:00.000Z" (ou com duração do serviço)
+        startDate: startDateTime.toISOString(), // "2024-11-20T14:30:00.000Z"
+        endDate: endDateTime.toISOString(), // "2024-11-20T14:50:00.000Z" (ou com duração do serviço)
         notes: notes || undefined,
       };
 
@@ -346,7 +341,7 @@ export function AppointmentDialog({
           clientId: appointment.clientId ?? user.id,
           source: appointment.source ?? "web",
         });
-        toast.success("Appointment updated successfully!");
+        toast.success("Agendamento atualizado com sucesso!");
       } else {
         await appointmentsAPI.create(barbershopIdNum, {
           businessId: barbershopIdNum,
@@ -354,7 +349,7 @@ export function AppointmentDialog({
           clientId: user.id,
           source: "web",
         });
-        toast.success("Appointment created successfully!");
+        toast.success("Agendamento criado com sucesso!");
       }
 
       onSuccess();
@@ -363,12 +358,16 @@ export function AppointmentDialog({
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.error(
-          isEditMode ? "Error updating appointment:" : "Error creating appointment:",
+          isEditMode
+            ? "Error updating appointment:"
+            : "Error creating appointment:",
           error
         );
       }
       toast.error(
-        isEditMode ? "Error updating appointment" : "Error creating appointment"
+        isEditMode
+          ? "Erro ao atualizar agendamento"
+          : "Erro ao criar agendamento"
       );
     } finally {
       setIsLoading(false);
@@ -432,12 +431,12 @@ export function AppointmentDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditMode ? "Edit Appointment" : "New Appointment"}
+            {isEditMode ? "Editar Agendamento" : "Novo Agendamento"}
           </DialogTitle>
           <DialogDescription>
             {isEditMode
-              ? "Review and update your appointment details"
-              : "Fill in the data to schedule your appointment"}
+              ? "Revise e atualize os detalhes do seu agendamento"
+              : "Preencha os dados para agendar seu compromisso"}
           </DialogDescription>
         </DialogHeader>
 
@@ -464,12 +463,12 @@ export function AppointmentDialog({
 
           {selectedBarber && (
             <div className="space-y-2">
-              <Label>Barber schedule</Label>
+              <Label>Horário do barbeiro</Label>
               {isLoadingBarberHours ? (
                 <LoadingSpinner size="small" />
               ) : !barberScheduleSummary.length ? (
                 <p className="text-sm text-muted-foreground">
-                  This barber does not have working hours configured.
+                  Este barbeiro não tem horários de trabalho configurados.
                 </p>
               ) : (
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -501,10 +500,10 @@ export function AppointmentDialog({
           />
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">Observações</Label>
             <Textarea
               id="notes"
-              placeholder="Any additional notes?"
+              placeholder="Alguma observação adicional?"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               disabled={isLoading}
@@ -521,7 +520,7 @@ export function AppointmentDialog({
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             onClick={handleSubmit}
@@ -534,7 +533,7 @@ export function AppointmentDialog({
             }
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isEditMode ? "Save changes" : "Confirm Appointment"}
+            {isEditMode ? "Salvar mudanças" : "Confirmar Agendamento"}
           </Button>
         </div>
       </DialogContent>

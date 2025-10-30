@@ -1,4 +1,4 @@
-import { Service } from './ServiceSelector';
+import { Service } from "./ServiceSelector";
 
 interface AppointmentSummaryProps {
   service: Service | undefined;
@@ -9,16 +9,18 @@ export function AppointmentSummary({ service }: AppointmentSummaryProps) {
 
   return (
     <div className="rounded-lg bg-muted p-4">
-      <p className="text-sm font-medium">Appointment Summary</p>
+      <p className="text-sm font-medium">Resumo do Agendamento</p>
       <div className="mt-2 space-y-1 text-sm text-muted-foreground">
         <p>
-          <span className="font-medium">Service:</span> {service.name}
+          <span className="font-medium">Serviço:</span> {service.name}
         </p>
         <p>
-          <span className="font-medium">Duration:</span> {service.durationMin} minutes
+          <span className="font-medium">Duração:</span> {service.durationMin}{" "}
+          minutos
         </p>
         <p>
-          <span className="font-medium">Price:</span> ${(service.priceCents / 100).toFixed(2)}
+          <span className="font-medium">Preço:</span> R${" "}
+          {(service.priceCents / 100).toFixed(2)}
         </p>
       </div>
     </div>

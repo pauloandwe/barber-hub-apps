@@ -36,13 +36,13 @@ type ScheduleEntry = {
 };
 
 const WEEK_DAYS = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
+  "Domingo",
+  "Segunda",
+  "Terça",
+  "Quarta",
+  "Quinta",
+  "Sexta",
+  "Sábado",
 ];
 
 const DEFAULT_DAY: Omit<ScheduleEntry, "dayOfWeek" | "label"> = {
@@ -58,7 +58,12 @@ const minutesSinceMidnight = (value: string): number => {
   return (hours ?? 0) * 60 + (minutes ?? 0);
 };
 
-export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: BarberScheduleDialogProps) {
+export function BarberScheduleDialog({
+  barber,
+  open,
+  onOpenChange,
+  onSaved,
+}: BarberScheduleDialogProps) {
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -97,7 +102,9 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
         }
 
         const mapped = initialSchedule.map((day) => {
-          const record = data.find((item: BarberWorkingHour) => item.dayOfWeek === day.dayOfWeek);
+          const record = data.find(
+            (item: BarberWorkingHour) => item.dayOfWeek === day.dayOfWeek
+          );
           if (!record) {
             return day;
           }
@@ -117,7 +124,7 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
         if (process.env.NODE_ENV === "development") {
           console.error("Error loading barber schedule", error);
         }
-        toast.error("Error loading schedule");
+        toast.error("Erro ao carregar horário");
         setSchedule(initialSchedule);
       } finally {
         setIsLoading(false);
@@ -140,7 +147,11 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
     );
   };
 
-  const handleTimeChange = (dayOfWeek: number, field: keyof ScheduleEntry, value: string) => {
+  const handleTimeChange = (
+    dayOfWeek: number,
+    field: keyof ScheduleEntry,
+    value: string
+  ) => {
     setSchedule((prev) =>
       prev.map((entry) =>
         entry.dayOfWeek === dayOfWeek
@@ -160,7 +171,9 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
       }
 
       if (!entry.openTime || !entry.closeTime) {
-        toast.error(`Please provide start and end times for ${entry.label}`);
+        toast.error(
+          `Por favor, forneça horários de início e fim para ${entry.label}`
+        );
         return false;
       }
 
@@ -168,7 +181,9 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
       const closeMinutes = minutesSinceMidnight(entry.closeTime);
 
       if (closeMinutes <= openMinutes) {
-        toast.error(`End time must be after start time for ${entry.label}`);
+        toast.error(
+          `O horário de encerramento deve ser posterior ao de abertura para ${entry.label}`
+        );
         return false;
       }
 
@@ -176,7 +191,9 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
       const hasBreakEnd = !!entry.breakEnd;
 
       if (hasBreakStart !== hasBreakEnd) {
-        toast.error(`Please complete break interval for ${entry.label}`);
+        toast.error(
+          `Por favor, complete o intervalo de pausa para ${entry.label}`
+        );
         return false;
       }
 
@@ -185,17 +202,20 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
         const breakEnd = minutesSinceMidnight(entry.breakEnd);
 
         if (breakStart < openMinutes || breakEnd > closeMinutes) {
-          toast.error(`Break must stay within working hours for ${entry.label}`);
+          toast.error(
+            `A pausa deve estar dentro do horário de funcionamento para ${entry.label}`
+          );
           return false;
         }
 
         if (breakEnd <= breakStart) {
-          toast.error(`Break end must be after break start for ${entry.label}`);
+          toast.error(
+            `O final da pausa deve ser posterior ao início para ${entry.label}`
+          );
           return false;
         }
       }
     }
-
     return true;
   };
 
@@ -229,14 +249,14 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
       });
 
       await barberWorkingHoursAPI.upsert(barber.id, payload);
-      toast.success("Schedule saved successfully!");
+      toast.success("Horário salvo com sucesso!");
       onSaved?.();
       onOpenChange(false);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.error("Error saving schedule", error);
       }
-      toast.error("Error saving schedule");
+      toast.error("Erro ao salvar horário");
     } finally {
       setIsSaving(false);
     }
@@ -248,7 +268,7 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
     }
 
     const confirmed = window.confirm(
-      `This will clear all working hours for ${barber.name}. Continue?`
+      `Isso limpará todos os horários de trabalho para ${barber.name}. Continuar?`
     );
 
     if (!confirmed) {
@@ -258,14 +278,14 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
     setIsClearing(true);
     try {
       await barberWorkingHoursAPI.clear(barber.id);
-      toast.success("Schedule cleared successfully!");
+      toast.success("Horário limpo com sucesso!");
       onSaved?.();
       onOpenChange(false);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.error("Error clearing schedule", error);
       }
-      toast.error("Error clearing schedule");
+      toast.error("Erro ao limpar horário");
     } finally {
       setIsClearing(false);
     }
@@ -275,14 +295,13 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Barber Schedule</DialogTitle>
+          <DialogTitle>Horário do Barbeiro</DialogTitle>
           <DialogDescription>
             {barber
-              ? `Configure the weekly working hours for ${barber.name}`
-              : "Select a barber to manage schedules"}
+              ? `Configure os horários de trabalho semanais para ${barber.name}`
+              : "Selecione um barbeiro para gerenciar horários"}
           </DialogDescription>
-        </DialogHeader>
-
+        </DialogHeader>{" "}
         {isLoading ? (
           <div className="py-10 flex justify-center">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -307,7 +326,7 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
                     disabled={isSaving || !barber}
                   />
                   <span className="text-sm text-muted-foreground">
-                    {entry.closed ? "Closed" : "Open"}
+                    {entry.closed ? "Fechado" : "Aberto"}
                   </span>
                 </div>
                 <div className="col-span-2">
@@ -316,7 +335,11 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
                     value={entry.openTime}
                     disabled={entry.closed || isSaving || !barber}
                     onChange={(event) =>
-                      handleTimeChange(entry.dayOfWeek, "openTime", event.target.value)
+                      handleTimeChange(
+                        entry.dayOfWeek,
+                        "openTime",
+                        event.target.value
+                      )
                     }
                     step="300"
                   />
@@ -327,7 +350,11 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
                     value={entry.closeTime}
                     disabled={entry.closed || isSaving || !barber}
                     onChange={(event) =>
-                      handleTimeChange(entry.dayOfWeek, "closeTime", event.target.value)
+                      handleTimeChange(
+                        entry.dayOfWeek,
+                        "closeTime",
+                        event.target.value
+                      )
                     }
                     step="300"
                   />
@@ -339,7 +366,11 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
                     placeholder="Break start"
                     disabled={entry.closed || isSaving || !barber}
                     onChange={(event) =>
-                      handleTimeChange(entry.dayOfWeek, "breakStart", event.target.value)
+                      handleTimeChange(
+                        entry.dayOfWeek,
+                        "breakStart",
+                        event.target.value
+                      )
                     }
                     step="300"
                   />
@@ -351,7 +382,11 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
                     placeholder="Break end"
                     disabled={entry.closed || isSaving || !barber}
                     onChange={(event) =>
-                      handleTimeChange(entry.dayOfWeek, "breakEnd", event.target.value)
+                      handleTimeChange(
+                        entry.dayOfWeek,
+                        "breakEnd",
+                        event.target.value
+                      )
                     }
                     step="300"
                   />
@@ -360,7 +395,6 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
             ))}
           </div>
         )}
-
         <div className="flex justify-end gap-3 pt-4">
           <Button
             type="button"
@@ -369,7 +403,7 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
             disabled={isSaving || isClearing || !barber}
           >
             {isClearing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Clear schedule
+            Limpar horário
           </Button>
           <Button
             type="button"
@@ -377,14 +411,14 @@ export function BarberScheduleDialog({ barber, open, onOpenChange, onSaved }: Ba
             onClick={() => onOpenChange(false)}
             disabled={isSaving || isClearing}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaving || isClearing || !barber}
           >
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save schedule
+            Salvar horário
           </Button>
         </div>
       </DialogContent>
