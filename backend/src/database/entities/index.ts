@@ -7,3 +7,4 @@ export { AppointmentEntity, AppointmentStatus, AppointmentOrigin } from './appoi
 export { ProfileEntity, UserRole } from './profile.entity';
 export { BloqueioEntity } from './bloqueio.entity';
 export { BarberWorkingHoursEntity } from './barber-working-hours.entity';
+export { ClientContactEntity } from './client-contact.entity';

@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { Repository, Between } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   AppointmentEntity,
@@ -7,6 +7,7 @@ import {
   ServiceEntity,
   BarberEntity,
   ProfileEntity,
+  ClientContactEntity,
 } from 'src/database/entities';
 import {
   CreateAppointmentDto,
@@ -28,12 +29,14 @@ export class AppointmentsService {
     private barberRepository: Repository<BarberEntity>,
     @InjectRepository(ProfileEntity)
     private profileRepository: Repository<ProfileEntity>,
+    @InjectRepository(ClientContactEntity)
+    private clientContactRepository: Repository<ClientContactEntity>,
   ) {}
 
   async findByBusinessId(businessId: number): Promise<AppointmentResponseDto[]> {
     const appointments = await this.appointmentRepository.find({
       where: { businessId },
-      relations: ['barber', 'client', 'service'],
+      relations: ['barber', 'client', 'service', 'clientContact'],
       order: { startDate: 'DESC' },
     });
 
@@ -46,7 +49,7 @@ export class AppointmentsService {
         id: appointmentId,
         businessId,
       },
-      relations: ['barber', 'client', 'service'],
+      relations: ['barber', 'client', 'service', 'clientContact'],
     });
 
     if (!appointment) {
@@ -101,11 +104,21 @@ export class AppointmentsService {
       throw new BadRequestException('Time slot already booked');
     }
 
+    const { clientId, clientContact } = await this.resolveClientDetails(
+      createAppointmentDto.businessId,
+      {
+        clientId: createAppointmentDto.clientId,
+        clientPhone: createAppointmentDto.clientPhone,
+        clientName: createAppointmentDto.clientName,
+      },
+    );
+
     const appointment = this.appointmentRepository.create({
       businessId: createAppointmentDto.businessId,
       serviceId: createAppointmentDto.serviceId,
       barberId: createAppointmentDto.barberId,
-      clientId: createAppointmentDto.clientId,
+      clientId: clientId ?? null,
+      clientContactId: clientContact?.id ?? null,
       startDate: startDate,
       endDate: endDate,
       notes: createAppointmentDto.notes,
@@ -152,15 +165,52 @@ export class AppointmentsService {
       }
     }
 
-    const updateData = { ...updateAppointmentDto };
-    if (updateData.startDate) {
-      updateData.startDate = new Date(updateData.startDate) as any;
-    }
-    if (updateData.endDate) {
-      updateData.endDate = new Date(updateData.endDate) as any;
+    if (
+      updateAppointmentDto.clientId !== undefined ||
+      updateAppointmentDto.clientPhone ||
+      updateAppointmentDto.clientName
+    ) {
+      const { clientId, clientContact } = await this.resolveClientDetails(
+        businessId,
+        {
+          clientId:
+            updateAppointmentDto.clientId !== undefined
+              ? updateAppointmentDto.clientId
+              : appointment.clientId ?? undefined,
+          clientPhone: updateAppointmentDto.clientPhone,
+          clientName: updateAppointmentDto.clientName,
+        },
+        appointment.clientContactId,
+      );
+
+      appointment.clientId = clientId;
+      appointment.clientContactId = clientContact?.id ?? appointment.clientContactId ?? null;
     }
 
-    Object.assign(appointment, updateData);
+    if (updateAppointmentDto.serviceId !== undefined) {
+      appointment.serviceId = updateAppointmentDto.serviceId;
+    }
+
+    if (updateAppointmentDto.barberId !== undefined) {
+      appointment.barberId = updateAppointmentDto.barberId;
+    }
+
+    if (updateAppointmentDto.startDate) {
+      appointment.startDate = new Date(updateAppointmentDto.startDate);
+    }
+
+    if (updateAppointmentDto.endDate) {
+      appointment.endDate = new Date(updateAppointmentDto.endDate);
+    }
+
+    if (updateAppointmentDto.notes !== undefined) {
+      appointment.notes = updateAppointmentDto.notes;
+    }
+
+    if (updateAppointmentDto.source !== undefined) {
+      appointment.source = updateAppointmentDto.source;
+    }
+
     const updatedAppointment = await this.appointmentRepository.save(appointment);
 
     return this.formatAppointmentResponse(updatedAppointment);
@@ -218,6 +268,78 @@ export class AppointmentsService {
     return { data: suggestions };
   }
 
+  private normalizePhone(phone?: string): string | null {
+    if (!phone) {
+      return null;
+    }
+
+    const digits = phone.replace(/\D/g, '');
+    return digits.length ? digits : null;
+  }
+
+  private async resolveClientDetails(
+    businessId: number,
+    payload: { clientId?: number; clientPhone?: string; clientName?: string },
+    currentContactId?: number | null,
+  ): Promise<{ clientId: number | null; clientContact: ClientContactEntity | null }> {
+    let resolvedClientId = payload.clientId ?? null;
+    const normalizedPhone = this.normalizePhone(payload.clientPhone);
+    let clientContact: ClientContactEntity | null = null;
+
+    if (payload.clientPhone && !normalizedPhone) {
+      throw new BadRequestException('Client phone is invalid');
+    }
+
+    if (normalizedPhone) {
+      clientContact = await this.clientContactRepository.findOne({
+        where: {
+          businessId,
+          phone: normalizedPhone,
+        },
+      });
+
+      if (!clientContact) {
+        clientContact = this.clientContactRepository.create({
+          businessId,
+          phone: normalizedPhone,
+          name: payload.clientName?.trim() || null,
+        });
+        clientContact = await this.clientContactRepository.save(clientContact);
+      } else {
+        const incomingName = payload.clientName?.trim();
+        if (incomingName && incomingName !== clientContact.name) {
+          clientContact.name = incomingName;
+          clientContact = await this.clientContactRepository.save(clientContact);
+        }
+      }
+
+      if (!resolvedClientId) {
+        const existingProfile = await this.profileRepository.findOne({
+          where: { phone: normalizedPhone },
+        });
+        if (existingProfile) {
+          resolvedClientId = existingProfile.id;
+        }
+      }
+    } else if (currentContactId) {
+      clientContact = await this.clientContactRepository.findOne({
+        where: { id: currentContactId },
+      });
+
+      const incomingName = payload.clientName?.trim();
+      if (clientContact && incomingName && incomingName !== clientContact.name) {
+        clientContact.name = incomingName;
+        clientContact = await this.clientContactRepository.save(clientContact);
+      }
+    }
+
+    if (!resolvedClientId && !normalizedPhone && !currentContactId) {
+      throw new BadRequestException('clientId or clientPhone must be provided');
+    }
+
+    return { clientId: resolvedClientId, clientContact };
+  }
+
   private getAvailableDates(workingHours: any[]): string[] {
     const dates: string[] = [];
     const today = new Date();
@@ -244,7 +366,8 @@ export class AppointmentsService {
       businessId: appointment.businessId,
       serviceId: appointment.serviceId,
       barberId: appointment.barberId,
-      clientId: appointment.clientId,
+      clientId: appointment.clientId ?? null,
+      clientContactId: appointment.clientContactId ?? null,
       startDate: appointment.startDate,
       endDate: appointment.endDate,
       notes: appointment.notes,
@@ -257,6 +380,13 @@ export class AppointmentsService {
         : undefined,
       client: appointment.client
         ? { id: appointment.client.id, name: appointment.client.name }
+        : undefined,
+      clientContact: appointment.clientContact
+        ? {
+            id: appointment.clientContact.id,
+            name: appointment.clientContact.name,
+            phone: appointment.clientContact.phone,
+          }
         : undefined,
       service: appointment.service
         ? {

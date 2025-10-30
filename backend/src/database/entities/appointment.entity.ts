@@ -11,6 +11,7 @@ import { BusinessEntity } from './business.entity';
 import { ServiceEntity } from './service.entity';
 import { BarberEntity } from './barber.entity';
 import { ProfileEntity } from './profile.entity';
+import { ClientContactEntity } from './client-contact.entity';
 
 export enum AppointmentStatus {
   PENDING = 'pending',
@@ -37,8 +38,11 @@ export class AppointmentEntity {
   @Column({ type: 'int' })
   barberId: number;
 
-  @Column({ type: 'int' })
-  clientId: number;
+  @Column({ type: 'int', nullable: true })
+  clientId: number | null;
+
+  @Column({ type: 'int', nullable: true })
+  clientContactId: number | null;
 
   @Column({ type: 'timestamp with time zone' })
   startDate: Date;
@@ -93,4 +97,10 @@ export class AppointmentEntity {
   })
   @JoinColumn({ name: 'clientId' })
   client: ProfileEntity;
+
+  @ManyToOne(() => ClientContactEntity, (contact) => contact.appointments, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'clientContactId' })
+  clientContact: ClientContactEntity;
 }

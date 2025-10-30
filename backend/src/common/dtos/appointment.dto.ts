@@ -15,8 +15,16 @@ export class CreateAppointmentDto {
   barberId: number;
 
   @IsNumber()
-  @IsNotEmpty()
-  clientId: number;
+  @IsOptional()
+  clientId?: number;
+
+  @IsString()
+  @IsOptional()
+  clientPhone?: string;
+
+  @IsString()
+  @IsOptional()
+  clientName?: string;
 
   @IsDateString()
   @IsNotEmpty()
@@ -47,6 +55,14 @@ export class UpdateAppointmentDto {
   @IsNumber()
   @IsOptional()
   clientId?: number;
+
+  @IsString()
+  @IsOptional()
+  clientPhone?: string;
+
+  @IsString()
+  @IsOptional()
+  clientName?: string;
 
   @IsDateString()
   @IsOptional()
@@ -88,7 +104,8 @@ export class AppointmentResponseDto {
   businessId: number;
   serviceId: number;
   barberId: number;
-  clientId: number;
+  clientId: number | null;
+  clientContactId: number | null;
   startDate: Date;
   endDate: Date;
   notes: string;
@@ -98,5 +115,6 @@ export class AppointmentResponseDto {
   updatedAt: Date;
   barber?: { id: number; name: string };
   client?: { id: number; name: string };
+  clientContact?: { id: number; name: string | null; phone: string };
   service?: { id: number; name: string; duration: number };
 }

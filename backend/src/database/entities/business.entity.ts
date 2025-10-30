@@ -13,6 +13,7 @@ import { ServiceEntity } from './service.entity';
 import { BarberEntity } from './barber.entity';
 import { SettingsEntity } from './settings.entity';
 import { AppointmentEntity } from './appointment.entity';
+import { ClientContactEntity } from './client-contact.entity';
 
 @Entity('businesses')
 export class BusinessEntity {
@@ -63,4 +64,7 @@ export class BusinessEntity {
 
   @OneToMany(() => AppointmentEntity, (appointment) => appointment.business)
   appointments: AppointmentEntity[];
+
+  @OneToMany(() => ClientContactEntity, (contact) => contact.business)
+  clientContacts: ClientContactEntity[];
 }

@@ -10,6 +10,7 @@ import {
   ServiceEntity,
   BarberEntity,
   ProfileEntity,
+  ClientContactEntity,
 } from 'src/database/entities';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -22,6 +23,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
       ServiceEntity,
       BarberEntity,
       ProfileEntity,
+      ClientContactEntity,
     ]),
     JwtModule.registerAsync({
       inject: [ConfigService],

@@ -22,14 +22,31 @@ export class AuthService {
       where: {
         phone: businessId,
       },
-      relations: ['workingHours', 'services', 'barbers', 'settings'],
+      relations: ['services', 'settings'],
     });
 
     if (!business) {
       throw new Error('Business not found');
     }
 
-    const businessData = this.formatBusinessResponse(business);
+    const profile = await this.profileRepository.findOne({
+      where: {
+        businessId: business.id,
+        role: UserRole.BARBERSHOP,
+      },
+    });
+
+    const tokenPayload = {
+      id: profile?.id ?? business.id,
+      email: profile?.email ?? `${business.phone}@barberhub.local`,
+      role: profile?.role ?? UserRole.BARBERSHOP,
+      businessId: business.id,
+      phone: profile?.phone ?? business.phone,
+    };
+
+    const accessToken = this.jwtService.sign(tokenPayload);
+
+    const businessData = this.formatBusinessResponse(business, accessToken);
 
     return {
       data: {
@@ -126,35 +143,22 @@ export class AuthService {
     };
   }
 
-  private formatBusinessResponse(business: BusinessEntity): BusinessDataDto {
+  private formatBusinessResponse(business: BusinessEntity, accessToken?: string): BusinessDataDto {
     return {
       id: business?.id,
-      token: business?.token,
+      token: accessToken ?? business?.token,
       name: business?.name,
       phone: business?.phone,
       type: business?.type,
-      workingHours: business?.workingHours?.map((wh) => ({
-        dayOfWeek: wh.dayOfWeek,
-        openTime: wh.openTime,
-        closeTime: wh.closeTime,
-        breakStart: wh.breakStart,
-        breakEnd: wh.breakEnd,
-        closed: wh.closed,
-      })),
-      services: business?.services?.map((service) => ({
-        id: service.id.toString(),
-        name: service.name,
-        description: service.description,
-        duration: service.duration,
-        price: parseFloat(service.price.toString()),
-        active: service.active,
-      })),
-      barbers: business?.barbers?.map((barber) => ({
-        id: barber.id.toString(),
-        name: barber.name,
-        specialties: barber.specialties || [],
-        active: barber.active,
-      })),
+      services:
+        business?.services?.map((service) => ({
+          id: service.id.toString(),
+          name: service.name,
+          description: service.description,
+          duration: service.duration,
+          price: parseFloat(service.price.toString()),
+          active: service.active,
+        })) ?? [],
       settings: {
         reminderHours: business?.settings?.reminderHours?.map((h) => parseInt(h)) || [],
         enableReminders: business?.settings?.enableReminders,
