@@ -317,15 +317,26 @@ export function AppointmentDialog({
         return;
       }
 
+      // Formatação de horário:
+      // selectedTime vem como "HH:mm" (ex: "14:30")
+      // Extraímos horas e minutos e construímos um Date object completo
       const [hours, minutes] = selectedTime.split(":").map(Number);
       const startDateTime = setHours(setMinutes(selectedDate, minutes), hours);
+
+      // Calcula endDate baseado na duração do serviço selecionado
       const endDateTime = addMinutes(startDateTime, service.durationMin);
+
       const barbershopIdNum = parseInt(barbershopId, 10);
+
+      // Payload enviado à API:
+      // - startDate e endDate em ISO string format (ex: "2024-11-20T14:30:00.000Z")
+      // - serviceId, barberId como números
+      // - source como 'web' (diferente de 'whatsapp')
       const basePayload = {
         serviceId: serviceIdNum,
         barberId: barberIdNum,
-        startDate: startDateTime.toISOString(),
-        endDate: endDateTime.toISOString(),
+        startDate: startDateTime.toISOString(),  // "2024-11-20T14:30:00.000Z"
+        endDate: endDateTime.toISOString(),      // "2024-11-20T14:50:00.000Z" (ou com duração do serviço)
         notes: notes || undefined,
       };
 

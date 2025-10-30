@@ -32,7 +32,7 @@ export const seedProfiles = async (dataSource: DataSource) => {
     {
       email: 'barbearia@barberhub.com',
       name: 'Barbearia BarberHub',
-      phone: '5511999999999',
+      phone: '15551806855',
       role: UserRole.BARBERSHOP,
       businessId: 1,
       password: 'barbearia123',

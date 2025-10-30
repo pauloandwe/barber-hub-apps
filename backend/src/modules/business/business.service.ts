@@ -37,6 +37,18 @@ export interface SingleBarberAvailabilityResponse {
   barber: BarberAvailability;
 }
 
+export interface AvailableDay {
+  date: string;
+  displayDate: string;
+  slotsCount: number;
+}
+
+export interface AvailableDaysResponse {
+  barberId: number;
+  barberName: string;
+  availableDays: AvailableDay[];
+}
+
 type WorkingHoursLike = Pick<
   WorkingHoursEntity,
   'openTime' | 'closeTime' | 'breakStart' | 'breakEnd'
@@ -218,6 +230,67 @@ export class BusinessService {
       date: this.formatDate(startOfDay),
       slotDurationMinutes,
       barber: barberAvailability,
+    };
+  }
+
+  async findAvailableDaysByPhone(
+    phone: string,
+    barberId: number,
+    options: { serviceId?: number; days?: number } = {},
+  ): Promise<AvailableDaysResponse> {
+    const { serviceId, days = 15 } = options;
+    const business = await this.getBusinessByPhoneOrThrow(phone, ['workingHours']);
+
+    const barber = await this.barberRepository.findOne({
+      where: { id: barberId, businessId: business.id, active: true },
+      relations: ['bloqueios', 'workingHours'],
+    });
+
+    if (!barber) {
+      throw new NotFoundException('Barber not found for this business');
+    }
+
+    const availableDays: AvailableDay[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Iterar pelos próximos N dias
+    for (let i = 0; i < days; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(checkDate.getDate() + i);
+
+      const dateStr = this.formatDate(checkDate);
+
+      // Pular domingos (6 = domingo)
+      if (checkDate.getDay() === 0) {
+        continue;
+      }
+
+      // Verificar disponibilidade para este dia
+      const availabilityResponse = await this.findBarberSlotsByPhone(phone, barberId, {
+        date: dateStr,
+        serviceId,
+      });
+
+      const slotsCount = availabilityResponse.barber.slots.length;
+
+      // Apenas incluir dias que têm slots disponíveis
+      if (slotsCount > 0) {
+        const dayOfWeek = checkDate.getDay();
+        const displayDate = this.formatDisplayDate(checkDate, dayOfWeek);
+
+        availableDays.push({
+          date: dateStr,
+          displayDate,
+          slotsCount,
+        });
+      }
+    }
+
+    return {
+      barberId,
+      barberName: barber.name,
+      availableDays,
     };
   }
 
@@ -555,5 +628,13 @@ export class BusinessService {
     const hours = `${date.getHours()}`.padStart(2, '0');
     const minutes = `${date.getMinutes()}`.padStart(2, '0');
     return `${hours}:${minutes}`;
+  }
+
+  private formatDisplayDate(date: Date, dayOfWeek: number): string {
+    const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+    const day = `${date.getDate()}`.padStart(2, '0');
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const dayName = daysOfWeek[dayOfWeek];
+    return `${dayName}, ${day}/${month}`;
   }
 }

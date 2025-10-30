@@ -15,7 +15,7 @@ export const seedBusiness = async (dataSource: DataSource) => {
   const settingsRepository = dataSource.getRepository(SettingsEntity);
 
   const existingBusiness = await businessRepository.findOne({
-    where: { phone: '5511999999999' },
+    where: { phone: '15551806855' },
   });
 
   if (existingBusiness) {
@@ -25,7 +25,7 @@ export const seedBusiness = async (dataSource: DataSource) => {
 
   const business = businessRepository.create({
     name: 'BarberHub',
-    phone: '5511999999999',
+    phone: '15551806855',
     type: 'barbershop',
     token: 'mocked_token_abc123',
   });

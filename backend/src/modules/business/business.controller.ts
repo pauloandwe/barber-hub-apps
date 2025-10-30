@@ -96,6 +96,38 @@ export class BusinessController {
     });
   }
 
+  @Get('phone/:phone/barbers/:barberId/available-days')
+  @ApiOperation({ summary: 'Get available days for a specific barber (next N days with slots)' })
+  async findAvailableDaysByPhone(
+    @Param('phone') phone: string,
+    @Param('barberId') barberId: string,
+    @Query('serviceId') serviceId?: string,
+    @Query('days') days: string = '15',
+  ) {
+    const parsedBarberId = Number(barberId);
+    if (Number.isNaN(parsedBarberId)) {
+      throw new BadRequestException('barberId must be a valid number');
+    }
+
+    let parsedServiceId: number | undefined;
+    if (serviceId !== undefined) {
+      parsedServiceId = Number(serviceId);
+      if (Number.isNaN(parsedServiceId)) {
+        throw new BadRequestException('serviceId must be a valid number');
+      }
+    }
+
+    const parsedDays = Number(days);
+    if (Number.isNaN(parsedDays) || parsedDays < 1 || parsedDays > 365) {
+      throw new BadRequestException('days must be a number between 1 and 365');
+    }
+
+    return await this.businessService.findAvailableDaysByPhone(phone, parsedBarberId, {
+      serviceId: parsedServiceId,
+      days: parsedDays,
+    });
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
