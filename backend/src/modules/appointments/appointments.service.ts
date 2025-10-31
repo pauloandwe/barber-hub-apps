@@ -52,6 +52,50 @@ export class AppointmentsService {
     return appointments.map((appointment) => this.formatAppointmentResponse(appointment));
   }
 
+  async findByPhoneNumber(
+    phoneNumber: string,
+    businessId?: number,
+  ): Promise<AppointmentResponseDto[]> {
+    const normalizedPhone = this.normalizePhone(phoneNumber);
+
+    if (!normalizedPhone) {
+      throw new BadRequestException('Invalid phone number format');
+    }
+
+    // Find the client contact by phone number
+    const clientContact = await this.clientContactRepository.findOne({
+      where: businessId
+        ? {
+            phone: normalizedPhone,
+            businessId,
+          }
+        : {
+            phone: normalizedPhone,
+          },
+    });
+
+    if (!clientContact) {
+      // Return empty array if no client contact found
+      return [];
+    }
+
+    // Find all appointments for this client contact
+    const appointments = await this.appointmentRepository.find({
+      where: businessId
+        ? {
+            clientContactId: clientContact.id,
+            businessId,
+          }
+        : {
+            clientContactId: clientContact.id,
+          },
+      relations: ['barber', 'client', 'service', 'clientContact'],
+      order: { startDate: 'DESC' },
+    });
+
+    return appointments.map((appointment) => this.formatAppointmentResponse(appointment));
+  }
+
   async findById(appointmentId: number, businessId: number): Promise<AppointmentResponseDto> {
     const appointment = await this.appointmentRepository.findOne({
       where: {

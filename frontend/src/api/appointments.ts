@@ -87,6 +87,16 @@ export interface AppointmentTimelineResponse {
 }
 
 export const appointmentsAPI = {
+  async getByPhoneNumber(
+    businessId: number,
+    phoneNumber: string
+  ): Promise<Appointment[]> {
+    const response = await apiClient.get(
+      `/appointments/${businessId}/appointments/phone/${phoneNumber}`
+    );
+    return response?.data?.data || [];
+  },
+
   async getAll(businessId: number): Promise<Appointment[]> {
     const response = await apiClient.get(
       `/appointments/${businessId}/appointments`

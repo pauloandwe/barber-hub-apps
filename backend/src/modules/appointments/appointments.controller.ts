@@ -62,6 +62,28 @@ export class AppointmentsController {
     );
   }
 
+  @Get(':businessId/appointments/phone/:phoneNumber')
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP, UserRole.CLIENT)
+  @ApiOperation({
+    summary: 'Get appointments by phone number',
+    description: 'Returns all appointments for a specific phone number within a business',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Appointments retrieved successfully',
+    type: [AppointmentResponseDto],
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid phone number format',
+  })
+  async getAppointmentsByPhone(
+    @Param('businessId') businessId: string,
+    @Param('phoneNumber') phoneNumber: string,
+  ): Promise<AppointmentResponseDto[]> {
+    return await this.appointmentsService.findByPhoneNumber(phoneNumber, parseInt(businessId));
+  }
+
   @Get(':businessId/appointments')
   @Roles(UserRole.ADMIN, UserRole.BARBERSHOP, UserRole.CLIENT)
   @ApiOperation({

@@ -5,9 +5,16 @@ export { usersAPI } from './users';
 export { appointmentsAPI } from './appointments';
 export { barbersAPI } from './barbers';
 export { servicesAPI } from './services';
+export {
+  hairhubTools,
+  showAppointmentsTool,
+  getUpcomingAppointmentsTool,
+  executeHairHubTool
+} from './hairhub-tools';
 export type { AuthResponse, UserProfile, LoginRequest, RegisterRequest } from './auth';
 export type { Business, CreateBusinessRequest, UpdateBusinessRequest } from './business';
 export type { UserProfile as UserProfileApi, UpdateUserRequest } from './users';
 export type { Appointment, CreateAppointmentRequest, UpdateAppointmentRequest } from './appointments';
 export type { Barber, CreateBarberRequest, UpdateBarberRequest } from './barbers';
 export type { Service, CreateServiceRequest, UpdateServiceRequest } from './services';
+export type { HairHubToolContext, HairHubToolResult } from './hairhub-tools';
