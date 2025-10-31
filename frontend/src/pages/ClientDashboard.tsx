@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { authAPI } from "@/api/auth";
 import { businessAPI } from "@/api/business";
-import { Appointment as AppointmentModel, appointmentsAPI } from "@/api/appointments";
+import {
+  Appointment as AppointmentModel,
+  appointmentsAPI,
+} from "@/api/appointments";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +14,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Scissors, Calendar, Building2, LogOut, User, Trash2 } from "lucide-react";
+import {
+  Scissors,
+  Calendar,
+  Building2,
+  LogOut,
+  User,
+  Trash2,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatUtcDateTime } from "@/utils/date.utils";
 import {
@@ -41,9 +51,8 @@ export function ClientDashboard() {
   const [appointments, setAppointments] = useState<DashboardAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false);
-  const [appointmentBeingEdited, setAppointmentBeingEdited] = useState<
-    DashboardAppointment | null
-  >(null);
+  const [appointmentBeingEdited, setAppointmentBeingEdited] =
+    useState<DashboardAppointment | null>(null);
 
   const dialogBarbershopId = appointmentBeingEdited
     ? appointmentBeingEdited.businessId.toString()
@@ -67,7 +76,7 @@ export function ClientDashboard() {
       if (process.env.NODE_ENV === "development") {
         console.error("Error fetching barbershops:", error);
       }
-      toast.error("Error loading barbershops");
+      toast.error("Erro ao carregar barbearias");
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +119,7 @@ export function ClientDashboard() {
       if (process.env.NODE_ENV === "development") {
         console.error("Error fetching appointments:", error);
       }
-      toast.error("Error loading appointments");
+      toast.error("Erro ao carregar agendamentos");
     }
   };
 
@@ -122,9 +131,12 @@ export function ClientDashboard() {
   const handleDeleteAppointment = async (appointment: DashboardAppointment) => {
     if (
       !window.confirm(
-        `Tem certeza que deseja deletar o agendamento de ${formatUtcDateTime(appointment.startDate, {
-          includeConnector: false,
-        })}?`
+        `Tem certeza que deseja deletar o agendamento de ${formatUtcDateTime(
+          appointment.startDate,
+          {
+            includeConnector: false,
+          }
+        )}?`
       )
     ) {
       return;
@@ -133,7 +145,7 @@ export function ClientDashboard() {
     try {
       await appointmentsAPI.delete(appointment.businessId, appointment.id);
       toast.success("Agendamento deletado com sucesso!");
-      setAppointments(appointments.filter(apt => apt.id !== appointment.id));
+      setAppointments(appointments.filter((apt) => apt.id !== appointment.id));
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.error("Error deleting appointment:", error);
@@ -157,16 +169,16 @@ export function ClientDashboard() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <Scissors className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">My Appointments</h1>
+            <h1 className="text-xl font-bold">Meus Agendamentos</h1>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => navigate(ROUTES.PROFILE)}>
               <User className="mr-2 h-4 w-4" />
-              Profile
+              Perfil
             </Button>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              Sair
             </Button>
           </div>
         </div>
@@ -175,18 +187,16 @@ export function ClientDashboard() {
       <main className="container mx-auto p-4 md:p-6 space-y-6">
         <div className="space-y-4">
           <div>
-            <h2 className="text-3xl font-bold">Select a Barbershop</h2>
+            <h2 className="text-3xl font-bold">Selecione uma Barbearia</h2>
             <p className="text-muted-foreground">
-              Choose a barbershop to schedule an appointment
+              Escolha uma barbearia para agendar um horário
             </p>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Available Barbershops</CardTitle>
-              <CardDescription>
-                Choose your preferred barbershop
-              </CardDescription>
+              <CardTitle>Barbearias Disponíveis</CardTitle>
+              <CardDescription>Escolha sua barbearia preferida</CardDescription>
             </CardHeader>
             <CardContent>
               <Select
@@ -194,7 +204,7 @@ export function ClientDashboard() {
                 onValueChange={setSelectedBarbershop}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a barbershop" />
+                  <SelectValue placeholder="Selecionar uma barbearia" />
                 </SelectTrigger>
                 <SelectContent>
                   {barbershops.map((barbershop) => (
@@ -215,7 +225,7 @@ export function ClientDashboard() {
                     setIsAppointmentDialogOpen(true);
                   }}
                 >
-                  Schedule Appointment
+                  Agendar Horário
                 </Button>
               )}
             </CardContent>
@@ -224,8 +234,8 @@ export function ClientDashboard() {
 
         <div className="space-y-4">
           <div>
-            <h2 className="text-2xl font-bold">My Appointments</h2>
-            <p className="text-muted-foreground">Your upcoming appointments</p>
+            <h2 className="text-2xl font-bold">Meus Agendamentos</h2>
+            <p className="text-muted-foreground">Seus próximos agendamentos</p>
           </div>
 
           <div className="grid gap-4">
@@ -239,7 +249,7 @@ export function ClientDashboard() {
                         {formatUtcDateTime(appointment.startDate)}
                       </CardTitle>
                       <CardDescription>
-                        {appointment.service?.name || "Service not available"}{" "}
+                        {appointment.service?.name || "Serviço não disponível"}{" "}
                         • {appointment.service?.duration || 0} min
                       </CardDescription>
                     </div>
@@ -251,7 +261,7 @@ export function ClientDashboard() {
                           size="sm"
                           onClick={() => handleEditAppointment(appointment)}
                         >
-                          Edit
+                          Editar
                         </Button>
                         <Button
                           variant="outline"
@@ -268,21 +278,21 @@ export function ClientDashboard() {
                 <CardContent className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Building2 className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Barbershop:</span>
+                    <span className="font-medium">Barbearia:</span>
                     <span>
-                      {appointment.barbershopName || "Barbershop not available"}
+                      {appointment.barbershopName || "Barbearia não disponível"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Scissors className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Barber:</span>
+                    <span className="font-medium">Barbeiro:</span>
                     <span>
-                      {appointment.barber?.name || "Barber not available"}
+                      {appointment.barber?.name || "Barbeiro não disponível"}
                     </span>
                   </div>
                   {appointment.notes && (
                     <div className="text-sm text-muted-foreground mt-2 pt-2 border-t">
-                      <span className="font-medium">Notes:</span>{" "}
+                      <span className="font-medium">Notas:</span>{" "}
                       {appointment.notes}
                     </div>
                   )}
@@ -293,8 +303,8 @@ export function ClientDashboard() {
 
           {appointments.length === 0 && (
             <EmptyState
-              title="No appointments yet"
-              description="Schedule an appointment to get started"
+              title="Nenhum agendamento ainda"
+              description="Agende um horário para começar"
               icon="📅"
             />
           )}

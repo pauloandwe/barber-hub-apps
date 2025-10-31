@@ -1,18 +1,18 @@
-import { useEffect, useState } from 'react';
-import { businessAPI } from '@/api/business';
-import { usersAPI } from '@/api/users';
-import { authAPI } from '@/api/auth';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
+import { businessAPI } from "@/api/business";
+import { usersAPI } from "@/api/users";
+import { authAPI } from "@/api/auth";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import {
   Scissors,
   Plus,
@@ -22,8 +22,8 @@ import {
   UserCog,
   User,
   Loader2,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -31,20 +31,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
-import { EmptyState } from '@/components/shared/EmptyState';
-import { RoleBadge } from '@/components/shared/RoleBadge';
-import { UserRole } from '@/constants/roles';
-import { ROUTES } from '@/constants/routes';
+} from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { RoleBadge } from "@/components/shared/RoleBadge";
+import { UserRole } from "@/constants/roles";
+import { ROUTES } from "@/constants/routes";
 
 interface Barbershop {
   id: number;
@@ -72,21 +72,24 @@ export function AdminDashboard() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [selectedRole, setSelectedRole] = useState<string>('');
-  const [selectedBarbershopId, setSelectedBarbershopId] = useState<string>('');
+  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [selectedBarbershopId, setSelectedBarbershopId] = useState<string>("");
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
   });
-  const [isEditBarbershopDialogOpen, setIsEditBarbershopDialogOpen] = useState(false);
-  const [barbershopToEdit, setBarbershopToEdit] = useState<Barbershop | null>(null);
+  const [isEditBarbershopDialogOpen, setIsEditBarbershopDialogOpen] =
+    useState(false);
+  const [barbershopToEdit, setBarbershopToEdit] = useState<Barbershop | null>(
+    null
+  );
   const [editFormData, setEditFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
   });
   const [isUpdatingBarbershop, setIsUpdatingBarbershop] = useState(false);
 
@@ -108,10 +111,10 @@ export function AdminDashboard() {
         }))
       );
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching barbershops:', error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error fetching barbershops:", error);
       }
-      toast.error('Error loading barbershops');
+      toast.error("Erro ao carregar barbearias");
     } finally {
       setIsLoading(false);
     }
@@ -128,32 +131,32 @@ export function AdminDashboard() {
         address: formData.address,
       });
 
-      toast.success('Barbershop created successfully!');
+      toast.success("Barbearia criada com sucesso!");
       setIsCreateDialogOpen(false);
-      setFormData({ name: '', email: '', phone: '', address: '' });
+      setFormData({ name: "", email: "", phone: "", address: "" });
       fetchBarbershops();
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error creating barbershop:', error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error creating barbershop:", error);
       }
-      toast.error('Error creating barbershop');
+      toast.error("Erro ao criar barbearia");
     }
   };
 
   const openEditBarbershopDialog = (barbershop: Barbershop) => {
     setBarbershopToEdit(barbershop);
     setEditFormData({
-      name: barbershop.name || '',
-      email: barbershop.email || '',
-      phone: barbershop.phone || '',
-      address: barbershop.address || '',
+      name: barbershop.name || "",
+      email: barbershop.email || "",
+      phone: barbershop.phone || "",
+      address: barbershop.address || "",
     });
     setIsEditBarbershopDialogOpen(true);
   };
 
   const resetEditBarbershopState = () => {
     setBarbershopToEdit(null);
-    setEditFormData({ name: '', email: '', phone: '', address: '' });
+    setEditFormData({ name: "", email: "", phone: "", address: "" });
     setIsUpdatingBarbershop(false);
   };
 
@@ -170,15 +173,15 @@ export function AdminDashboard() {
         address: editFormData.address || undefined,
       });
 
-      toast.success('Barbershop updated successfully!');
+      toast.success("Barbearia atualizada com sucesso!");
       setIsEditBarbershopDialogOpen(false);
       resetEditBarbershopState();
       fetchBarbershops();
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error updating barbershop:', error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error updating barbershop:", error);
       }
-      toast.error('Error updating barbershop');
+      toast.error("Erro ao atualizar barbearia");
     } finally {
       setIsUpdatingBarbershop(false);
     }
@@ -199,10 +202,10 @@ export function AdminDashboard() {
         }))
       );
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching users:', error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error fetching users:", error);
       }
-      toast.error('Error loading users');
+      toast.error("Erro ao carregar usuários");
     } finally {
       setIsLoading(false);
     }
@@ -211,7 +214,7 @@ export function AdminDashboard() {
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
     setSelectedRole(user.role);
-    setSelectedBarbershopId(user.businessId ? user.businessId.toString() : '');
+    setSelectedBarbershopId(user.businessId ? user.businessId.toString() : "");
     setIsEditUserDialogOpen(true);
   };
 
@@ -220,20 +223,22 @@ export function AdminDashboard() {
 
     try {
       await usersAPI.update(selectedUser.id, {
-        role: selectedRole as 'ADMIN' | 'BARBERSHOP' | 'CLIENT',
+        role: selectedRole as "ADMIN" | "BARBERSHOP" | "CLIENT",
         businessId:
-          selectedRole === 'BARBERSHOP' ? parseInt(selectedBarbershopId) || undefined : undefined,
+          selectedRole === "BARBERSHOP"
+            ? parseInt(selectedBarbershopId) || undefined
+            : undefined,
       });
 
-      toast.success('User updated successfully!');
+      toast.success("Usuário atualizado com sucesso!");
       setIsEditUserDialogOpen(false);
       setSelectedUser(null);
       fetchUsers();
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error updating user:', error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error updating user:", error);
       }
-      toast.error('Error updating user');
+      toast.error("Erro ao atualizar usuário");
     }
   };
 
@@ -252,16 +257,16 @@ export function AdminDashboard() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <Scissors className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">Admin Panel</h1>
+            <h1 className="text-xl font-bold">Painel de Administrador</h1>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => navigate(ROUTES.PROFILE)}>
               <User className="mr-2 h-4 w-4" />
-              Profile
+              Perfil
             </Button>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              Sair
             </Button>
           </div>
         </div>
@@ -272,72 +277,87 @@ export function AdminDashboard() {
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="barbershops">
               <Building2 className="mr-2 h-4 w-4" />
-              Barbershops
+              Barbearias
             </TabsTrigger>
             <TabsTrigger value="users">
               <Users className="mr-2 h-4 w-4" />
-              Users
+              Usuários
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="barbershops" className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold">Barbershops</h2>
-                <p className="text-muted-foreground">Manage all barbershops in the system</p>
+                <h2 className="text-3xl font-bold">Barbearias</h2>
+                <p className="text-muted-foreground">
+                  Gerenciar todas as barbearias do sistema
+                </p>
               </div>
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <Dialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+              >
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="mr-2 h-4 w-4" />
-                    New Barbershop
+                    Nova Barbearia
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Create New Barbershop</DialogTitle>
-                    <DialogDescription>Fill in the barbershop details</DialogDescription>
+                    <DialogTitle>Criar Nova Barbearia</DialogTitle>
+                    <DialogDescription>
+                      Preencha os detalhes da barbearia
+                    </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleCreateBarbershop} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Name *</Label>
+                      <Label htmlFor="name">Nome *</Label>
                       <Input
                         id="name"
                         type="text"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">E-mail</Label>
                       <Input
                         id="email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phone">Telefone</Label>
                       <Input
                         id="phone"
                         type="tel"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, phone: e.target.value })
+                        }
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="address">Address</Label>
+                      <Label htmlFor="address">Endereço</Label>
                       <Input
                         id="address"
                         type="text"
                         value={formData.address}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, address: e.target.value })
+                        }
                       />
                     </div>
                     <Button type="submit" className="w-full">
-                      Create Barbershop
+                      Criar Barbearia
                     </Button>
                   </form>
                 </DialogContent>
@@ -355,20 +375,26 @@ export function AdminDashboard() {
                         size="sm"
                         onClick={() => openEditBarbershopDialog(barbershop)}
                       >
-                        Edit
+                        Editar
                       </Button>
                     </div>
                     <CardTitle>{barbershop.name}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
                     {barbershop.email && (
-                      <p className="text-muted-foreground">📧 {barbershop.email}</p>
+                      <p className="text-muted-foreground">
+                        📧 {barbershop.email}
+                      </p>
                     )}
                     {barbershop.phone && (
-                      <p className="text-muted-foreground">📱 {barbershop.phone}</p>
+                      <p className="text-muted-foreground">
+                        📱 {barbershop.phone}
+                      </p>
                     )}
                     {barbershop.address && (
-                      <p className="text-muted-foreground">📍 {barbershop.address}</p>
+                      <p className="text-muted-foreground">
+                        📍 {barbershop.address}
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -377,8 +403,8 @@ export function AdminDashboard() {
 
             {barbershops.length === 0 && (
               <EmptyState
-                title="No barbershops registered"
-                description="Start by creating your first barbershop"
+                title="Nenhuma barbearia registrada"
+                description="Comece criando sua primeira barbearia"
                 icon="🏪"
               />
             )}
@@ -394,66 +420,83 @@ export function AdminDashboard() {
             >
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Edit Barbershop</DialogTitle>
+                  <DialogTitle>Editar Barbearia</DialogTitle>
                   <DialogDescription>
-                    Update the barbershop information below
+                    Atualize as informações da barbearia abaixo
                   </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleUpdateBarbershop} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-name">Name *</Label>
+                    <Label htmlFor="edit-name">Nome *</Label>
                     <Input
                       id="edit-name"
                       type="text"
                       value={editFormData.name}
                       onChange={(e) =>
-                        setEditFormData((prev) => ({ ...prev, name: e.target.value }))
+                        setEditFormData((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
                       }
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-email">Email</Label>
+                    <Label htmlFor="edit-email">E-mail</Label>
                     <Input
                       id="edit-email"
                       type="email"
                       value={editFormData.email}
                       onChange={(e) =>
-                        setEditFormData((prev) => ({ ...prev, email: e.target.value }))
+                        setEditFormData((prev) => ({
+                          ...prev,
+                          email: e.target.value,
+                        }))
                       }
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-phone">Phone *</Label>
+                    <Label htmlFor="edit-phone">Telefone *</Label>
                     <Input
                       id="edit-phone"
                       type="tel"
                       value={editFormData.phone}
                       onChange={(e) =>
-                        setEditFormData((prev) => ({ ...prev, phone: e.target.value }))
+                        setEditFormData((prev) => ({
+                          ...prev,
+                          phone: e.target.value,
+                        }))
                       }
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-address">Address</Label>
+                    <Label htmlFor="edit-address">Endereço</Label>
                     <Input
                       id="edit-address"
                       type="text"
                       value={editFormData.address}
                       onChange={(e) =>
-                        setEditFormData((prev) => ({ ...prev, address: e.target.value }))
+                        setEditFormData((prev) => ({
+                          ...prev,
+                          address: e.target.value,
+                        }))
                       }
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={isUpdatingBarbershop}>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isUpdatingBarbershop}
+                  >
                     {isUpdatingBarbershop ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                        Salvando...
                       </>
                     ) : (
-                      'Save changes'
+                      "Salvar mudanças"
                     )}
                   </Button>
                 </form>
@@ -463,8 +506,10 @@ export function AdminDashboard() {
 
           <TabsContent value="users" className="space-y-6">
             <div>
-              <h2 className="text-3xl font-bold">Users</h2>
-              <p className="text-muted-foreground">Manage users and their permissions</p>
+              <h2 className="text-3xl font-bold">Usuários</h2>
+              <p className="text-muted-foreground">
+                Gerenciar usuários e suas permissões
+              </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -479,14 +524,16 @@ export function AdminDashboard() {
                     <CardDescription>{user.email}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
-                    {user.phone && <p className="text-muted-foreground">📱 {user.phone}</p>}
+                    {user.phone && (
+                      <p className="text-muted-foreground">📱 {user.phone}</p>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"
                       className="w-full mt-2"
                       onClick={() => handleEditUser(user)}
                     >
-                      Edit Permissions
+                      Editar Permissões
                     </Button>
                   </CardContent>
                 </Card>
@@ -495,48 +542,61 @@ export function AdminDashboard() {
 
             {users.length === 0 && (
               <EmptyState
-                title="No users registered"
-                description="Users will appear here once they sign up"
+                title="Nenhum usuário registrado"
+                description="Os usuários aparecerão aqui quando se cadastrem"
                 icon="👥"
               />
             )}
           </TabsContent>
         </Tabs>
 
-        <Dialog open={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen}>
+        <Dialog
+          open={isEditUserDialogOpen}
+          onOpenChange={setIsEditUserDialogOpen}
+        >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit User</DialogTitle>
-              <DialogDescription>Change the role and link a barbershop to the user</DialogDescription>
+              <DialogTitle>Editar Usuário</DialogTitle>
+              <DialogDescription>
+                Altere a função e vincule uma barbearia ao usuário
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>User</Label>
-                <Input value={selectedUser?.name || ''} disabled />
+                <Label>Usuário</Label>
+                <Input value={selectedUser?.name || ""} disabled />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role">Função</Label>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
+                    <SelectValue placeholder="Selecionar uma função" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ADMIN">Administrator</SelectItem>
-                    <SelectItem value="BARBERSHOP">Barbershop Manager</SelectItem>
-                    <SelectItem value="CLIENT">Client</SelectItem>
+                    <SelectItem value="ADMIN">Administrador</SelectItem>
+                    <SelectItem value="BARBERSHOP">
+                      Gerente de Barbearia
+                    </SelectItem>
+                    <SelectItem value="CLIENT">Cliente</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              {selectedRole === 'BARBERSHOP' && (
+              {selectedRole === "BARBERSHOP" && (
                 <div className="space-y-2">
-                  <Label htmlFor="barbershop">Barbershop</Label>
-                  <Select value={selectedBarbershopId} onValueChange={setSelectedBarbershopId}>
+                  <Label htmlFor="barbershop">Barbearia</Label>
+                  <Select
+                    value={selectedBarbershopId}
+                    onValueChange={setSelectedBarbershopId}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a barbershop" />
+                      <SelectValue placeholder="Selecionar uma barbearia" />
                     </SelectTrigger>
                     <SelectContent>
                       {barbershops.map((barbershop) => (
-                        <SelectItem key={barbershop.id} value={barbershop.id.toString()}>
+                        <SelectItem
+                          key={barbershop.id}
+                          value={barbershop.id.toString()}
+                        >
                           {barbershop.name}
                         </SelectItem>
                       ))}
@@ -545,7 +605,7 @@ export function AdminDashboard() {
                 </div>
               )}
               <Button onClick={handleUpdateUser} className="w-full">
-                Save Changes
+                Salvar Mudanças
               </Button>
             </div>
           </DialogContent>

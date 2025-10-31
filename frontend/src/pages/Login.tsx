@@ -44,17 +44,17 @@ export function Login() {
 
   const validateForm = (): boolean => {
     if (!formData.email || !formData.password) {
-      toast.error("Please fill in all fields");
+      toast.error("Por favor, preencha todos os campos");
       return false;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      toast.error("Please enter a valid email");
+      toast.error("Por favor, digite um e-mail válido");
       return false;
     }
 
     if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error("A senha deve ter pelo menos 6 caracteres");
       return false;
     }
 
@@ -82,14 +82,14 @@ export function Login() {
 
       authAPI.setStoredUser(user);
 
-      toast.success("Login successful!");
+      toast.success("Login realizado com sucesso!");
 
       const dashboardRoute = getDashboardRoute(user.role);
       navigate(dashboardRoute);
     } catch (error: any) {
       const errorMessage =
-        error.response?.data?.message || error.message || "Login failed";
-      toast.error(`Login error: ${errorMessage}`);
+        error.response?.data?.message || error.message || "Falha no login";
+      toast.error(`Erro de login: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -105,19 +105,19 @@ export function Login() {
           <div>
             <CardTitle className="text-3xl">Barber Hub</CardTitle>
             <CardDescription className="mt-2">
-              Manage your barbershop professionally
+              Gerenciar sua barbearia profissionalmente
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-mail</Label>
               <Input
                 id="email"
                 type="email"
                 name="email"
-                placeholder="your@email.com"
+                placeholder="seu@email.com"
                 value={formData.email}
                 onChange={handleInputChange}
                 disabled={isLoading}
@@ -125,7 +125,7 @@ export function Login() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Senha</Label>
               <Input
                 id="password"
                 type="password"
@@ -138,18 +138,16 @@ export function Login() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? "Fazendo login..." : "Entrar"}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            <span className="text-muted-foreground">
-              Don't have an account?{" "}
-            </span>
+            <span className="text-muted-foreground">Não tem uma conta? </span>
             <Link
               to={ROUTES.REGISTER}
               className="font-medium text-primary hover:underline"
             >
-              Sign up
+              Cadastre-se
             </Link>
           </div>
         </CardContent>

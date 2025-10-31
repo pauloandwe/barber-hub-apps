@@ -25,13 +25,13 @@ import {
 import { appointmentsAPI } from "@/api/appointments";
 
 const DAY_LABELS = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
+  "Domingo",
+  "Segunda",
+  "Terça",
+  "Quarta",
+  "Quinta",
+  "Sexta",
+  "Sábado",
 ];
 
 export interface BarberAppointment {
@@ -99,14 +99,14 @@ export function BarberCard({
               appointment.clientContact?.name ||
               appointment.clientContact?.phone ||
               appointment.barber?.name ||
-              "Client not available",
+              "Cliente não disponível",
           },
           service: appointment.service
             ? {
                 name: appointment.service.name,
                 duration: appointment.service.duration,
               }
-            : { name: "Service not available", duration: 0 },
+            : { name: "Serviço não disponível", duration: 0 },
         }));
 
       normalizedAppointments.sort(
@@ -142,11 +142,11 @@ export function BarberCard({
     const record = workingHours.find((item) => item.dayOfWeek === index);
 
     if (!record) {
-      return { label, text: "Not configured" };
+      return { label, text: "Não configurado" };
     }
 
     if (record.closed) {
-      return { label, text: "Closed" };
+      return { label, text: "Fechado" };
     }
 
     const range = `${record.openTime ?? "--:--"} – ${
@@ -155,7 +155,7 @@ export function BarberCard({
     if (record.breakStart && record.breakEnd) {
       return {
         label,
-        text: `${range} (break ${record.breakStart}–${record.breakEnd})`,
+        text: `${range} (pausa ${record.breakStart}–${record.breakEnd})`,
       };
     }
 
@@ -192,7 +192,7 @@ export function BarberCard({
                     : "bg-gray-100 text-gray-800"
                 }`}
               >
-                {barber.active ? "Active" : "Inactive"}
+                {barber.active ? "Ativo" : "Inativo"}
               </span>
               {onEdit && (
                 <Button
@@ -200,7 +200,7 @@ export function BarberCard({
                   size="sm"
                   onClick={() => onEdit(barber)}
                 >
-                  Edit
+                  Editar
                 </Button>
               )}
               <Button
@@ -209,7 +209,7 @@ export function BarberCard({
                 onClick={handleViewSchedule}
                 disabled={!onViewSchedule}
               >
-                Manage schedule
+                Gerenciar horário
               </Button>
             </div>
           </div>
@@ -217,7 +217,7 @@ export function BarberCard({
         <CardContent>
           <div className="mb-4">
             <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-              Working hours
+              Horário de trabalho
             </p>
             {isLoadingSchedule ? (
               <LoadingSpinner size="small" />
@@ -237,7 +237,7 @@ export function BarberCard({
           <CollapsibleTrigger asChild>
             <Button variant="outline" className="w-full">
               <Clock className="mr-2 h-4 w-4" />
-              {isOpen ? "Hide Appointments" : "View Appointments"}
+              {isOpen ? "Ocultar Agendamentos" : "Ver Agendamentos"}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-4">
@@ -245,8 +245,8 @@ export function BarberCard({
               <LoadingSpinner size="small" />
             ) : appointments.length === 0 ? (
               <EmptyState
-                title="No scheduled appointments"
-                description="There are no appointments scheduled for this barber yet."
+                title="Nenhum agendamento agendado"
+                description="Não há agendamentos programados para este barbeiro ainda."
               />
             ) : (
               <div className="space-y-3">
@@ -262,12 +262,14 @@ export function BarberCard({
                           {formatUtcDateTime(appointment.startDate)}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {appointment.service?.name || "Service not available"}{" "}
+                          {appointment.service?.name ||
+                            "Serviço não disponível"}{" "}
                           • {appointment.service?.duration || 0} min
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Client:{" "}
-                          {appointment.profile?.name || "Client not available"}
+                          Cliente:{" "}
+                          {appointment.profile?.name ||
+                            "Cliente não disponível"}
                         </p>
                       </div>
                       <StatusBadge status={appointment.status as any} />

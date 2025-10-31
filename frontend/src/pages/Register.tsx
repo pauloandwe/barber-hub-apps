@@ -49,27 +49,27 @@ export function Register() {
 
   const validateForm = (): boolean => {
     if (!formData.name || !formData.email || !formData.password) {
-      toast.error("Please fill in all required fields");
+      toast.error("Por favor, preencha todos os campos obrigatórios");
       return false;
     }
 
     if (formData.name.length < 3) {
-      toast.error("Name must be at least 3 characters");
+      toast.error("O nome deve ter pelo menos 3 caracteres");
       return false;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      toast.error("Please enter a valid email");
+      toast.error("Por favor, digite um e-mail válido");
       return false;
     }
 
     if (formData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error("A senha deve ter pelo menos 6 caracteres");
       return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error("As senhas não coincidem");
       return false;
     }
 
@@ -95,14 +95,14 @@ export function Register() {
 
       authAPI.setStoredUser(user);
 
-      toast.success("Account created successfully! Redirecting...");
+      toast.success("Conta criada com sucesso! Redirecionando...");
 
       const dashboardRoute = getDashboardRoute(UserRole.CLIENT);
       navigate(dashboardRoute);
     } catch (error: any) {
       const errorMessage =
-        error.response?.data?.message || error.message || "Registration failed";
-      toast.error(`Error creating account: ${errorMessage}`);
+        error.response?.data?.message || error.message || "Falha no cadastro";
+      toast.error(`Erro ao criar conta: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -116,21 +116,21 @@ export function Register() {
             <Scissors className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-3xl">Create Account</CardTitle>
+            <CardTitle className="text-3xl">Criar Conta</CardTitle>
             <CardDescription className="mt-2">
-              Start managing your appointments today
+              Comece a gerenciar seus agendamentos hoje
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">Nome Completo</Label>
               <Input
                 id="name"
                 type="text"
                 name="name"
-                placeholder="John Doe"
+                placeholder="João Silva"
                 value={formData.name}
                 onChange={handleInputChange}
                 disabled={isLoading}
@@ -138,12 +138,12 @@ export function Register() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-mail</Label>
               <Input
                 id="email"
                 type="email"
                 name="email"
-                placeholder="your@email.com"
+                placeholder="seu@email.com"
                 value={formData.email}
                 onChange={handleInputChange}
                 disabled={isLoading}
@@ -151,7 +151,7 @@ export function Register() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone (optional)</Label>
+              <Label htmlFor="phone">Telefone (opcional)</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -163,7 +163,7 @@ export function Register() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Senha</Label>
               <Input
                 id="password"
                 type="password"
@@ -176,7 +176,7 @@ export function Register() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">Confirme a Senha</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -189,18 +189,16 @@ export function Register() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Create Account"}
+              {isLoading ? "Criando conta..." : "Criar Conta"}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            <span className="text-muted-foreground">
-              Already have an account?{" "}
-            </span>
+            <span className="text-muted-foreground">Já tem uma conta? </span>
             <Link
               to={ROUTES.LOGIN}
               className="font-medium text-primary hover:underline"
             >
-              Sign in
+              Entrar
             </Link>
           </div>
         </CardContent>

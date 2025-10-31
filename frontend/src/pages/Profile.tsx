@@ -25,13 +25,13 @@ const profileSchema = z
   .object({
     name: z
       .string()
-      .min(3, "Name must be at least 3 characters")
-      .max(100, "Name is too long"),
+      .min(3, "Nome deve ter pelo menos 3 caracteres")
+      .max(100, "Nome é muito longo"),
     phone: z.string().optional(),
-    email: z.string().email("Invalid email"),
+    email: z.string().email("E-mail inválido"),
     newPassword: z
       .string()
-      .min(6, "Password must be at least 6 characters")
+      .min(6, "Senha deve ter pelo menos 6 caracteres")
       .optional()
       .or(z.literal("")),
     confirmPassword: z.string().optional().or(z.literal("")),
@@ -44,7 +44,7 @@ const profileSchema = z
       return true;
     },
     {
-      message: "Passwords do not match",
+      message: "As senhas não coincidem",
       path: ["confirmPassword"],
     }
   );
@@ -88,7 +88,7 @@ export function Profile() {
       if (process.env.NODE_ENV === "development") {
         console.error("Error loading profile data:", error);
       }
-      toast.error("Error loading profile data");
+      toast.error("Erro ao carregar dados do perfil");
     } finally {
       setIsLoading(false);
     }
@@ -108,10 +108,10 @@ export function Profile() {
       });
 
       if (data.newPassword && data.newPassword.length > 0) {
-        toast.warning("Password change not yet implemented via API");
+        toast.warning("Alteração de senha ainda não implementada via API");
       }
 
-      toast.success("Profile updated successfully!");
+      toast.success("Perfil atualizado com sucesso!");
 
       const storedUser = authAPI.getStoredUser();
       if (storedUser) {
@@ -126,7 +126,7 @@ export function Profile() {
       if (process.env.NODE_ENV === "development") {
         console.error("Error updating profile:", error);
       }
-      toast.error(error.message || "Error updating profile");
+      toast.error(error.message || "Erro ao atualizar perfil");
     } finally {
       setIsSaving(false);
     }
@@ -143,16 +143,16 @@ export function Profile() {
           <div className="container mx-auto px-4 py-4">
             <Button variant="ghost" onClick={() => navigate(ROUTES.HOME)}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              Voltar
             </Button>
           </div>
         </header>
 
         <main className="container mx-auto max-w-2xl p-4 py-8">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold">My Profile</h1>
+            <h1 className="text-3xl font-bold">Meu Perfil</h1>
             <p className="text-muted-foreground mt-2">
-              Manage your personal information
+              Gerenciar suas informações pessoais
             </p>
           </div>
 
@@ -163,9 +163,9 @@ export function Profile() {
                   <User className="h-6 w-6" />
                 </div>
                 <div>
-                  <CardTitle>Personal Information</CardTitle>
+                  <CardTitle>Informações Pessoais</CardTitle>
                   <CardDescription>
-                    Update your profile information
+                    Atualize suas informações de perfil
                   </CardDescription>
                 </div>
               </div>
@@ -173,11 +173,11 @@ export function Profile() {
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="name">Nome Completo</Label>
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Your full name"
+                    placeholder="Seu nome completo"
                     {...register("name")}
                   />
                   {errors.name && (
@@ -188,7 +188,7 @@ export function Profile() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">Telefone</Label>
                   <Input
                     id="phone"
                     type="tel"
@@ -203,11 +203,11 @@ export function Profile() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">E-mail</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder="seu@email.com"
                     {...register("email")}
                   />
                   {errors.email && (
@@ -218,18 +218,18 @@ export function Profile() {
                 </div>
 
                 <div className="border-t pt-6">
-                  <h3 className="font-semibold mb-4">Change Password</h3>
+                  <h3 className="font-semibold mb-4">Alterar Senha</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Leave blank if you don't want to change your password
+                    Deixe em branco se não quiser alterar sua senha
                   </p>
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="newPassword">New Password</Label>
+                      <Label htmlFor="newPassword">Nova Senha</Label>
                       <Input
                         id="newPassword"
                         type="password"
-                        placeholder="Minimum 6 characters"
+                        placeholder="Mínimo 6 caracteres"
                         {...register("newPassword")}
                       />
                       {errors.newPassword && (
@@ -241,12 +241,12 @@ export function Profile() {
 
                     <div className="space-y-2">
                       <Label htmlFor="confirmPassword">
-                        Confirm New Password
+                        Confirme a Nova Senha
                       </Label>
                       <Input
                         id="confirmPassword"
                         type="password"
-                        placeholder="Enter password again"
+                        placeholder="Digite a senha novamente"
                         {...register("confirmPassword")}
                       />
                       {errors.confirmPassword && (
@@ -262,10 +262,10 @@ export function Profile() {
                   {isSaving ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
+                      Salvando...
                     </>
                   ) : (
-                    "Save Changes"
+                    "Salvar Mudanças"
                   )}
                 </Button>
               </form>

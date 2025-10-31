@@ -296,7 +296,7 @@ export function AppointmentDialog({
     try {
       const user = authAPI.getStoredUser();
       if (!user) {
-        toast.error("User not authenticated");
+        toast.error("Usuário não autenticado");
         return;
       }
 
@@ -319,15 +319,17 @@ export function AppointmentDialog({
       const [hours, minutes] = selectedTime.split(":").map(Number);
 
       // Cria data em UTC, não em horário local
-      const utcDate = new Date(Date.UTC(
-        selectedDate.getUTCFullYear(),
-        selectedDate.getUTCMonth(),
-        selectedDate.getUTCDate(),
-        hours,
-        minutes,
-        0,
-        0
-      ));
+      const utcDate = new Date(
+        Date.UTC(
+          selectedDate.getUTCFullYear(),
+          selectedDate.getUTCMonth(),
+          selectedDate.getUTCDate(),
+          hours,
+          minutes,
+          0,
+          0
+        )
+      );
       const startDateTime = utcDate;
 
       // Calcula endDate baseado na duração do serviço selecionado
@@ -416,11 +418,11 @@ export function AppointmentDialog({
       );
 
       if (!record) {
-        return { label, text: "Not configured", dayOfWeek: index };
+        return { label, text: "Não configurado", dayOfWeek: index };
       }
 
       if (record.closed) {
-        return { label, text: "Closed", dayOfWeek: index };
+        return { label, text: "Fechado", dayOfWeek: index };
       }
 
       const range = `${record.openTime ?? "--:--"} - ${
@@ -429,7 +431,7 @@ export function AppointmentDialog({
       if (record.breakStart && record.breakEnd) {
         return {
           label,
-          text: `${range} (break ${record.breakStart} - ${record.breakEnd})`,
+          text: `${range} (pausa ${record.breakStart} - ${record.breakEnd})`,
           dayOfWeek: index,
         };
       }

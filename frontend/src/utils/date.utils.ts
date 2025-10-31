@@ -78,7 +78,7 @@ export function formatUtcDateTime(
     return "";
   }
 
-  const { connector = "at", includeConnector = true } = options;
+  const { connector = "as ", includeConnector = true } = options;
   const dateStr = formatUtcDate(dateObj);
   const timeStr = formatUtcTime(dateObj);
 
@@ -94,9 +94,10 @@ export function formatUtcDateTime(
   return `${dateStr} ${connectorText} ${timeStr}`;
 }
 
-export function getUtcDateTimeParts(
-  date: Date | string
-): { date: string; time: string } {
+export function getUtcDateTimeParts(date: Date | string): {
+  date: string;
+  time: string;
+} {
   const dateObj = toDate(date);
   if (isInvalid(dateObj)) {
     return { date: "", time: "" };
@@ -168,5 +169,7 @@ export function convertUtcIsoToLocalDate(dateString: string): Date {
   if (Number.isNaN(date.getTime())) {
     return date;
   }
-  return new Date(date.getTime() + date.getTimezoneOffset() * MILLISECONDS_PER_MINUTE);
+  return new Date(
+    date.getTime() + date.getTimezoneOffset() * MILLISECONDS_PER_MINUTE
+  );
 }
