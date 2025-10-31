@@ -18,6 +18,7 @@ interface DateTimePickerProps {
   availableTimes: string[];
   isLoadingTimes: boolean;
   isDateRequired?: boolean;
+  hasServiceSelected?: boolean;
 }
 
 export function DateTimePicker({
@@ -28,6 +29,7 @@ export function DateTimePicker({
   availableTimes,
   isLoadingTimes,
   isDateRequired = true,
+  hasServiceSelected = false,
 }: DateTimePickerProps) {
   return (
     <>
@@ -49,9 +51,23 @@ export function DateTimePicker({
           {isLoadingTimes ? (
             <LoadingSpinner size="small" />
           ) : availableTimes.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Sem horários disponíveis para esta data
-            </p>
+            selectedTime ? (
+              <div className="rounded-md border px-3 py-2 text-sm">
+                <div className="font-medium">Horário selecionado</div>
+                <div>{selectedTime}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  A disponibilidade será confirmada após escolher o serviço.
+                </p>
+              </div>
+            ) : hasServiceSelected ? (
+              <p className="text-sm text-muted-foreground">
+                Sem horários disponíveis para esta data
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Selecione um serviço para visualizar os horários disponíveis
+              </p>
+            )
           ) : (
             <Select value={selectedTime} onValueChange={onTimeChange}>
               <SelectTrigger id="time">

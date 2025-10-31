@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { authAPI } from "@/api/auth";
-import { appointmentsAPI } from "@/api/appointments";
 import { Barber, barbersAPI } from "@/api/barbers";
 import { Service as ServiceModel, servicesAPI } from "@/api/services";
 import { businessAPI, Business } from "@/api/business";
@@ -25,42 +24,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   Scissors,
-  Calendar,
   User,
   LogOut,
   Plus,
   Building2,
   Loader2,
-  Trash2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { formatUtcDateTime } from "@/utils/date.utils";
 import { ServiceDialog } from "@/components/ServiceDialog";
 import { BarberDialog } from "@/components/BarberDialog";
 import { BarberCard } from "@/components/BarberCard";
 import { BarberScheduleDialog } from "@/components/BarberScheduleDialog";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { StatusBadge } from "@/components/shared/StatusBadge";
+import { AppointmentTimelineView } from "@/components/appointments/timeline/AppointmentTimelineView";
 import { ROUTES } from "@/constants/routes";
-
-interface Appointment {
-  clientContact: unknown;
-  id: number;
-  startDate: string;
-  endDate: string;
-  status: string;
-  notes?: string;
-  barber?: { name: string };
-  client?: { name: string };
-  service?: { name: string; duration: number };
-}
 
 export function BarbershopDashboard() {
   const navigate = useNavigate();
   const { barbershopId, isLoading: roleLoading } = useUserRole();
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<ServiceModel[]>([]);
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,12 +92,6 @@ export function BarbershopDashboard() {
 
       const business = await businessAPI.getById(barbershopIdNum);
       setBarbershopInfo(business);
-
-      const appts = await appointmentsAPI.getAll(barbershopIdNum);
-      const futureAppointments = appts.filter(
-        (apt: any) => new Date(apt.startDate) >= new Date()
-      );
-      setAppointments(futureAppointments);
 
       const svcs = await servicesAPI.getAll(barbershopIdNum);
       setServices(svcs);
@@ -193,32 +170,6 @@ export function BarbershopDashboard() {
     setIsBarberDialogOpen(true);
   };
 
-  const handleDeleteAppointment = async (appointment: Appointment) => {
-    if (!barbershopId) return;
-
-    if (
-      !window.confirm(
-        `Tem certeza que deseja deletar o agendamento de ${formatUtcDateTime(appointment.startDate, {
-          includeConnector: false,
-        })}?`
-      )
-    ) {
-      return;
-    }
-
-    try {
-      const barbershopIdNum = parseInt(barbershopId, 10);
-      await appointmentsAPI.delete(barbershopIdNum, appointment.id);
-      toast.success("Agendamento deletado com sucesso!");
-      setAppointments(appointments.filter(apt => apt.id !== appointment.id));
-    } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Error deleting appointment:", error);
-      }
-      toast.error("Erro ao deletar agendamento");
-    }
-  };
-
   const handleLogout = () => {
     authAPI.logout();
     navigate(ROUTES.LOGIN);
@@ -258,85 +209,16 @@ export function BarbershopDashboard() {
       </header>
 
       <main className="container mx-auto p-4 md:p-6 space-y-6">
-        <Tabs defaultValue="appointments" className="w-full">
+        <Tabs defaultValue="timeline" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="appointments">Agendamentos</TabsTrigger>
+            <TabsTrigger value="timeline">📅 Agenda</TabsTrigger>
             <TabsTrigger value="services">Serviços</TabsTrigger>
             <TabsTrigger value="barbers">Barbeiros</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="appointments" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Agendamentos</h2>
-                <p className="text-muted-foreground">Horários agendados</p>
-              </div>
-            </div>
-
-            <div className="grid gap-4">
-              {appointments.map((appointment) => (
-                <Card key={appointment.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1 flex-1">
-                        <CardTitle className="flex items-center gap-2">
-                          <Calendar className="h-5 w-5" />
-                          {formatUtcDateTime(appointment.startDate)}
-                        </CardTitle>
-                        <CardDescription>
-                          {appointment.service?.name ||
-                            "Serviço não disponível"}{" "}
-                          • {appointment.service?.duration || 0} min
-                        </CardDescription>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <StatusBadge status={appointment.status as any} />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteAppointment(appointment)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Cliente:</span>
-                      <span>
-                        {appointment.client?.name ||
-                          appointment?.clientContact?.name ||
-                          appointment?.clientContact?.phone ||
-                          "Cliente não disponível"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Scissors className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Barbeiro:</span>
-                      <span>
-                        {appointment.barber?.name || "Barbeiro não disponível"}
-                      </span>
-                    </div>
-                    {appointment.notes && (
-                      <div className="text-sm text-muted-foreground mt-2 pt-2 border-t">
-                        <span className="font-medium">Observações:</span>{" "}
-                        {appointment.notes}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {appointments.length === 0 && (
-              <EmptyState
-                title="Nenhum agendamento futuro"
-                description="Os agendamentos aparecerão aqui quando forem programados"
-                icon="📅"
-              />
+          <TabsContent value="timeline" className="space-y-4">
+            {barbershopId && (
+              <AppointmentTimelineView businessId={parseInt(barbershopId, 10)} />
             )}
           </TabsContent>
 

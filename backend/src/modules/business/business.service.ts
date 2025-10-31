@@ -133,9 +133,7 @@ export class BusinessService {
     }
 
     const dayOfWeek = startOfDay.getDay();
-    const businessWorkingDay = business.workingHours?.find(
-      (wh) => wh.dayOfWeek === dayOfWeek,
-    );
+    const businessWorkingDay = business.workingHours?.find((wh) => wh.dayOfWeek === dayOfWeek);
 
     const barberIds = barbers.map((barber) => barber.id);
 
@@ -203,9 +201,7 @@ export class BusinessService {
     }
 
     const dayOfWeek = startOfDay.getDay();
-    const businessWorkingDay = business.workingHours?.find(
-      (wh) => wh.dayOfWeek === dayOfWeek,
-    );
+    const businessWorkingDay = business.workingHours?.find((wh) => wh.dayOfWeek === dayOfWeek);
 
     const appointments = await this.appointmentRepository.find({
       where: {
@@ -254,19 +250,16 @@ export class BusinessService {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Iterar pelos próximos N dias
     for (let i = 0; i < days; i++) {
       const checkDate = new Date(today);
       checkDate.setDate(checkDate.getDate() + i);
 
       const dateStr = this.formatDate(checkDate);
 
-      // Pular domingos (6 = domingo)
       if (checkDate.getDay() === 0) {
         continue;
       }
 
-      // Verificar disponibilidade para este dia
       const availabilityResponse = await this.findBarberSlotsByPhone(phone, barberId, {
         date: dateStr,
         serviceId,
@@ -274,7 +267,6 @@ export class BusinessService {
 
       const slotsCount = availabilityResponse.barber.slots.length;
 
-      // Apenas incluir dias que têm slots disponíveis
       if (slotsCount > 0) {
         const dayOfWeek = checkDate.getDay();
         const displayDate = this.formatDisplayDate(checkDate, dayOfWeek);

@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   AppointmentEntity,
@@ -8,6 +8,7 @@ import {
   BarberEntity,
   ProfileEntity,
   ClientContactEntity,
+  BarberWorkingHoursEntity,
 } from 'src/database/entities';
 import {
   CreateAppointmentDto,
@@ -15,6 +16,12 @@ import {
   SuggestAppointmentDto,
   AppointmentResponseDto,
 } from 'src/common/dtos/appointment.dto';
+import {
+  AppointmentTimelineResponseDto,
+  BarberTimelineDto,
+  AppointmentTimelineCardDto,
+  BarberWorkingHourDto,
+} from 'src/common/dtos/appointment-timeline.dto';
 
 @Injectable()
 export class AppointmentsService {
@@ -31,6 +38,8 @@ export class AppointmentsService {
     private profileRepository: Repository<ProfileEntity>,
     @InjectRepository(ClientContactEntity)
     private clientContactRepository: Repository<ClientContactEntity>,
+    @InjectRepository(BarberWorkingHoursEntity)
+    private barberWorkingHoursRepository: Repository<BarberWorkingHoursEntity>,
   ) {}
 
   async findByBusinessId(businessId: number): Promise<AppointmentResponseDto[]> {
@@ -57,6 +66,138 @@ export class AppointmentsService {
     }
 
     return this.formatAppointmentResponse(appointment);
+  }
+
+  async getTimelineByDate(
+    businessId: number,
+    date: string,
+    barberIds?: number[],
+    status?: 'pending' | 'confirmed' | 'canceled',
+    serviceId?: number,
+  ): Promise<AppointmentTimelineResponseDto> {
+    const startDate = new Date(`${date}T00:00:00Z`);
+    const endDate = new Date(`${date}T23:59:59Z`);
+
+    let barbers = await this.barberRepository.find({
+      where: {
+        businessId,
+        active: true,
+      },
+    });
+
+    if (barberIds && barberIds.length > 0) {
+      barbers = barbers.filter((b) => barberIds.includes(b.id));
+    }
+
+    const appointmentQuery = this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .where('appointment.businessId = :businessId', { businessId })
+      .andWhere('appointment.startDate >= :startDate', { startDate })
+      .andWhere('appointment.startDate < :endDate', { endDate })
+      .leftJoinAndSelect('appointment.barber', 'barber')
+      .leftJoinAndSelect('appointment.service', 'service')
+      .leftJoinAndSelect('appointment.clientContact', 'clientContact');
+
+    if (status) {
+      appointmentQuery.andWhere('appointment.status = :status', { status });
+    }
+
+    if (serviceId) {
+      appointmentQuery.andWhere('appointment.serviceId = :serviceId', { serviceId });
+    }
+
+    const appointments = await appointmentQuery.getMany();
+
+    let workingHours = [];
+    if (barbers.length > 0) {
+      const barberIds = barbers.map((b) => b.id);
+      workingHours = await this.barberWorkingHoursRepository.find({
+        where: {
+          barberId: In(barberIds),
+        },
+      });
+    }
+
+    const dayOfWeek = new Date(date).getDay();
+
+    const barberTimelines: BarberTimelineDto[] = barbers.map((barber) => {
+      const barberAppointments = appointments.filter((a) => a.barberId === barber.id);
+      const barberWorkingHour = workingHours.find(
+        (wh) => wh.barberId === barber.id && wh.dayOfWeek === dayOfWeek,
+      );
+
+      return {
+        id: barber.id,
+        name: barber.name,
+        specialties: barber.specialties || [],
+        appointments: barberAppointments.map((apt) => this.formatAppointmentTimelineCard(apt)),
+        workingHours: barberWorkingHour
+          ? this.formatWorkingHourDto(barberWorkingHour)
+          : this.getDefaultClosedHours(),
+      };
+    });
+
+    return {
+      date,
+      barbers: barberTimelines,
+      slotDurationMinutes: 30,
+    };
+  }
+
+  private formatAppointmentTimelineCard(
+    appointment: AppointmentEntity,
+  ): AppointmentTimelineCardDto {
+    return {
+      id: appointment.id,
+      barberId: appointment.barberId,
+      startDate: appointment.startDate.toISOString(),
+      endDate: appointment.endDate.toISOString(),
+      status: appointment.status,
+      notes: appointment.notes,
+      source: appointment.source,
+      clientContact: appointment.clientContact
+        ? {
+            name: appointment.clientContact.name,
+            phone: appointment.clientContact.phone,
+          }
+        : {
+            name: null,
+            phone: '',
+          },
+      service: appointment.service
+        ? {
+            name: appointment.service.name,
+            duration: appointment.service.duration,
+            price: appointment.service.price,
+          }
+        : {
+            name: '',
+            duration: 0,
+            price: 0,
+          },
+    };
+  }
+
+  private formatWorkingHourDto(workingHour: BarberWorkingHoursEntity): BarberWorkingHourDto {
+    return {
+      dayOfWeek: workingHour.dayOfWeek,
+      openTime: workingHour.openTime,
+      closeTime: workingHour.closeTime,
+      breakStart: workingHour.breakStart,
+      breakEnd: workingHour.breakEnd,
+      closed: workingHour.closed,
+    };
+  }
+
+  private getDefaultClosedHours(): BarberWorkingHourDto {
+    return {
+      dayOfWeek: 0,
+      openTime: null,
+      closeTime: null,
+      breakStart: null,
+      breakEnd: null,
+      closed: true,
+    };
   }
 
   async create(createAppointmentDto: CreateAppointmentDto): Promise<AppointmentResponseDto> {
@@ -176,7 +317,7 @@ export class AppointmentsService {
           clientId:
             updateAppointmentDto.clientId !== undefined
               ? updateAppointmentDto.clientId
-              : appointment.clientId ?? undefined,
+              : (appointment.clientId ?? undefined),
           clientPhone: updateAppointmentDto.clientPhone,
           clientName: updateAppointmentDto.clientName,
         },
@@ -240,7 +381,7 @@ export class AppointmentsService {
   }
 
   async suggestAppointments(suggestAppointmentDto: SuggestAppointmentDto): Promise<{ data: any }> {
-    const { businessId, serviceId, barberId, startDate } = suggestAppointmentDto;
+    const { businessId, serviceId, startDate } = suggestAppointmentDto;
 
     const suggestions: any = {};
 

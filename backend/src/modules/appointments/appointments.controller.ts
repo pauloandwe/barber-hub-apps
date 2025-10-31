@@ -10,6 +10,7 @@ import {
   BadRequestException,
   ValidationPipe,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -22,6 +23,10 @@ import {
   SuggestAppointmentDto,
   AppointmentResponseDto,
 } from 'src/common/dtos/appointment.dto';
+import {
+  AppointmentTimelineResponseDto,
+  AppointmentTimelineQueryDto,
+} from 'src/common/dtos/appointment-timeline.dto';
 import { UserRole } from 'src/database/entities';
 
 @ApiTags('Appointments')
@@ -29,6 +34,33 @@ import { UserRole } from 'src/database/entities';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AppointmentsController {
   constructor(private appointmentsService: AppointmentsService) {}
+
+  @Get(':businessId/timeline')
+  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP, UserRole.CLIENT)
+  @ApiOperation({
+    summary: 'Get appointments timeline for barbershop dashboard',
+    description: 'Returns appointments organized by barber for a specific date with working hours',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Timeline retrieved successfully',
+    type: AppointmentTimelineResponseDto,
+  })
+  async getAppointmentTimeline(
+    @Param('businessId') businessId: string,
+    @Query('date') date: string,
+    @Query('barberIds') barberIds?: string,
+    @Query('status') status?: string,
+    @Query('serviceId') serviceId?: string,
+  ): Promise<AppointmentTimelineResponseDto> {
+    return await this.appointmentsService.getTimelineByDate(
+      parseInt(businessId),
+      date,
+      barberIds ? barberIds.split(',').map(id => parseInt(id)) : undefined,
+      status as any,
+      serviceId ? parseInt(serviceId) : undefined,
+    );
+  }
 
   @Get(':businessId/appointments')
   @Roles(UserRole.ADMIN, UserRole.BARBERSHOP, UserRole.CLIENT)

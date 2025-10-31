@@ -24,6 +24,7 @@ import { DialogProps } from "@/types/shared.types";
 import { formatUtcTime } from "@/utils/date.utils";
 import { ServiceSelector, Service } from "./appointments/ServiceSelector";
 import { BarberSelector } from "./appointments/BarberSelector";
+import { ClientSelector, ClientSelection } from "./appointments/ClientSelector";
 import { DateTimePicker } from "./appointments/DateTimePicker";
 import { AppointmentSummary } from "./appointments/AppointmentSummary";
 
@@ -31,6 +32,12 @@ interface AppointmentDialogProps extends DialogProps {
   barbershopId: string;
   onSuccess: () => void;
   appointment?: Appointment | null;
+  initialSelection?: {
+    barberId?: number;
+    barberName?: string;
+    date?: Date;
+    time?: string;
+  };
 }
 
 const DAY_LABELS = [
@@ -49,12 +56,22 @@ type BarberScheduleItem = {
   dayOfWeek: number;
 };
 
+const normalizePhoneDigits = (phone?: string | null): string | undefined => {
+  if (!phone) {
+    return undefined;
+  }
+
+  const digits = phone.replace(/\D/g, "");
+  return digits.length ? digits : undefined;
+};
+
 export function AppointmentDialog({
   open,
   onOpenChange,
   barbershopId,
   onSuccess,
   appointment,
+  initialSelection,
 }: AppointmentDialogProps) {
   const [selectedService, setSelectedService] = useState<string>("");
   const [selectedBarber, setSelectedBarber] = useState<string>("");
@@ -70,6 +87,9 @@ export function AppointmentDialog({
     BarberWorkingHour[]
   >([]);
   const [isLoadingBarberHours, setIsLoadingBarberHours] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ClientSelection | null>(
+    null
+  );
   const isEditMode = Boolean(appointment);
   const originalStartDate = useMemo(() => {
     if (!appointment) {
@@ -105,12 +125,51 @@ export function AppointmentDialog({
           slots.includes(appointmentTime) ? slots : [appointmentTime, ...slots]
         );
       }
+      setSelectedClient({
+        type: "existing",
+        clientId: appointment.clientId ?? null,
+        clientContactId: appointment.clientContactId ?? null,
+        name:
+          appointment.client?.name ?? appointment.clientContact?.name ?? null,
+        phone: appointment.clientContact?.phone ?? null,
+      });
     }
   }, [open, isEditMode, appointment, originalStartDate, originalTime]);
 
   useEffect(() => {
-    console.log("selectedBarber changed:", selectedBarber);
-  }, [selectedBarber]);
+    if (!open || isEditMode) {
+      return;
+    }
+
+    setSelectedClient(null);
+
+    if (!initialSelection) {
+      setSelectedService("");
+      setSelectedBarber("");
+      setSelectedDate(undefined);
+      setSelectedTime("");
+      setAvailableTimes([]);
+      setNotes("");
+      return;
+    }
+
+    setSelectedService("");
+    setNotes("");
+    setSelectedBarber(
+      initialSelection.barberId ? String(initialSelection.barberId) : ""
+    );
+    setSelectedDate(
+      initialSelection.date ? new Date(initialSelection.date) : undefined
+    );
+
+    if (initialSelection.time) {
+      setSelectedTime(initialSelection.time);
+      setAvailableTimes([initialSelection.time]);
+    } else {
+      setSelectedTime("");
+      setAvailableTimes([]);
+    }
+  }, [open, isEditMode, initialSelection]);
 
   useEffect(() => {
     const fetchAvailableTimes = async () => {
@@ -143,8 +202,6 @@ export function AppointmentDialog({
             serviceId,
           }
         );
-
-        console.log("availability", availability);
 
         const slotStarts = (availability?.barber?.slots ?? [])
           .map((slot) => slot?.start)
@@ -184,12 +241,6 @@ export function AppointmentDialog({
       }
     };
 
-    console.log("Fetching available times with:", {
-      selectedBarber,
-      selectedDate,
-      selectedService,
-      businessPhone,
-    });
     if (selectedBarber && selectedDate && selectedService && businessPhone) {
       fetchAvailableTimes();
     }
@@ -264,6 +315,10 @@ export function AppointmentDialog({
       return;
     }
 
+    if (!availableTimes.length) {
+      return;
+    }
+
     if (
       isEditMode &&
       originalTime &&
@@ -292,6 +347,37 @@ export function AppointmentDialog({
       toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
+
+    if (!selectedClient) {
+      toast.error("Selecione um cliente");
+      return;
+    }
+
+    const clientIdPayload =
+      selectedClient.type === "existing" &&
+      selectedClient.clientId !== null &&
+      selectedClient.clientId !== undefined
+        ? selectedClient.clientId
+        : undefined;
+
+    const clientPhonePayload = normalizePhoneDigits(selectedClient.phone);
+    const clientNamePayload = selectedClient.name?.trim().length
+      ? selectedClient.name.trim()
+      : undefined;
+
+    if (!clientIdPayload && !clientPhonePayload) {
+      toast.error("Informe um cliente com telefone válido");
+      return;
+    }
+
+    if (
+      selectedClient.type === "manual" &&
+      (!clientPhonePayload || clientPhonePayload.length < 8)
+    ) {
+      toast.error("Informe um telefone válido para o cliente");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const user = authAPI.getStoredUser();
@@ -313,12 +399,8 @@ export function AppointmentDialog({
         return;
       }
 
-      // Formatação de horário:
-      // selectedTime vem como "HH:mm" (ex: "14:30")
-      // Extraímos horas e minutos e construímos um Date object em UTC
       const [hours, minutes] = selectedTime.split(":").map(Number);
 
-      // Cria data em UTC, não em horário local
       const utcDate = new Date(
         Date.UTC(
           selectedDate.getUTCFullYear(),
@@ -332,27 +414,24 @@ export function AppointmentDialog({
       );
       const startDateTime = utcDate;
 
-      // Calcula endDate baseado na duração do serviço selecionado
       const endDateTime = addMinutes(startDateTime, service.durationMin);
 
       const barbershopIdNum = parseInt(barbershopId, 10);
 
-      // Payload enviado à API:
-      // - startDate e endDate em ISO string format (ex: "2024-11-20T14:30:00.000Z")
-      // - serviceId, barberId como números
-      // - source como 'web' (diferente de 'whatsapp')
       const basePayload = {
         serviceId: serviceIdNum,
         barberId: barberIdNum,
-        startDate: startDateTime.toISOString(), // "2024-11-20T14:30:00.000Z"
-        endDate: endDateTime.toISOString(), // "2024-11-20T14:50:00.000Z" (ou com duração do serviço)
+        startDate: startDateTime.toISOString(),
+        endDate: endDateTime.toISOString(),
         notes: notes || undefined,
       };
 
       if (isEditMode && appointment) {
         await appointmentsAPI.update(barbershopIdNum, appointment.id, {
           ...basePayload,
-          clientId: appointment.clientId ?? user.id,
+          clientId: clientIdPayload,
+          clientPhone: clientPhonePayload,
+          clientName: clientNamePayload,
           source: appointment.source ?? "web",
         });
         toast.success("Agendamento atualizado com sucesso!");
@@ -360,7 +439,9 @@ export function AppointmentDialog({
         await appointmentsAPI.create(barbershopIdNum, {
           businessId: barbershopIdNum,
           ...basePayload,
-          clientId: user.id,
+          clientId: clientIdPayload ?? undefined,
+          clientPhone: clientPhonePayload,
+          clientName: clientNamePayload,
           source: "web",
         });
         toast.success("Agendamento criado com sucesso!");
@@ -396,6 +477,7 @@ export function AppointmentDialog({
     setNotes("");
     setAvailableTimes([]);
     setBarberWorkingHours([]);
+    setSelectedClient(null);
   };
 
   useEffect(() => {
@@ -468,6 +550,13 @@ export function AppointmentDialog({
             }}
           />
 
+          <ClientSelector
+            barbershopId={barbershopId}
+            value={selectedClient}
+            onChange={setSelectedClient}
+            disabled={isLoading}
+          />
+
           <BarberSelector
             barbershopId={barbershopId}
             value={selectedBarber}
@@ -511,6 +600,7 @@ export function AppointmentDialog({
             onTimeChange={setSelectedTime}
             availableTimes={availableTimes}
             isLoadingTimes={isLoadingTimes}
+            hasServiceSelected={Boolean(selectedService)}
           />
 
           <div className="space-y-2">

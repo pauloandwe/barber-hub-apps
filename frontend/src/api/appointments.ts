@@ -44,6 +44,48 @@ export interface UpdateAppointmentRequest {
   notes?: string;
 }
 
+export interface AppointmentTimelineCard {
+  id: number;
+  barberId: number;
+  startDate: string;
+  endDate: string;
+  status: "pending" | "confirmed" | "canceled";
+  notes: string | null;
+  source: "web" | "whatsapp" | null;
+  clientContact: {
+    name: string | null;
+    phone: string;
+  };
+  service: {
+    name: string;
+    duration: number;
+    price: number;
+  };
+}
+
+export interface BarberWorkingHour {
+  dayOfWeek: number;
+  openTime: string | null;
+  closeTime: string | null;
+  breakStart: string | null;
+  breakEnd: string | null;
+  closed: boolean;
+}
+
+export interface BarberTimeline {
+  id: number;
+  name: string;
+  specialties: string[];
+  appointments: AppointmentTimelineCard[];
+  workingHours: BarberWorkingHour;
+}
+
+export interface AppointmentTimelineResponse {
+  date: string;
+  barbers: BarberTimeline[];
+  slotDurationMinutes: number;
+}
+
 export const appointmentsAPI = {
   async getAll(businessId: number): Promise<Appointment[]> {
     const response = await apiClient.get(
@@ -56,7 +98,7 @@ export const appointmentsAPI = {
     const response = await apiClient.get(
       `/appointments/${businessId}/appointments/${id}`
     );
-    return response?.data?.data;
+    return response?.data?.data?.data || response?.data?.data;
   },
 
   async create(
@@ -101,5 +143,32 @@ export const appointmentsAPI = {
   async getSuggestions(data: any): Promise<any> {
     const response = await apiClient.post("/appointments/suggest", data);
     return response?.data?.data;
+  },
+
+  async getTimeline(
+    businessId: number,
+    date: string,
+    barberIds?: number[],
+    status?: "pending" | "confirmed" | "canceled",
+    serviceId?: number
+  ): Promise<AppointmentTimelineResponse> {
+    const params = new URLSearchParams();
+    params.append("date", date);
+    if (barberIds && barberIds.length > 0) {
+      params.append("barberIds", barberIds.join(","));
+    }
+    if (status) {
+      params.append("status", status);
+    }
+    if (serviceId) {
+      params.append("serviceId", serviceId.toString());
+    }
+
+    const response = await apiClient.get(
+      `/appointments/${businessId}/timeline?${params.toString()}`
+    );
+    console.log("\n\n\n\nresponse", response);
+
+    return response?.data?.data?.data || response?.data?.data;
   },
 };
