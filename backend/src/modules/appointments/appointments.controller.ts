@@ -27,7 +27,7 @@ import {
   AppointmentTimelineResponseDto,
   AppointmentTimelineQueryDto,
 } from 'src/common/dtos/appointment-timeline.dto';
-import { UserRole } from 'src/database/entities';
+import { AppointmentStatus, UserRole } from 'src/database/entities';
 
 @ApiTags('Appointments')
 @Controller('appointments')
@@ -56,7 +56,7 @@ export class AppointmentsController {
     return await this.appointmentsService.getTimelineByDate(
       parseInt(businessId),
       date,
-      barberIds ? barberIds.split(',').map(id => parseInt(id)) : undefined,
+      barberIds ? barberIds.split(',').map((id) => parseInt(id)) : undefined,
       status as any,
       serviceId ? parseInt(serviceId) : undefined,
     );
@@ -80,8 +80,33 @@ export class AppointmentsController {
   async getAppointmentsByPhone(
     @Param('businessId') businessId: string,
     @Param('phoneNumber') phoneNumber: string,
+    @Query('status') status?: string,
   ): Promise<AppointmentResponseDto[]> {
-    return await this.appointmentsService.findByPhoneNumber(phoneNumber, parseInt(businessId));
+    let statusFilter: AppointmentStatus[] | undefined;
+
+    if (status) {
+      const rawValues = status
+        .split(',')
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean);
+
+      const validValues = Object.values(AppointmentStatus);
+      const invalidValues = rawValues.filter(
+        (value) => !validValues.includes(value as AppointmentStatus),
+      );
+
+      if (invalidValues.length > 0) {
+        throw new BadRequestException(`Invalid status value(s): ${invalidValues.join(', ')}`);
+      }
+
+      statusFilter = rawValues as AppointmentStatus[];
+    }
+
+    return await this.appointmentsService.findByPhoneNumber(
+      phoneNumber,
+      parseInt(businessId),
+      statusFilter,
+    );
   }
 
   @Get(':businessId/appointments')

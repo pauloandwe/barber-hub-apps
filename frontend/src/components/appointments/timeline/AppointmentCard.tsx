@@ -32,10 +32,6 @@ interface AppointmentCardProps {
   onDelete?: (appointment: AppointmentTimelineCard) => void;
 }
 
-/**
- * Draggable appointment card shown in the timeline
- * Displays appointment info with status badge and optional icons
- */
 export function AppointmentCard({
   appointment,
   slotDurationMinutes,

@@ -3,6 +3,7 @@ import { Repository, In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   AppointmentEntity,
+  AppointmentStatus,
   BusinessEntity,
   ServiceEntity,
   BarberEntity,
@@ -55,6 +56,7 @@ export class AppointmentsService {
   async findByPhoneNumber(
     phoneNumber: string,
     businessId?: number,
+    statuses?: AppointmentStatus[],
   ): Promise<AppointmentResponseDto[]> {
     const normalizedPhone = this.normalizePhone(phoneNumber);
 
@@ -77,15 +79,32 @@ export class AppointmentsService {
       return [];
     }
 
+    const uniqueStatuses =
+      statuses && statuses.length > 0 ? Array.from(new Set(statuses)) : undefined;
+
+    const baseWhere = businessId
+      ? {
+          clientContactId: clientContact.id,
+          businessId,
+        }
+      : {
+          clientContactId: clientContact.id,
+        };
+
+    const where = { ...baseWhere } as {
+      clientContactId: number;
+      businessId?: number;
+      status?: AppointmentStatus | ReturnType<typeof In>;
+    };
+
+    if (uniqueStatuses && uniqueStatuses.length === 1) {
+      where.status = uniqueStatuses[0];
+    } else if (uniqueStatuses && uniqueStatuses.length > 1) {
+      where.status = In(uniqueStatuses);
+    }
+
     const appointments = await this.appointmentRepository.find({
-      where: businessId
-        ? {
-            clientContactId: clientContact.id,
-            businessId,
-          }
-        : {
-            clientContactId: clientContact.id,
-          },
+      where,
       relations: ['barber', 'client', 'service', 'clientContact'],
       order: { startDate: 'DESC' },
     });
