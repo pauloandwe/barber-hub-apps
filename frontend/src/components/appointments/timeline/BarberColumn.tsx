@@ -1,10 +1,8 @@
-import { useDroppable } from "@dnd-kit/core";
 import { BarberTimeline, AppointmentTimelineCard } from "@/api/appointments";
 import { TimeSlot } from "@/hooks/useTimeSlots";
 import { TimeSlot as TimeSlotComponent } from "./TimeSlot";
 import { AppointmentCard } from "./AppointmentCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
 
 interface BarberColumnProps {
   barber: BarberTimeline;
@@ -26,13 +24,6 @@ export function BarberColumn({
   onAppointmentDelete,
 }: BarberColumnProps) {
   const effectiveSlotDuration = Math.max(slotDurationMinutes, 1);
-  const { setNodeRef } = useDroppable({
-    id: `barber-${barber.id}`,
-    data: {
-      barberId: barber.id,
-      type: "barber",
-    },
-  });
 
   const isSlotAvailable = (slotTime: string): boolean => {
     if (barber.workingHours.closed || !barber.workingHours.openTime) {
@@ -124,11 +115,7 @@ export function BarberColumn({
       </div>
 
       {/* Time slots */}
-      <div
-        ref={setNodeRef}
-        className="flex-1 relative overflow-hidden"
-        data-barberId={barber.id}
-      >
+      <div className="flex-1 relative overflow-hidden">
         {timeSlots.map((slot, index) => {
           const appointmentsInSlot = getAppointmentsInSlot(slot.startTime);
           const isWorking = isSlotAvailable(slot.startTime);
@@ -140,8 +127,8 @@ export function BarberColumn({
               slotHeightPx={slotHeightPx}
               isOccupied={isOccupied}
               isWorkingHours={isWorking}
-              data-barberId={barber.id}
-              data-slotTime={slot.startTime}
+              barberId={barber.id}
+              slotTime={slot.startTime}
               onClick={() =>
                 onSlotClick?.({
                   barber,

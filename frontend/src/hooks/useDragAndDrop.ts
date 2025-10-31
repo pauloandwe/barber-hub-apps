@@ -43,13 +43,20 @@ export function useDragAndDrop({
       const { over } = event;
       setIsDragging(false);
 
-      if (!draggedAppointment || !over?.data.current) {
+      const overData = over?.data.current;
+
+      if (!draggedAppointment || !overData) {
         setDraggedAppointment(null);
         return;
       }
 
-      const targetBarberId = over.data.current.barberId;
-      const targetSlotTime = over.data.current.slotTime;
+      if (overData.type !== "slot") {
+        setDraggedAppointment(null);
+        return;
+      }
+
+      const targetBarberId = overData.barberId;
+      const targetSlotTime = overData.slotTime;
 
       if (!targetBarberId || !targetSlotTime) {
         toast.error("Slot inválido para reagendamento");
@@ -76,9 +83,9 @@ export function useDragAndDrop({
 
         const originalDate = new Date(originalAppointment.startDate);
         const newStartDate = new Date(originalDate);
-        newStartDate.setHours(targetHour, targetMinute, 0, 0);
+        newStartDate.setUTCHours(targetHour, targetMinute, 0, 0);
         const newEndDate = new Date(newStartDate);
-        newEndDate.setMinutes(newEndDate.getMinutes() + durationMinutes);
+        newEndDate.setUTCMinutes(newEndDate.getUTCMinutes() + durationMinutes);
 
         await appointmentsAPI.update(
           businessId,

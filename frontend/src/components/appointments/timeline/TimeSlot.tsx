@@ -1,4 +1,5 @@
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
+import { useDroppable } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 
 interface TimeSlotProps {
@@ -12,9 +13,10 @@ interface TimeSlotProps {
   children?: ReactNode;
   /** Click handler for empty slots */
   onClick?: () => void;
-  /** Drag and drop identifier */
-  "data-barberId"?: number;
-  "data-slotTime"?: string;
+  /** Barber identifier owning this slot */
+  barberId: number;
+  /** Slot start time string (HH:mm) */
+  slotTime: string;
 }
 
 /**
@@ -27,19 +29,38 @@ export function TimeSlot({
   isWorkingHours,
   children,
   onClick,
-  ...droppableData
+  barberId,
+  slotTime,
 }: TimeSlotProps) {
+  const droppableId = useMemo(
+    () => `timeline-slot-${barberId}-${slotTime}`,
+    [barberId, slotTime]
+  );
+
+  const { setNodeRef, isOver } = useDroppable({
+    id: droppableId,
+    data: {
+      type: "slot",
+      barberId,
+      slotTime,
+    },
+    disabled: !isWorkingHours,
+  });
+
   return (
     <div
+      ref={setNodeRef}
       style={{ height: slotHeightPx }}
       className={cn(
         "relative border-b border-gray-100 transition-colors duration-150",
-        isOccupied ? "bg-white" : isWorkingHours
+        isOccupied
+          ? "bg-white"
+          : isWorkingHours
           ? "bg-gray-50 hover:bg-blue-50 cursor-pointer"
-          : "bg-gray-100"
+          : "bg-gray-100",
+        isOver && isWorkingHours && !isOccupied && "bg-blue-100 border-blue-300"
       )}
       onClick={() => !isOccupied && isWorkingHours && onClick?.()}
-      {...droppableData}
     >
       {children}
     </div>
