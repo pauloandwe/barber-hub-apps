@@ -31,11 +31,11 @@ import {
   Plus,
   Building2,
   Loader2,
+  Trash2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { formatUtcDateTime } from "@/utils/date.utils";
 import { ServiceDialog } from "@/components/ServiceDialog";
 import { BarberDialog } from "@/components/BarberDialog";
 import { BarberCard } from "@/components/BarberCard";
@@ -193,6 +193,32 @@ export function BarbershopDashboard() {
     setIsBarberDialogOpen(true);
   };
 
+  const handleDeleteAppointment = async (appointment: Appointment) => {
+    if (!barbershopId) return;
+
+    if (
+      !window.confirm(
+        `Tem certeza que deseja deletar o agendamento de ${formatUtcDateTime(appointment.startDate, {
+          includeConnector: false,
+        })}?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const barbershopIdNum = parseInt(barbershopId, 10);
+      await appointmentsAPI.delete(barbershopIdNum, appointment.id);
+      toast.success("Agendamento deletado com sucesso!");
+      setAppointments(appointments.filter(apt => apt.id !== appointment.id));
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error deleting appointment:", error);
+      }
+      toast.error("Erro ao deletar agendamento");
+    }
+  };
+
   const handleLogout = () => {
     authAPI.logout();
     navigate(ROUTES.LOGIN);
@@ -255,13 +281,7 @@ export function BarbershopDashboard() {
                       <div className="space-y-1 flex-1">
                         <CardTitle className="flex items-center gap-2">
                           <Calendar className="h-5 w-5" />
-                          {format(
-                            new Date(appointment.startDate),
-                            "dd/MM/yyyy 'at' HH:mm",
-                            {
-                              locale: ptBR,
-                            }
-                          )}
+                          {formatUtcDateTime(appointment.startDate)}
                         </CardTitle>
                         <CardDescription>
                           {appointment.service?.name ||
@@ -269,7 +289,17 @@ export function BarbershopDashboard() {
                           • {appointment.service?.duration || 0} min
                         </CardDescription>
                       </div>
-                      <StatusBadge status={appointment.status as any} />
+                      <div className="flex flex-col items-end gap-2">
+                        <StatusBadge status={appointment.status as any} />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteAppointment(appointment)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-2">

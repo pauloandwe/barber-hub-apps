@@ -21,6 +21,7 @@ import { addMinutes, format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { DialogProps } from "@/types/shared.types";
+import { formatUtcTime } from "@/utils/date.utils";
 import { ServiceSelector, Service } from "./appointments/ServiceSelector";
 import { BarberSelector } from "./appointments/BarberSelector";
 import { DateTimePicker } from "./appointments/DateTimePicker";
@@ -81,7 +82,7 @@ export function AppointmentDialog({
     ? format(originalStartDate, "yyyy-MM-dd")
     : undefined;
   const originalTime = originalStartDate
-    ? format(originalStartDate, "HH:mm")
+    ? formatUtcTime(originalStartDate)
     : undefined;
   const originalBarberId = appointment?.barberId ?? undefined;
 

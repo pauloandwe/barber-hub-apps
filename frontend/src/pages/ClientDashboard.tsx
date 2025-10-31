@@ -11,10 +11,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Scissors, Calendar, Building2, LogOut, User } from "lucide-react";
+import { Scissors, Calendar, Building2, LogOut, User, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { formatUtcDateTime } from "@/utils/date.utils";
 import {
   Select,
   SelectContent,
@@ -120,6 +119,29 @@ export function ClientDashboard() {
     setIsAppointmentDialogOpen(true);
   };
 
+  const handleDeleteAppointment = async (appointment: DashboardAppointment) => {
+    if (
+      !window.confirm(
+        `Tem certeza que deseja deletar o agendamento de ${formatUtcDateTime(appointment.startDate, {
+          includeConnector: false,
+        })}?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await appointmentsAPI.delete(appointment.businessId, appointment.id);
+      toast.success("Agendamento deletado com sucesso!");
+      setAppointments(appointments.filter(apt => apt.id !== appointment.id));
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error deleting appointment:", error);
+      }
+      toast.error("Erro ao deletar agendamento");
+    }
+  };
+
   const handleLogout = () => {
     authAPI.logout();
     navigate(ROUTES.LOGIN);
@@ -214,11 +236,7 @@ export function ClientDashboard() {
                     <div className="space-y-1">
                       <CardTitle className="flex items-center gap-2">
                         <Calendar className="h-5 w-5" />
-                        {format(
-                          new Date(appointment.startDate),
-                          "dd/MM/yyyy 'at' HH:mm",
-                          { locale: ptBR }
-                        )}
+                        {formatUtcDateTime(appointment.startDate)}
                       </CardTitle>
                       <CardDescription>
                         {appointment.service?.name || "Service not available"}{" "}
@@ -227,13 +245,23 @@ export function ClientDashboard() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <StatusBadge status={appointment.status as any} />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditAppointment(appointment)}
-                      >
-                        Edit
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditAppointment(appointment)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteAppointment(appointment)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardHeader>

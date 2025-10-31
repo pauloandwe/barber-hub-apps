@@ -8,8 +8,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, User as UserIcon } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import {
   Collapsible,
   CollapsibleContent,
@@ -18,6 +16,7 @@ import {
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { formatUtcDateTime } from "@/utils/date.utils";
 
 export interface Barber {
   id: string;
@@ -121,13 +120,7 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
                       <div className="space-y-1 flex-1">
                         <p className="text-sm font-medium flex items-center gap-2">
                           <Calendar className="h-4 w-4" />
-                          {format(
-                            new Date(appointment.startDate),
-                            "dd/MM/yyyy 'at' HH:mm",
-                            {
-                              locale: ptBR,
-                            }
-                          )}
+                          {formatUtcDateTime(appointment.startDate)}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {appointment.service?.name ||
