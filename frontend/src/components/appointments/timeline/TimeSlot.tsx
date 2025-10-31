@@ -3,26 +3,15 @@ import { useDroppable } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 
 interface TimeSlotProps {
-  /** Slot height in pixels */
   slotHeightPx: number;
-  /** Is this slot occupied by an appointment */
   isOccupied: boolean;
-  /** Is this slot within working hours */
   isWorkingHours: boolean;
-  /** Optional appointment card to display */
   children?: ReactNode;
-  /** Click handler for empty slots */
   onClick?: () => void;
-  /** Barber identifier owning this slot */
   barberId: number;
-  /** Slot start time string (HH:mm) */
   slotTime: string;
 }
 
-/**
- * Represents a single time slot in the timeline
- * Can be empty (available) or occupied by an appointment
- */
 export function TimeSlot({
   slotHeightPx,
   isOccupied,

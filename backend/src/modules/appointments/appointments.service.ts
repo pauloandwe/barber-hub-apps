@@ -62,7 +62,6 @@ export class AppointmentsService {
       throw new BadRequestException('Invalid phone number format');
     }
 
-    // Find the client contact by phone number
     const clientContact = await this.clientContactRepository.findOne({
       where: businessId
         ? {
@@ -75,11 +74,9 @@ export class AppointmentsService {
     });
 
     if (!clientContact) {
-      // Return empty array if no client contact found
       return [];
     }
 
-    // Find all appointments for this client contact
     const appointments = await this.appointmentRepository.find({
       where: businessId
         ? {

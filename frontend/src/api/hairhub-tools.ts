@@ -1,12 +1,4 @@
-/**
- * Hairhub Tools - AI Assistant Tools for WhatsApp
- *
- * These tools are designed to be used by the Hairhub AI assistant
- * to interact with appointments and business data through WhatsApp conversations.
- */
-
 import { appointmentsAPI, Appointment } from "./appointments";
-import { businessAPI } from "./business";
 
 export interface HairHubToolContext {
   businessId?: number;
@@ -21,18 +13,6 @@ export interface HairHubToolResult {
   error?: string;
 }
 
-/**
- * Tool: Show Appointments
- *
- * Description: Retrieves all appointments for a customer based on their phone number
- *
- * Input:
- *   - phoneNumber: string (required) - The customer's phone number (e.g., "5511987654321")
- *   - businessId: number (optional) - Filter appointments for a specific business
- *
- * Output:
- *   - Array of appointments with details (date, time, service, barber, status)
- */
 export const showAppointmentsTool = {
   name: "show_appointments",
   description:
@@ -43,7 +23,8 @@ export const showAppointmentsTool = {
     properties: {
       phoneNumber: {
         type: "string",
-        description: "The customer's phone number (e.g., '5511987654321' or '+55 11 98765-4321')",
+        description:
+          "The customer's phone number (e.g., '5511987654321' or '+55 11 98765-4321')",
       },
       businessId: {
         type: "number",
@@ -58,7 +39,6 @@ export const showAppointmentsTool = {
     businessId?: number
   ): Promise<HairHubToolResult> {
     try {
-      // If businessId is not provided, we'll use a default or need to handle it
       if (!businessId) {
         throw new Error("businessId is required to retrieve appointments");
       }
@@ -76,7 +56,6 @@ export const showAppointmentsTool = {
         };
       }
 
-      // Format appointments for friendly display
       const formattedAppointments = appointments.map((apt) => ({
         id: apt.id,
         date: new Date(apt.startDate).toLocaleDateString("pt-BR", {
@@ -113,19 +92,6 @@ export const showAppointmentsTool = {
   },
 };
 
-/**
- * Tool: Get Upcoming Appointments
- *
- * Description: Retrieves upcoming appointments (future dates) for a customer
- *
- * Input:
- *   - phoneNumber: string (required) - The customer's phone number
- *   - businessId: number (optional) - Filter for a specific business
- *   - daysAhead: number (optional, default: 30) - Number of days to look ahead
- *
- * Output:
- *   - Array of upcoming appointments sorted by date
- */
 export const getUpcomingAppointmentsTool = {
   name: "get_upcoming_appointments",
   description:
@@ -166,7 +132,9 @@ export const getUpcomingAppointmentsTool = {
       );
 
       const now = new Date();
-      const futureDate = new Date(now.getTime() + daysAhead * 24 * 60 * 60 * 1000);
+      const futureDate = new Date(
+        now.getTime() + daysAhead * 24 * 60 * 60 * 1000
+      );
 
       const upcomingAppointments = allAppointments.filter((apt) => {
         const appointmentDate = new Date(apt.startDate);
@@ -207,27 +175,11 @@ export const getUpcomingAppointmentsTool = {
   },
 };
 
-/**
- * Hairhub Tools Registry
- *
- * This object contains all available tools for the Hairhub AI assistant.
- * Each tool can be called with specific parameters to perform actions.
- */
 export const hairhubTools = {
   showAppointments: showAppointmentsTool,
   getUpcomingAppointments: getUpcomingAppointmentsTool,
 };
 
-/**
- * Execute Tool
- *
- * Helper function to execute any registered Hairhub tool
- *
- * @param toolName - The name of the tool to execute
- * @param params - The parameters to pass to the tool
- * @param context - Context information (businessId, userId, etc.)
- * @returns - Result of the tool execution
- */
 export async function executeHairHubTool(
   toolName: string,
   params: any,

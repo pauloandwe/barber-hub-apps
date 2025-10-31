@@ -20,13 +20,12 @@ interface TimelineHeaderProps {
   selectedBarberIds?: number[];
   onBarberFilterChange?: (barberIds: number[]) => void;
   selectedStatus?: "pending" | "confirmed" | "canceled" | undefined;
-  onStatusFilterChange?: (status: "pending" | "confirmed" | "canceled" | undefined) => void;
+  onStatusFilterChange?: (
+    status: "pending" | "confirmed" | "canceled" | undefined
+  ) => void;
   isLoading?: boolean;
 }
 
-/**
- * Header component with date picker, filters, and controls
- */
 export function TimelineHeader({
   currentDate,
   onDateChange,
@@ -37,7 +36,9 @@ export function TimelineHeader({
   onStatusFilterChange,
   isLoading = false,
 }: TimelineHeaderProps) {
-  const [isAllBarbers, setIsAllBarbers] = useState(!selectedBarberIds || selectedBarberIds.length === barbers.length);
+  const [isAllBarbers, setIsAllBarbers] = useState(
+    !selectedBarberIds || selectedBarberIds.length === barbers.length
+  );
 
   const handlePreviousDay = () => {
     onDateChange(subDays(currentDate, 1));
@@ -83,7 +84,6 @@ export function TimelineHeader({
 
   return (
     <div className="space-y-4 p-4 bg-white border-b border-gray-200 rounded-t-lg">
-      {/* Date navigation */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <Button
@@ -112,18 +112,18 @@ export function TimelineHeader({
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
-
         <div className="text-center">
-          <p className="text-sm font-semibold text-gray-900 capitalize">{dayLabel}</p>
-          <p className="text-xs text-gray-500">{format(currentDate, "dd/MM/yyyy")}</p>
+          <p className="text-sm font-semibold text-gray-900 capitalize">
+            {dayLabel}
+          </p>
+          <p className="text-xs text-gray-500">
+            {format(currentDate, "dd/MM/yyyy")}
+          </p>
         </div>
-
-        <div className="flex-1" /> {/* Spacer */}
+        <div className="flex-1" />
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3">
-        {/* Barber filter */}
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700">Barbeiros:</span>
           <Button
@@ -135,7 +135,8 @@ export function TimelineHeader({
             Todos
           </Button>
           {barbers.map((barber) => {
-            const isSelected = !selectedBarberIds || selectedBarberIds.includes(barber.id);
+            const isSelected =
+              !selectedBarberIds || selectedBarberIds.includes(barber.id);
             return (
               <Button
                 key={barber.id}
@@ -150,14 +151,15 @@ export function TimelineHeader({
           })}
         </div>
 
-        {/* Status filter */}
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700">Status:</span>
           <Select
             value={selectedStatus || "all"}
             onValueChange={(value) =>
               onStatusFilterChange?.(
-                value === "all" ? undefined : (value as "pending" | "confirmed" | "canceled")
+                value === "all"
+                  ? undefined
+                  : (value as "pending" | "confirmed" | "canceled")
               )
             }
             disabled={isLoading}

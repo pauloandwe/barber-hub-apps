@@ -1,21 +1,9 @@
-/**
- * Hairhub Tools - Usage Examples
- *
- * This file demonstrates how to use the Hairhub AI assistant tools
- * in your application or integrate them with the WhatsApp bot.
- */
-
 import { executeHairHubTool, HairHubToolContext } from "./hairhub-tools";
 
-/**
- * Example 1: Show all appointments for a customer by phone number
- *
- * This example shows how to retrieve all appointments for a specific customer.
- */
 export async function exampleShowAllAppointments() {
   const context: HairHubToolContext = {
-    businessId: 1, // Your business ID
-    phoneNumber: "5511987654321", // Customer's phone number
+    businessId: 1,
+    phoneNumber: "5511987654321",
   };
 
   const result = await executeHairHubTool(
@@ -41,11 +29,6 @@ export async function exampleShowAllAppointments() {
   }
 }
 
-/**
- * Example 2: Show upcoming appointments for a customer
- *
- * This example shows how to retrieve only future appointments.
- */
 export async function exampleGetUpcomingAppointments() {
   const context: HairHubToolContext = {
     businessId: 1,
@@ -56,7 +39,7 @@ export async function exampleGetUpcomingAppointments() {
     "get_upcoming_appointments",
     {
       phoneNumber: "5511987654321",
-      daysAhead: 30, // Look ahead 30 days (optional)
+      daysAhead: 30,
     },
     context
   );
@@ -74,18 +57,11 @@ export async function exampleGetUpcomingAppointments() {
   }
 }
 
-/**
- * Example 3: Integration with WhatsApp Bot
- *
- * This example shows how to integrate the tools with a WhatsApp bot handler.
- * This would be called when a user sends a message to the bot.
- */
 export async function handleWhatsAppBotMessage(
   userMessage: string,
   userPhoneNumber: string,
   businessId: number
 ): Promise<string> {
-  // Simple pattern matching for demonstration
   if (
     userMessage.toLowerCase().includes("meus agendamentos") ||
     userMessage.toLowerCase().includes("meus compromissos") ||
@@ -105,8 +81,7 @@ export async function handleWhatsAppBotMessage(
     );
 
     if (result.success && result.data && result.data.length > 0) {
-      let response =
-        "📅 Seus agendamentos:\n\n";
+      let response = "📅 Seus agendamentos:\n\n";
       result.data.forEach((apt: any, index: number) => {
         response += `${index + 1}. ${apt.service}\n`;
         response += `   📍 ${apt.date} às ${apt.time}\n`;
@@ -134,7 +109,7 @@ export async function handleWhatsAppBotMessage(
       "get_upcoming_appointments",
       {
         phoneNumber: userPhoneNumber,
-        daysAhead: 7, // Only next 7 days
+        daysAhead: 7,
       },
       context
     );
@@ -157,11 +132,6 @@ export async function handleWhatsAppBotMessage(
   return "Desculpe, não entendi sua mensagem. Tente: 'meus agendamentos' ou 'próximos agendamentos'";
 }
 
-/**
- * Example 4: Format tool output for WhatsApp display
- *
- * Format the tool result in a way that's friendly for WhatsApp messages.
- */
 export function formatAppointmentsForWhatsApp(appointments: any[]): string {
   if (appointments.length === 0) {
     return "Nenhum agendamento encontrado.";
@@ -184,11 +154,6 @@ export function formatAppointmentsForWhatsApp(appointments: any[]): string {
   return message;
 }
 
-/**
- * Example 5: Direct tool invocation without context
- *
- * For simple cases where you have all needed information.
- */
 export async function getAppointmentsSimple(
   businessId: number,
   phoneNumber: string

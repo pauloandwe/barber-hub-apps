@@ -114,7 +114,6 @@ export function BarberColumn({
         </div>
       </div>
 
-      {/* Time slots */}
       <div className="flex-1 relative overflow-hidden">
         {timeSlots.map((slot, index) => {
           const appointmentsInSlot = getAppointmentsInSlot(slot.startTime);
