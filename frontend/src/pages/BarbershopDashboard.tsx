@@ -46,6 +46,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ROUTES } from "@/constants/routes";
 
 interface Appointment {
+  clientContact: unknown;
   id: number;
   startDate: string;
   endDate: string;
@@ -276,7 +277,10 @@ export function BarbershopDashboard() {
                       <User className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">Cliente:</span>
                       <span>
-                        {appointment.client?.name || "Cliente não disponível"}
+                        {appointment.client?.name ||
+                          appointment?.clientContact?.name ||
+                          appointment?.clientContact?.phone ||
+                          "Cliente não disponível"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">

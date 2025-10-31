@@ -97,6 +97,8 @@ export function BarberCard({
           profile: {
             name:
               appointment.client?.name ||
+              appointment.clientContact?.name ||
+              appointment.clientContact?.phone ||
               appointment.barber?.name ||
               "Client not available",
           },

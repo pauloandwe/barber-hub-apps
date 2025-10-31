@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { addMinutes, setHours, setMinutes, format } from "date-fns";
+import { addMinutes, format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { DialogProps } from "@/types/shared.types";
@@ -314,9 +314,20 @@ export function AppointmentDialog({
 
       // Formatação de horário:
       // selectedTime vem como "HH:mm" (ex: "14:30")
-      // Extraímos horas e minutos e construímos um Date object completo
+      // Extraímos horas e minutos e construímos um Date object em UTC
       const [hours, minutes] = selectedTime.split(":").map(Number);
-      const startDateTime = setHours(setMinutes(selectedDate, minutes), hours);
+
+      // Cria data em UTC, não em horário local
+      const utcDate = new Date(Date.UTC(
+        selectedDate.getUTCFullYear(),
+        selectedDate.getUTCMonth(),
+        selectedDate.getUTCDate(),
+        hours,
+        minutes,
+        0,
+        0
+      ));
+      const startDateTime = utcDate;
 
       // Calcula endDate baseado na duração do serviço selecionado
       const endDateTime = addMinutes(startDateTime, service.durationMin);

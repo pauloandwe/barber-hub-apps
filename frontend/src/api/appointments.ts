@@ -5,7 +5,8 @@ export interface Appointment {
   businessId: number;
   serviceId: number;
   barberId?: number;
-  clientId: number;
+  clientId: number | null;
+  clientContactId: number | null;
   startDate: string;
   endDate: string;
   status: "pending" | "confirmed" | "cancelled" | "canceled";
@@ -13,7 +14,8 @@ export interface Appointment {
   notes?: string;
   createdAt?: string;
   barber?: { name: string };
-  client?: { name: string };
+  client?: { id?: number; name: string };
+  clientContact?: { id: number; name: string | null; phone: string };
   service?: { name: string; duration: number };
 }
 
@@ -21,7 +23,9 @@ export interface CreateAppointmentRequest {
   businessId: number;
   serviceId: number;
   barberId: number;
-  clientId: number;
+  clientId?: number;
+  clientPhone?: string;
+  clientName?: string;
   startDate: string;
   endDate: string;
   notes?: string;
@@ -32,6 +36,8 @@ export interface UpdateAppointmentRequest {
   serviceId?: number;
   barberId?: number;
   clientId?: number;
+  clientPhone?: string;
+  clientName?: string;
   startDate?: string;
   endDate?: string;
   source?: "web" | "whatsapp";
