@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEmail } from 'class-validator';
 
 export class CreateBusinessDto {
   @IsString()
@@ -16,4 +16,12 @@ export class CreateBusinessDto {
   @IsString()
   @IsOptional()
   token?: string;
+
+  @IsEmail()
+  @IsOptional()
+  email?: string;
+
+  @IsString()
+  @IsOptional()
+  address?: string;
 }

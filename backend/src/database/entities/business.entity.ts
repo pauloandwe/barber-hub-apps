@@ -32,6 +32,12 @@ export class BusinessEntity {
   @Column({ type: 'varchar', length: 255, unique: true, nullable: true })
   token?: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  email?: string;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  address?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

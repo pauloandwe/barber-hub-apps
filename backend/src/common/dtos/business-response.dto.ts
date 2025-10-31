@@ -23,6 +23,8 @@ export class BusinessDataDto {
   name: string;
   phone: string;
   type: string;
+  email?: string;
+  address?: string;
   services: ServiceDto[];
   settings: SettingsDto;
 }

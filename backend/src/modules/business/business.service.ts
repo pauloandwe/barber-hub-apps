@@ -298,6 +298,9 @@ export class BusinessService {
     if (!createBusinessDto.token) {
       createBusinessDto.token = this.generateToken();
     }
+    if (!createBusinessDto.type) {
+      createBusinessDto.type = 'BARBERSHOP';
+    }
     const business = this.businessRepository.create(createBusinessDto);
     return this.businessRepository.save(business);
   }
