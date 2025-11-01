@@ -23,7 +23,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { formatUtcDateTime } from "@/utils/date.utils";
+import { formatDateTime } from "@/utils/date.utils";
 import {
   Select,
   SelectContent,
@@ -131,11 +131,8 @@ export function ClientDashboard() {
   const handleDeleteAppointment = async (appointment: DashboardAppointment) => {
     if (
       !window.confirm(
-        `Tem certeza que deseja deletar o agendamento de ${formatUtcDateTime(
-          appointment.startDate,
-          {
-            includeConnector: false,
-          }
+        `Tem certeza que deseja deletar o agendamento de ${formatDateTime(
+          appointment.startDate
         )}?`
       )
     ) {
@@ -246,7 +243,7 @@ export function ClientDashboard() {
                     <div className="space-y-1">
                       <CardTitle className="flex items-center gap-2">
                         <Calendar className="h-5 w-5" />
-                        {formatUtcDateTime(appointment.startDate)}
+                        {formatDateTime(appointment.startDate)}
                       </CardTitle>
                       <CardDescription>
                         {appointment.service?.name || "Serviço não disponível"}{" "}

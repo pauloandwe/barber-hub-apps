@@ -10,8 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  RefreshCcw,
+  Loader2,
+} from "lucide-react";
 
 interface TimelineHeaderProps {
   currentDate: Date;
@@ -24,6 +29,8 @@ interface TimelineHeaderProps {
     status: "pending" | "confirmed" | "canceled" | undefined
   ) => void;
   isLoading?: boolean;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export function TimelineHeader({
@@ -35,6 +42,8 @@ export function TimelineHeader({
   selectedStatus,
   onStatusFilterChange,
   isLoading = false,
+  onRefresh,
+  isRefreshing = false,
 }: TimelineHeaderProps) {
   const [isAllBarbers, setIsAllBarbers] = useState(
     !selectedBarberIds || selectedBarberIds.length === barbers.length
@@ -112,7 +121,7 @@ export function TimelineHeader({
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
-        <div className="text-center">
+        <div className="flex-1 text-center">
           <p className="text-sm font-semibold text-gray-900 capitalize">
             {dayLabel}
           </p>
@@ -120,7 +129,21 @@ export function TimelineHeader({
             {format(currentDate, "dd/MM/yyyy")}
           </p>
         </div>
-        <div className="flex-1" />
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onRefresh?.()}
+            disabled={isLoading || isRefreshing}
+          >
+            {isRefreshing ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCcw className="mr-2 h-4 w-4" />
+            )}
+            Recarregar
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3">

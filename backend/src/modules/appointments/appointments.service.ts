@@ -135,8 +135,14 @@ export class AppointmentsService {
     status?: 'pending' | 'confirmed' | 'canceled',
     serviceId?: number,
   ): Promise<AppointmentTimelineResponseDto> {
-    const startDate = new Date(`${date}T00:00:00Z`);
-    const endDate = new Date(`${date}T23:59:59Z`);
+    const [year, month, day] = date.split('-').map(Number);
+
+    if (!year || !month || !day) {
+      throw new BadRequestException('Invalid date format. Expected yyyy-MM-dd.');
+    }
+
+    const startDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
 
     let barbers = await this.barberRepository.find({
       where: {
@@ -178,7 +184,7 @@ export class AppointmentsService {
       });
     }
 
-    const dayOfWeek = new Date(date).getDay();
+    const dayOfWeek = new Date(year, month - 1, day).getDay();
 
     const barberTimelines: BarberTimelineDto[] = barbers.map((barber) => {
       const barberAppointments = appointments.filter((a) => a.barberId === barber.id);
@@ -261,6 +267,10 @@ export class AppointmentsService {
   }
 
   async create(createAppointmentDto: CreateAppointmentDto): Promise<AppointmentResponseDto> {
+    // Validar que as datas recebidas estão em formato ISO com timezone explícito
+    this.validateDateStringWithTimezone(createAppointmentDto.startDate);
+    this.validateDateStringWithTimezone(createAppointmentDto.endDate);
+
     const business = await this.businessRepository.findOne({
       where: { id: createAppointmentDto.businessId },
     });
@@ -346,6 +356,10 @@ export class AppointmentsService {
     if (!appointment) {
       throw new NotFoundException('Appointment not found');
     }
+
+    // Validar que as datas recebidas estão em formato ISO com timezone explícito
+    this.validateDateStringWithTimezone(updateAppointmentDto.startDate);
+    this.validateDateStringWithTimezone(updateAppointmentDto.endDate);
 
     if (updateAppointmentDto.startDate || updateAppointmentDto.endDate) {
       const newStartTime = updateAppointmentDto.startDate
@@ -476,6 +490,33 @@ export class AppointmentsService {
 
     const digits = phone.replace(/\D/g, '');
     return digits.length ? digits : null;
+  }
+
+  /**
+   * Valida se a data é uma string ISO válida com timezone explícito.
+   * Aceita formatos como: "2025-03-20T14:30:00Z" ou "2025-03-20T14:30:00+00:00"
+   * Rejeita formatos sem timezone como: "2025-03-20T14:30:00"
+   */
+  private validateDateStringWithTimezone(dateString?: string): void {
+    if (!dateString) {
+      return;
+    }
+
+    // Verifica se é uma string ISO válida
+    const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?(Z|[+-]\d{2}:\d{2})$/;
+    if (!isoRegex.test(dateString)) {
+      throw new BadRequestException(
+        `Data em formato inválido. Deve ser ISO 8601 com timezone. Recebido: "${dateString}". Esperado: "2025-03-20T14:30:00Z" ou "2025-03-20T14:30:00+00:00"`,
+      );
+    }
+
+    // Tenta fazer parse da data para garantir que é válida
+    const parsedDate = new Date(dateString);
+    if (isNaN(parsedDate.getTime())) {
+      throw new BadRequestException(
+        `Data inválida. Não consegui fazer parse: "${dateString}"`,
+      );
+    }
   }
 
   private async resolveClientDetails(

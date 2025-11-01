@@ -16,7 +16,7 @@ import {
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { formatUtcDateTime } from "@/utils/date.utils";
+import { formatDateTime } from "@/utils/date.utils";
 import { Barber as BarberModel } from "@/api/barbers";
 import {
   barberWorkingHoursAPI,
@@ -259,7 +259,7 @@ export function BarberCard({
                       <div className="space-y-1 flex-1">
                         <p className="text-sm font-medium flex items-center gap-2">
                           <Calendar className="h-4 w-4" />
-                          {formatUtcDateTime(appointment.startDate)}
+                          {formatDateTime(appointment.startDate)}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {appointment.service?.name ||

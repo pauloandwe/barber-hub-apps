@@ -21,7 +21,7 @@ import { addMinutes, format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { DialogProps } from "@/types/shared.types";
-import { formatUtcTime } from "@/utils/date.utils";
+import { formatTime } from "@/utils/date.utils";
 import { ServiceSelector, Service } from "./appointments/ServiceSelector";
 import { BarberSelector } from "./appointments/BarberSelector";
 import { ClientSelector, ClientSelection } from "./appointments/ClientSelector";
@@ -102,7 +102,7 @@ export function AppointmentDialog({
     ? format(originalStartDate, "yyyy-MM-dd")
     : undefined;
   const originalTime = originalStartDate
-    ? formatUtcTime(originalStartDate)
+    ? formatTime(originalStartDate)
     : undefined;
   const originalBarberId = appointment?.barberId ?? undefined;
 
@@ -401,18 +401,24 @@ export function AppointmentDialog({
 
       const [hours, minutes] = selectedTime.split(":").map(Number);
 
-      const utcDate = new Date(
-        Date.UTC(
-          selectedDate.getUTCFullYear(),
-          selectedDate.getUTCMonth(),
-          selectedDate.getUTCDate(),
-          hours,
-          minutes,
-          0,
-          0
-        )
-      );
-      const startDateTime = utcDate;
+      // Criar um Date no timezone local e depois converter para UTC
+      // O usuário seleciona "9:00" em seu timezone local (BRT)
+      // Precisa ser convertido para 12:00 UTC (9:00 BRT + 3h)
+      const localDate = new Date(selectedDate);
+      localDate.setHours(hours, minutes, 0, 0);
+
+      // Criar um Date em UTC ajustando pelo offset do timezone local
+      const offsetMinutes = localDate.getTimezoneOffset();
+      const startDateTime = new Date(Date.UTC(
+        selectedDate.getUTCFullYear(),
+        selectedDate.getUTCMonth(),
+        selectedDate.getUTCDate(),
+        hours,
+        minutes,
+        0,
+        0
+      ));
+      startDateTime.setTime(startDateTime.getTime() + offsetMinutes * 60000);
 
       const endDateTime = addMinutes(startDateTime, service.durationMin);
 

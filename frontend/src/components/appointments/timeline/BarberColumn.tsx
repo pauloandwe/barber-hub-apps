@@ -77,9 +77,11 @@ export function BarberColumn({
       const aptStart = new Date(apt.startDate);
       const aptEnd = new Date(apt.endDate);
 
+      // Usar getHours() em vez de getUTCHours() para manter consistência com os slots locais
+      // Os slots de trabalho vêm em hora local, então a comparação deve ser em hora local
       const aptStartMinutes =
-        aptStart.getUTCHours() * 60 + aptStart.getUTCMinutes();
-      const aptEndMinutes = aptEnd.getUTCHours() * 60 + aptEnd.getUTCMinutes();
+        aptStart.getHours() * 60 + aptStart.getMinutes();
+      const aptEndMinutes = aptEnd.getHours() * 60 + aptEnd.getMinutes();
 
       return (
         aptStartMinutes >= slotStartMinutes && aptStartMinutes < slotEndMinutes

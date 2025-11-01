@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { formatUtcTime } from "@/utils/date.utils";
+import { formatTime } from "@/utils/date.utils";
 
 interface AppointmentCardProps {
   appointment: AppointmentTimelineCard;
@@ -63,8 +63,8 @@ export function AppointmentCard({
     canceled: "bg-red-100 border-red-400 text-red-900 opacity-60",
   }[appointment.status];
 
-  const startTimeStr = formatUtcTime(startDate);
-  const endTimeStr = formatUtcTime(endDate);
+  const startTimeStr = formatTime(startDate);
+  const endTimeStr = formatTime(endDate);
   const clientName = appointment.clientContact.name || "Cliente";
 
   return (

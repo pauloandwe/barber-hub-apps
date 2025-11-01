@@ -83,9 +83,11 @@ export function useDragAndDrop({
 
         const originalDate = new Date(originalAppointment.startDate);
         const newStartDate = new Date(originalDate);
-        newStartDate.setUTCHours(targetHour, targetMinute, 0, 0);
+        // Usar setHours() em vez de setUTCHours() para manter consistência com hora local
+        // O targetSlotTime vem em hora local, então deve ser configurado em hora local
+        newStartDate.setHours(targetHour, targetMinute, 0, 0);
         const newEndDate = new Date(newStartDate);
-        newEndDate.setUTCMinutes(newEndDate.getUTCMinutes() + durationMinutes);
+        newEndDate.setMinutes(newEndDate.getMinutes() + durationMinutes);
 
         await appointmentsAPI.update(
           businessId,

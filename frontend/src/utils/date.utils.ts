@@ -43,6 +43,10 @@ export function formatDateTime(date: Date | string): string {
   return `${dateStr} ${timeStr}`;
 }
 
+/**
+ * @deprecated Use formatDate() para exibir datas ao usuário.
+ * Esta função usa getUTCDate() e não converte para timezone local.
+ */
 export function formatUtcDate(date: Date | string): string {
   const dateObj = toDate(date);
   if (isInvalid(dateObj)) {
@@ -54,6 +58,10 @@ export function formatUtcDate(date: Date | string): string {
   return `${day}/${month}/${year}`;
 }
 
+/**
+ * @deprecated Use formatTime() para exibir horários ao usuário.
+ * Esta função usa getUTCHours() e não converte para timezone local.
+ */
 export function formatUtcTime(date: Date | string): string {
   const dateObj = toDate(date);
   if (isInvalid(dateObj)) {
@@ -69,6 +77,10 @@ interface FormatUtcDateTimeOptions {
   includeConnector?: boolean;
 }
 
+/**
+ * @deprecated Use formatDateTime() para exibir data/hora ao usuário.
+ * Esta função usa getUTCHours() e getUTCDate() e não converte para timezone local.
+ */
 export function formatUtcDateTime(
   date: Date | string,
   options: FormatUtcDateTimeOptions = {}
@@ -164,6 +176,19 @@ export function getMinimumDate(): string {
   return today.toISOString().split("T")[0];
 }
 
+/**
+ * @deprecated NUNCA use esta função!
+ * A lógica está invertida - está adicionando o offset de timezone quando não deveria.
+ *
+ * Exemplos de por que não funciona:
+ * - Input: "2025-03-20T14:30:00Z" (UTC)
+ * - Cria Date object representando 14:30 UTC
+ * - Adiciona 3 horas (se timezone local é UTC-3)
+ * - Retorna Date representando 17:30 UTC (INCORRETO!)
+ *
+ * O Date object já representa corretamente o momento em UTC.
+ * Use as funções formatDate(), formatTime(), etc para exibir no timezone local.
+ */
 export function convertUtcIsoToLocalDate(dateString: string): Date {
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) {

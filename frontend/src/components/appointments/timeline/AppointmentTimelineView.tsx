@@ -42,6 +42,7 @@ export function AppointmentTimelineView({
   const {
     data: timelineData,
     isLoading,
+    isFetching,
     refetch,
   } = useTimelineData({
     businessId,
@@ -122,6 +123,10 @@ export function AppointmentTimelineView({
     refetch();
   }, [handleDialogClose, refetch]);
 
+  const handleManualRefresh = useCallback(() => {
+    void refetch();
+  }, [refetch]);
+
   const handleAppointmentDelete = useCallback(
     async (appointment: AppointmentTimelineCard) => {
       const formattedDate = formatUtcDateTime(appointment.startDate, {
@@ -169,6 +174,8 @@ export function AppointmentTimelineView({
         selectedStatus={selectedStatus}
         onStatusFilterChange={setSelectedStatus}
         isLoading={isLoading}
+        onRefresh={handleManualRefresh}
+        isRefreshing={isFetching && !isLoading}
       />
 
       <TimelineGrid
