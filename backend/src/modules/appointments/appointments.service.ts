@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { Repository, In } from 'typeorm';
+import { Repository, In, Not } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   AppointmentEntity,
@@ -361,17 +361,23 @@ export class AppointmentsService {
     this.validateDateStringWithTimezone(updateAppointmentDto.startDate);
     this.validateDateStringWithTimezone(updateAppointmentDto.endDate);
 
-    if (updateAppointmentDto.startDate || updateAppointmentDto.endDate) {
+    const shouldCheckConflicts =
+      updateAppointmentDto.startDate !== undefined ||
+      updateAppointmentDto.endDate !== undefined ||
+      updateAppointmentDto.barberId !== undefined;
+
+    if (shouldCheckConflicts) {
       const newStartTime = updateAppointmentDto.startDate
         ? new Date(updateAppointmentDto.startDate)
         : appointment.startDate;
-      const barberId = updateAppointmentDto.barberId || appointment.barberId;
+      const barberId = updateAppointmentDto.barberId ?? appointment.barberId;
 
       const conflict = await this.appointmentRepository.findOne({
         where: {
           barberId,
+          businessId,
           startDate: newStartTime,
-          id: appointmentId !== appointmentId ? appointmentId : undefined,
+          id: Not(appointmentId),
         },
       });
 

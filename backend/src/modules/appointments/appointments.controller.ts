@@ -243,9 +243,12 @@ export class AppointmentsController {
   async partialUpdateAppointment(
     @Param('businessId') businessId: string,
     @Param('appointmentId') appointmentId: string,
-    @Body(new ValidationPipe()) updateAppointmentDto: UpdateAppointmentDto,
+    @Body(new ValidationPipe({ skipMissingProperties: true })) updateAppointmentDto: UpdateAppointmentDto,
   ): Promise<AppointmentResponseDto> {
     try {
+      if (!this.hasAnyUpdatableField(updateAppointmentDto)) {
+        throw new BadRequestException('No fields provided for update');
+      }
       return await this.appointmentsService.partialUpdate(
         parseInt(appointmentId),
         parseInt(businessId),
@@ -280,5 +283,9 @@ export class AppointmentsController {
     } catch (error) {
       throw error;
     }
+  }
+
+  private hasAnyUpdatableField(updateAppointmentDto: UpdateAppointmentDto): boolean {
+    return Object.values(updateAppointmentDto).some((value) => value !== undefined);
   }
 }
