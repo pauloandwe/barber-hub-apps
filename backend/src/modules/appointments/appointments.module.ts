@@ -15,6 +15,7 @@ import {
 } from 'src/database/entities';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { RemindersModule } from '../reminders/reminders.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
         },
       }),
     }),
+    RemindersModule,
   ],
   controllers: [AppointmentsController],
   providers: [AppointmentsService, JwtAuthGuard, RolesGuard],

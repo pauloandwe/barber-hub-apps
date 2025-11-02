@@ -29,6 +29,7 @@ import {
   Plus,
   Building2,
   Loader2,
+  Bell,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -188,6 +189,13 @@ export function BarbershopDashboard() {
             <h1 className="text-xl font-bold">{barbershopDisplayName}</h1>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate(ROUTES.BARBERSHOP_REMINDERS)}
+            >
+              <Bell className="mr-2 h-4 w-4" />
+              Lembretes
+            </Button>
             <Button
               variant="outline"
               onClick={openBusinessDialog}

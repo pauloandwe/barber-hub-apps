@@ -5,6 +5,7 @@ export { usersAPI } from './users';
 export { appointmentsAPI } from './appointments';
 export { barbersAPI } from './barbers';
 export { servicesAPI } from './services';
+export { remindersAPI } from './reminders';
 export {
   hairhubTools,
   showAppointmentsTool,
@@ -17,4 +18,12 @@ export type { UserProfile as UserProfileApi, UpdateUserRequest } from './users';
 export type { Appointment, CreateAppointmentRequest, UpdateAppointmentRequest } from './appointments';
 export type { Barber, CreateBarberRequest, UpdateBarberRequest } from './barbers';
 export type { Service, CreateServiceRequest, UpdateServiceRequest } from './services';
+export type {
+  ReminderType,
+  ReminderStatus,
+  ReminderSettings,
+  ReminderTemplate,
+  ReminderLog,
+  ReminderAnalytics,
+} from './reminders';
 export type { HairHubToolContext, HairHubToolResult } from './hairhub-tools';

@@ -19,8 +19,14 @@ import {
   ProfileEntity,
   BloqueioEntity,
   BarberWorkingHoursEntity,
+  ReminderSettingsEntity,
+  ReminderTemplateEntity,
+  ReminderLogEntity,
+  ClientPreferencesEntity,
 } from './database/entities';
 import { BarberWorkingHoursModule } from './modules/barber-working-hours/barber-working-hours.module';
+import { QueueModule } from './queue/queue.module';
+import { RemindersModule } from './modules/reminders/reminders.module';
 
 @Module({
   imports: [
@@ -43,7 +49,13 @@ import { BarberWorkingHoursModule } from './modules/barber-working-hours/barber-
       ProfileEntity,
       BloqueioEntity,
       BarberWorkingHoursEntity,
+      ReminderSettingsEntity,
+      ReminderTemplateEntity,
+      ReminderLogEntity,
+      ClientPreferencesEntity,
     ]),
+    QueueModule,
+    RemindersModule,
     AuthModule,
     AppointmentsModule,
     BloqueiosModule,

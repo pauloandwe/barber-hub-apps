@@ -1,0 +1,363 @@
+================================================================================
+                    BARBER HUB FRONTEND ARCHITECTURE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          ENTRY POINT (main.tsx)                             │
+│                                                                              │
+│  ReactDOM.createRoot(document.getElementById('root')).render(<App />)      │
+└──────────────────────────────┬──────────────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────────────────────┐
+│                      APP.TSX - Root Component                               │
+│                                                                              │
+│  ┌─ QueryClientProvider (TanStack React Query)                             │
+│  │  └─ TooltipProvider (Radix UI)                                          │
+│  │     ├─ Toaster (shadcn/ui - Shadcn)                                     │
+│  │     ├─ Sonner (Toast notifications)                                     │
+│  │     └─ BrowserRouter (React Router v6)                                  │
+│  │        └─ Routes Configuration                                          │
+│  │           ├─ /login                  → Login                            │
+│  │           ├─ /register               → Register                         │
+│  │           ├─ /admin                  → AdminDashboard (AuthGuard)        │
+│  │           ├─ /barbershop             → BarbershopDashboard (AuthGuard)   │
+│  │           ├─ /client                 → ClientDashboard (AuthGuard)       │
+│  │           ├─ /profile                → Profile (AuthGuard)               │
+│  │           └─ *                       → NotFound                         │
+│  │                                                                          │
+│  └─ AuthGuard wrapper handles:                                             │
+│     • User authentication check (via localStorage)                         │
+│     • Role-based access control                                           │
+│     • Redirect to login if not authenticated                              │
+│     • Redirect to correct dashboard if role mismatch                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+                            API ARCHITECTURE LAYER
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     src/api/client.ts - HTTP Client                         │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ ApiClient Class (Singleton)                                         │   │
+│  │                                                                     │   │
+│  │ • Instance of axios with baseURL configuration                     │   │
+│  │ • Token management (localStorage)                                  │   │
+│  │ • Request interceptor: Adds Authorization header (Bearer token)   │   │
+│  │ • Response interceptor: Handles 401/403, auto-logout              │   │
+│  │ • Methods: get, post, put, patch, delete                          │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  export const apiClient = new ApiClient();                                 │
+└──────────────────────────────┬──────────────────────────────────────────────┘
+                               │
+        ┌──────────────────────┼──────────────────────┐
+        │                      │                      │
+        ▼                      ▼                      ▼
+┌──────────────────┐ ┌──────────────────┐ ┌──────────────────────┐
+│  auth.ts         │ │  services.ts     │ │  appointments.ts     │
+│  ────────────    │ │  ────────────    │ │  ────────────────    │
+│ • register()     │ │ • getAll()       │ │ • getAll()          │
+│ • login()        │ │ • getById()      │ │ • getById()         │
+│ • getProfile()   │ │ • create()       │ │ • create()          │
+│ • logout()       │ │ • update()       │ │ • update()          │
+│ • getStoredUser()│ │ • delete()       │ │ • getTimeline()     │
+│                  │ │                  │ │ • getSuggestions()  │
+└──────────────────┘ └──────────────────┘ └──────────────────────┘
+
+Additional API Modules:
+• barbers.ts       - Barber CRUD + specialties
+• business.ts      - Barbershop CRUD
+• users.ts         - User management (Admin only)
+• hairhub-tools.ts - AI integrations
+
+================================================================================
+                        COMPONENT ARCHITECTURE LAYER
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      src/components/ui/ (70+ Components)                     │
+│                                                                              │
+│  Pre-built shadcn/ui components powered by Radix UI:                       │
+│                                                                              │
+│  Form:          Button, Input, Label, Textarea, Checkbox, Switch           │
+│  Selection:     Select, RadioGroup, ToggleGroup                            │
+│  Layout:        Card, Container, Separator                                 │
+│  Dialog:        Dialog, Drawer, Sheet, AlertDialog                         │
+│  Navigation:    Tabs, Breadcrumb, Pagination, Menubar                      │
+│  Display:       Badge, Avatar, Table, Progress, Carousel                   │
+│  Overlay:       Tooltip, Popover, HoverCard, DropdownMenu                  │
+│                                                                              │
+│  Each uses:                                                                 │
+│  • Tailwind CSS for styling                                               │
+│  • CVA (Class Variance Authority) for variants                            │
+│  • cn() utility for class merging                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         src/components/shared/                              │
+│                      Reusable Custom Components                             │
+│                                                                              │
+│  ┌─ LoadingSpinner.tsx                                                     │
+│  │  └─ Shows spinner (small/medium/large or fullPage)                      │
+│  │                                                                          │
+│  ├─ EmptyState.tsx                                                         │
+│  │  └─ Shows empty state with icon, title, description, action             │
+│  │                                                                          │
+│  ├─ AuthGuard.tsx                                                          │
+│  │  └─ Route protection + role validation + auto-redirect                  │
+│  │                                                                          │
+│  ├─ ErrorBoundary.tsx                                                      │
+│  │  └─ Catches React errors                                               │
+│  │                                                                          │
+│  ├─ RoleBadge.tsx                                                          │
+│  │  └─ Displays user role label                                           │
+│  │                                                                          │
+│  └─ StatusBadge.tsx                                                        │
+│     └─ Displays status with color coding                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    src/components/appointments/                             │
+│                    Domain-Specific Components                               │
+│                                                                              │
+│  • AppointmentDialog.tsx       - Create/Edit appointment dialog            │
+│  • AppointmentSummary.tsx      - Display appointment details               │
+│  • BarberSelector.tsx          - Select barber dropdown                    │
+│  • ClientSelector.tsx          - Select client dropdown                    │
+│  • DateTimePicker.tsx          - Date and time selection                   │
+│  • ServiceSelector.tsx         - Select service dropdown                   │
+│                                                                              │
+│  └─ timeline/                                                              │
+│     • AppointmentTimelineView.tsx  - Main timeline component               │
+│     • TimelineGrid.tsx             - Grid layout                           │
+│     • BarberColumn.tsx             - Column per barber                     │
+│     • TimeScale.tsx                - Time axis                            │
+│     • AppointmentCard.tsx          - Individual appointment                │
+│     • TimeSlot.tsx                 - Hourly slot                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+                          STATE MANAGEMENT LAYER
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         React Hooks (Local State)                           │
+│                                                                              │
+│  Standard patterns used across all pages:                                   │
+│                                                                              │
+│  1. Data State:           useState<Item[]>([])                              │
+│  2. Loading State:        useState<boolean>(true)                           │
+│  3. Dialog/Modal State:   useState<boolean>(false)                          │
+│  4. Form State:           useState<FormData>(INITIAL)                       │
+│  5. Error State:          useState<string | null>(null)                     │
+│                                                                              │
+│  useEffect with cleanup for data fetching on mount/dependency change        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    src/hooks/useUserRole.tsx                                │
+│                  Custom Hook for User Context                               │
+│                                                                              │
+│  function useUserRole() {                                                   │
+│    ├─ Loads user from localStorage (authAPI.getStoredUser())               │
+│    ├─ Extracts role and barbershopId                                       │
+│    ├─ Validates role with isValidRole()                                    │
+│    └─ Returns: { role, barbershopId, isLoading, error }                    │
+│                                                                              │
+│    Used in: All pages to get current user context                          │
+│  }                                                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     LocalStorage (Auth State)                               │
+│                                                                              │
+│  Keys stored:                                                               │
+│  • access_token    - JWT token for API requests                            │
+│  • user            - Serialized user profile object                        │
+│                                                                              │
+│  Accessed via: authAPI.getStoredUser() / authAPI.setStoredUser()           │
+│  Cleared on: authAPI.logout() or 401 error                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+                         DATA FLOW EXAMPLE: Create Service
+================================================================================
+
+User Click "Add Service" Button
+        │
+        ▼
+ServiceDialog Component Opens
+        │
+        ├─ state: formData = { name, price, duration }
+        ├─ state: isLoading = false
+        └─ state: isEditMode = false
+        │
+User Fills Form & Clicks Submit
+        │
+        ▼
+handleSubmit() Method
+        │
+        ├─ Validate form data
+        │  └─ If invalid → toast.error() → return
+        │
+        ├─ setIsLoading(true)
+        │
+        └─ try/catch block
+           │
+           ├─ try:
+           │  └─ servicesAPI.create({businessId, name, price, duration})
+           │     │
+           │     └─ POST /services
+           │        └─ apiClient interceptor adds Authorization header
+           │           └─ Backend response: { data: { id, name, ... } }
+           │
+           ├─ on success:
+           │  ├─ toast.success("Service created!")
+           │  ├─ onSuccess() callback
+           │  │  └─ Parent component refreshes list
+           │  └─ onOpenChange(false) closes dialog
+           │
+           ├─ on error:
+           │  └─ toast.error("Error message")
+           │
+           └─ finally:
+              └─ setIsLoading(false)
+
+================================================================================
+                            STYLING ARCHITECTURE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Tailwind CSS + CSS Variables                             │
+│                                                                              │
+│  src/index.css - Defines CSS Variables:                                    │
+│                                                                              │
+│  Colors:        --primary, --secondary, --accent, --destructive            │
+│  Spacing:       --radius (0.75rem)                                         │
+│  Gradients:     --gradient-primary, --gradient-accent, --gradient-subtle   │
+│  Shadows:       --shadow-sm to --shadow-xl, --shadow-glow                  │
+│  Sidebar:       --sidebar-background, --sidebar-foreground, etc.           │
+│                                                                              │
+│  tailwind.config.ts extends these as Tailwind theme variables              │
+│  allowing Tailwind class usage like: bg-primary, text-accent, shadow-lg    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                   CVA (Class Variance Authority) Pattern                    │
+│                                                                              │
+│  Example: Button Component                                                 │
+│                                                                              │
+│  const buttonVariants = cva(                                               │
+│    "inline-flex items-center justify-center gap-2 rounded-md...",          │
+│    {                                                                        │
+│      variants: {                                                           │
+│        variant: {                                                          │
+│          default: "bg-primary text-primary-foreground hover:...",          │
+│          outline: "border border-input bg-background hover:...",           │
+│          ghost: "hover:bg-accent hover:text-accent-foreground",            │
+│        },                                                                  │
+│        size: {                                                             │
+│          default: "h-10 px-4 py-2",                                       │
+│          lg: "h-11 px-8",                                                 │
+│        },                                                                  │
+│      },                                                                    │
+│      defaultVariants: { variant: "default", size: "default" },            │
+│    }                                                                       │
+│  );                                                                        │
+│                                                                              │
+│  Usage: <Button variant="outline" size="lg">Click me</Button>              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+                    TYPICAL PAGE COMPONENT STRUCTURE
+================================================================================
+
+  src/pages/ReminderDashboard.tsx
+  ┌──────────────────────────────────────┐
+  │ Imports                              │
+  │ ├─ React hooks (useState, useEffect) │
+  │ ├─ API (remindersAPI)                │
+  │ ├─ Components (ui, shared, custom)   │
+  │ ├─ Icons (lucide-react)              │
+  │ ├─ Hooks (useNavigate, useUserRole)  │
+  │ ├─ Toast (sonner)                    │
+  │ └─ Constants (ROUTES, UserRole)      │
+  └────────────┬─────────────────────────┘
+               │
+  ┌────────────▼─────────────────────────┐
+  │ Type Definitions                     │
+  │ ├─ interface ReminderItem            │
+  │ └─ interface DialogState             │
+  └────────────┬─────────────────────────┘
+               │
+  ┌────────────▼─────────────────────────┐
+  │ Component Function                   │
+  │ ├─ const navigate = useNavigate()    │
+  │ ├─ const { barbershopId } = ...      │
+  │ ├─ const [reminders, setReminders]   │
+  │ ├─ const [isLoading, setIsLoading]   │
+  │ ├─ const [isDialogOpen, setIsDialog] │
+  │ └─ const [selectedItem, setSelected] │
+  └────────────┬─────────────────────────┘
+               │
+  ┌────────────▼─────────────────────────┐
+  │ Data Fetching Effect                 │
+  │ useEffect(() => {                    │
+  │   if (!barbershopId) return;         │
+  │   fetchReminders();                  │
+  │ }, [barbershopId]);                  │
+  └────────────┬─────────────────────────┘
+               │
+  ┌────────────▼─────────────────────────┐
+  │ API Call Handlers                    │
+  │ ├─ const fetchReminders = async...   │
+  │ ├─ const handleCreate = async...     │
+  │ ├─ const handleUpdate = async...     │
+  │ ├─ const handleDelete = async...     │
+  │ └─ const handleDialogClose = ()...   │
+  └────────────┬─────────────────────────┘
+               │
+  ┌────────────▼─────────────────────────┐
+  │ Render                               │
+  │ └─ AuthGuard wrapper                 │
+  │    └─ Header section                 │
+  │    ├─ Actions (Add, Search, etc.)    │
+  │    ├─ Loading state                  │
+  │    ├─ Error state                    │
+  │    ├─ Empty state                    │
+  │    ├─ Data list/table                │
+  │    └─ Custom dialog component        │
+  └──────────────────────────────────────┘
+
+================================================================================
+                            ROLE-BASED ROUTING
+================================================================================
+
+User Logs In
+    │
+    ├─ authAPI.login() called
+    ├─ User stored in localStorage
+    ├─ Token stored in localStorage
+    └─ Navigate to dashboard
+       │
+       ▼
+  AuthGuard Checks Role
+       │
+       ├─ If role = "ADMIN"
+       │  └─ Redirect to /admin → AdminDashboard
+       │
+       ├─ If role = "BARBERSHOP"
+       │  └─ Redirect to /barbershop → BarbershopDashboard
+       │
+       └─ If role = "CLIENT"
+          └─ Redirect to /client → ClientDashboard
+
+Protected Routes:
+    /admin           → Only ADMIN role
+    /barbershop      → Only BARBERSHOP_MANAGER role
+    /client          → Only CLIENT role
+    /profile         → All authenticated users
+
+================================================================================

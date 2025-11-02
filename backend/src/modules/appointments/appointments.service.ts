@@ -24,6 +24,7 @@ import {
   AppointmentTimelineCardDto,
   BarberWorkingHourDto,
 } from 'src/common/dtos/appointment-timeline.dto';
+import { RemindersService } from '../reminders/reminders.service';
 
 @Injectable()
 export class AppointmentsService {
@@ -42,6 +43,7 @@ export class AppointmentsService {
     private clientContactRepository: Repository<ClientContactEntity>,
     @InjectRepository(BarberWorkingHoursEntity)
     private barberWorkingHoursRepository: Repository<BarberWorkingHoursEntity>,
+    private remindersService: RemindersService,
   ) {}
 
   async findByBusinessId(businessId: number): Promise<AppointmentResponseDto[]> {
@@ -338,6 +340,15 @@ export class AppointmentsService {
 
     const savedAppointment = await this.appointmentRepository.save(appointment);
 
+    // Schedule reminders asynchronously
+    try {
+      await this.remindersService.scheduleConfirmationReminder(savedAppointment.id);
+      await this.remindersService.schedulePreAppointmentReminders(savedAppointment.id);
+    } catch (error) {
+      console.error('Failed to schedule reminders for appointment:', error);
+      // Don't fail the appointment creation if reminder scheduling fails
+    }
+
     return this.formatAppointmentResponse(savedAppointment);
   }
 
@@ -357,9 +368,11 @@ export class AppointmentsService {
       throw new NotFoundException('Appointment not found');
     }
 
-    // Validar que as datas recebidas estão em formato ISO com timezone explícito
     this.validateDateStringWithTimezone(updateAppointmentDto.startDate);
     this.validateDateStringWithTimezone(updateAppointmentDto.endDate);
+
+    // Track original values for reminder scheduling
+    const originalStartDate = appointment.startDate;
 
     const shouldCheckConflicts =
       updateAppointmentDto.startDate !== undefined ||
@@ -432,6 +445,18 @@ export class AppointmentsService {
       appointment.source = updateAppointmentDto.source;
     }
 
+    // Handle reschedule (date/time change) - reschedule pre-appointment reminders
+    const dateChanged = updateAppointmentDto.startDate &&
+      originalStartDate.getTime() !== appointment.startDate.getTime();
+
+    if (dateChanged && appointment.status !== AppointmentStatus.CANCELED) {
+      try {
+        await this.remindersService.schedulePreAppointmentReminders(appointmentId);
+      } catch (error) {
+        console.error('Failed to reschedule pre-appointment reminders:', error);
+      }
+    }
+
     const updatedAppointment = await this.appointmentRepository.save(appointment);
 
     return this.formatAppointmentResponse(updatedAppointment);
@@ -455,6 +480,15 @@ export class AppointmentsService {
 
     if (!appointment) {
       throw new NotFoundException('Appointment not found');
+    }
+
+    // Schedule rescheduling reminder before deleting
+    try {
+      if (appointment.status !== AppointmentStatus.CANCELED) {
+        await this.remindersService.scheduleRescheduleReminder(appointmentId, 3);
+      }
+    } catch (error) {
+      console.error('Failed to schedule reschedule reminder on delete:', error);
     }
 
     await this.appointmentRepository.remove(appointment);

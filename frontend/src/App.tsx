@@ -9,6 +9,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import BarbershopDashboard from "./pages/BarbershopDashboard";
 import ClientDashboard from "./pages/ClientDashboard";
 import Profile from "./pages/Profile";
+import { RemindersSettings } from "./pages/RemindersSettings";
 import NotFound from "./pages/NotFound";
 import { AuthGuard } from "./components/AuthGuard";
 import { ROUTES } from "@/constants/routes";
@@ -39,6 +40,14 @@ const App = () => (
             element={
               <AuthGuard requiredRole={UserRole.BARBERSHOP_MANAGER}>
                 <BarbershopDashboard />
+              </AuthGuard>
+            }
+          />
+          <Route
+            path={ROUTES.BARBERSHOP_REMINDERS}
+            element={
+              <AuthGuard requiredRole={UserRole.BARBERSHOP_MANAGER}>
+                <RemindersSettings />
               </AuthGuard>
             }
           />

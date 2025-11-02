@@ -8,3 +8,7 @@ export { ProfileEntity, UserRole } from './profile.entity';
 export { BloqueioEntity } from './bloqueio.entity';
 export { BarberWorkingHoursEntity } from './barber-working-hours.entity';
 export { ClientContactEntity } from './client-contact.entity';
+export { ReminderSettingsEntity, ReminderType } from './reminder-settings.entity';
+export { ReminderTemplateEntity } from './reminder-template.entity';
+export { ReminderLogEntity, ReminderStatus } from './reminder-log.entity';
+export { ClientPreferencesEntity } from './client-preferences.entity';

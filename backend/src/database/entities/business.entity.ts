@@ -14,6 +14,8 @@ import { BarberEntity } from './barber.entity';
 import { SettingsEntity } from './settings.entity';
 import { AppointmentEntity } from './appointment.entity';
 import { ClientContactEntity } from './client-contact.entity';
+import { ReminderSettingsEntity } from './reminder-settings.entity';
+import { ReminderTemplateEntity } from './reminder-template.entity';
 
 @Entity('businesses')
 export class BusinessEntity {
@@ -73,4 +75,16 @@ export class BusinessEntity {
 
   @OneToMany(() => ClientContactEntity, (contact) => contact.business)
   clientContacts: ClientContactEntity[];
+
+  @OneToMany(
+    () => ReminderSettingsEntity,
+    (reminderSettings) => reminderSettings.business,
+  )
+  reminderSettings: ReminderSettingsEntity[];
+
+  @OneToMany(
+    () => ReminderTemplateEntity,
+    (reminderTemplate) => reminderTemplate.business,
+  )
+  reminderTemplates: ReminderTemplateEntity[];
 }
