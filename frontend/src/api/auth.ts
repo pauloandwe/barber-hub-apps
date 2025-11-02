@@ -32,13 +32,39 @@ export interface UserProfile {
   createdAt: string;
 }
 
+const extractResponseData = <T>(response: any): T => {
+  const topLevel = response?.data;
+
+  if (
+    topLevel &&
+    typeof topLevel === "object" &&
+    !Array.isArray(topLevel) &&
+    Object.prototype.hasOwnProperty.call(topLevel, "data")
+  ) {
+    const nested = (topLevel as any).data;
+
+    if (
+      nested &&
+      typeof nested === "object" &&
+      !Array.isArray(nested) &&
+      Object.prototype.hasOwnProperty.call(nested, "data")
+    ) {
+      return (nested as any).data as T;
+    }
+
+    return nested as T;
+  }
+
+  return topLevel as T;
+};
+
 export const authAPI = {
   async register(data: RegisterRequest): Promise<AuthResponse> {
     try {
       console.log("🔄 Iniciando registro com email:", data.email);
       const response = await apiClient.post("/auth/register", data);
       console.log("✅ Resposta do servidor:", response.data);
-      const authData = response.data.data.data;
+      const authData = extractResponseData<AuthResponse>(response);
       apiClient.setToken(authData.access_token);
       console.log("✅ Token armazenado com sucesso");
       return authData;
@@ -56,7 +82,7 @@ export const authAPI = {
       console.log("📍 URL da API:", import.meta.env.VITE_API_URL);
       const response = await apiClient.post("/auth/login", data);
       console.log("✅ Resposta do servidor:", response.data);
-      const authData = response.data.data.data as AuthResponse;
+      const authData = extractResponseData<AuthResponse>(response);
       apiClient.setToken(authData.access_token);
       console.log("✅ Token armazenado com sucesso");
 
@@ -88,7 +114,7 @@ export const authAPI = {
 
   async getProfile(): Promise<UserProfile> {
     const response = await apiClient.get("/auth/me");
-    return response.data.data.data;
+    return extractResponseData<UserProfile>(response);
   },
 
   async logout(): Promise<void> {

@@ -118,3 +118,8 @@ export class AppointmentResponseDto {
   clientContact?: { id: number; name: string | null; phone: string };
   service?: { id: number; name: string; duration: number };
 }
+
+export interface AppointmentSuggestionsDto {
+  availableDates?: string[];
+  serviceDuration?: number;
+}

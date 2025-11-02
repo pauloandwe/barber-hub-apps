@@ -22,11 +22,9 @@ import {
   UpdateAppointmentDto,
   SuggestAppointmentDto,
   AppointmentResponseDto,
+  AppointmentSuggestionsDto,
 } from 'src/common/dtos/appointment.dto';
-import {
-  AppointmentTimelineResponseDto,
-  AppointmentTimelineQueryDto,
-} from 'src/common/dtos/appointment-timeline.dto';
+import { AppointmentTimelineResponseDto } from 'src/common/dtos/appointment-timeline.dto';
 import { AppointmentStatus, UserRole } from 'src/database/entities';
 
 @ApiTags('Appointments')
@@ -160,7 +158,7 @@ export class AppointmentsController {
   })
   async suggestAppointments(
     @Body() suggestAppointmentDto: SuggestAppointmentDto,
-  ): Promise<{ data: any }> {
+  ): Promise<AppointmentSuggestionsDto> {
     return this.appointmentsService.suggestAppointments(suggestAppointmentDto);
   }
 
@@ -243,7 +241,8 @@ export class AppointmentsController {
   async partialUpdateAppointment(
     @Param('businessId') businessId: string,
     @Param('appointmentId') appointmentId: string,
-    @Body(new ValidationPipe({ skipMissingProperties: true })) updateAppointmentDto: UpdateAppointmentDto,
+    @Body(new ValidationPipe({ skipMissingProperties: true }))
+    updateAppointmentDto: UpdateAppointmentDto,
   ): Promise<AppointmentResponseDto> {
     try {
       if (!this.hasAnyUpdatableField(updateAppointmentDto)) {

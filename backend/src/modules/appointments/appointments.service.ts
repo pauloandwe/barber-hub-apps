@@ -16,6 +16,7 @@ import {
   UpdateAppointmentDto,
   SuggestAppointmentDto,
   AppointmentResponseDto,
+  AppointmentSuggestionsDto,
 } from 'src/common/dtos/appointment.dto';
 import {
   AppointmentTimelineResponseDto,
@@ -267,7 +268,6 @@ export class AppointmentsService {
   }
 
   async create(createAppointmentDto: CreateAppointmentDto): Promise<AppointmentResponseDto> {
-    // Validar que as datas recebidas estão em formato ISO com timezone explícito
     this.validateDateStringWithTimezone(createAppointmentDto.startDate);
     this.validateDateStringWithTimezone(createAppointmentDto.endDate);
 
@@ -460,10 +460,12 @@ export class AppointmentsService {
     await this.appointmentRepository.remove(appointment);
   }
 
-  async suggestAppointments(suggestAppointmentDto: SuggestAppointmentDto): Promise<{ data: any }> {
+  async suggestAppointments(
+    suggestAppointmentDto: SuggestAppointmentDto,
+  ): Promise<AppointmentSuggestionsDto> {
     const { businessId, serviceId, startDate } = suggestAppointmentDto;
 
-    const suggestions: any = {};
+    const suggestions: AppointmentSuggestionsDto = {};
 
     if (businessId && !startDate) {
       const business = await this.businessRepository.findOne({
@@ -486,7 +488,7 @@ export class AppointmentsService {
       }
     }
 
-    return { data: suggestions };
+    return suggestions;
   }
 
   private normalizePhone(phone?: string): string | null {
@@ -519,9 +521,7 @@ export class AppointmentsService {
     // Tenta fazer parse da data para garantir que é válida
     const parsedDate = new Date(dateString);
     if (isNaN(parsedDate.getTime())) {
-      throw new BadRequestException(
-        `Data inválida. Não consegui fazer parse: "${dateString}"`,
-      );
+      throw new BadRequestException(`Data inválida. Não consegui fazer parse: "${dateString}"`);
     }
   }
 

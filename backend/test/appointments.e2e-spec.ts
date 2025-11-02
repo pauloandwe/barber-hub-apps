@@ -59,8 +59,8 @@ describe('Appointments (e2e)', () => {
         .send(appointmentData)
         .expect(201)
         .expect((res) => {
-          expect(res.body.data.data).toBeDefined();
-          expect(res.body.data.data.clientName).toBe('John Doe');
+          expect(res.body.data).toBeDefined();
+          expect(res.body.data.id).toBeDefined();
         });
     });
 
@@ -88,9 +88,9 @@ describe('Appointments (e2e)', () => {
         .get('/auth/153/5511999999999')
         .expect(200)
         .expect((res) => {
-          expect(res.body.data.data).toBeDefined();
-          expect(res.body.data.data.id).toBe(153);
-          expect(res.body.data.data.name).toBe('BarberHub');
+          expect(res.body.data).toBeDefined();
+          expect(res.body.data.id).toBe(153);
+          expect(res.body.data.name).toBe('BarberHub');
         });
     });
   });
