@@ -250,7 +250,7 @@ export function BusinessDashboard() {
                       <div>
                         <CardTitle>{service.name}</CardTitle>
                         <CardDescription>
-                          R$ {(service.price / 100).toFixed(2)} •{" "}
+                          R$ {Number(service.price).toFixed(2)} •{" "}
                           {service.duration} min
                         </CardDescription>
                       </div>

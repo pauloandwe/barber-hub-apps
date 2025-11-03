@@ -14,7 +14,7 @@ export interface Service {
   id: string;
   name: string;
   durationMin: number;
-  priceCents: number;
+  price: number;
 }
 
 interface ServiceSelectorProps {
@@ -48,7 +48,7 @@ export function ServiceSelector({
         id: s.id.toString(),
         name: s.name,
         durationMin: s.duration,
-        priceCents: s.price,
+        price: Number(s.price),
       }));
 
       setServices(mapped);
@@ -77,7 +77,7 @@ export function ServiceSelector({
         <SelectContent>
           {services.map((service) => (
             <SelectItem key={service.id} value={service.id}>
-              {service.name} - R$ {(service.priceCents / 100).toFixed(2)} (
+              {service.name} - R$ {service.price.toFixed(2)} (
               {service.durationMin} min)
             </SelectItem>
           ))}

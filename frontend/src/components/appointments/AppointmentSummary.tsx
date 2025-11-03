@@ -20,7 +20,7 @@ export function AppointmentSummary({ service }: AppointmentSummaryProps) {
         </p>
         <p>
           <span className="font-medium">Preço:</span> R${" "}
-          {(service.priceCents / 100).toFixed(2)}
+          {Number(service.price).toFixed(2)}
         </p>
       </div>
     </div>

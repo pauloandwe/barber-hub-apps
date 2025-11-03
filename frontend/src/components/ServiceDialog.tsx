@@ -63,6 +63,17 @@ export function ServiceDialog({
       return false;
     }
 
+    const decimalPart = formData.price.split(".")[1];
+    if (decimalPart && decimalPart.length > 2) {
+      toast.error("O preço deve ter no máximo duas casas decimais");
+      return false;
+    }
+
+    if (price >= 100000000) {
+      toast.error("O preço deve ser menor que R$ 99.999.999,99");
+      return false;
+    }
+
     const duration = parseInt(formData.duration, 10);
     if (isNaN(duration) || duration < 5) {
       toast.error("A duração deve ser de pelo menos 5 minutos");
@@ -85,7 +96,7 @@ export function ServiceDialog({
         name: formData.name,
         description: undefined,
         duration: parseInt(formData.duration, 10),
-        price: parseFloat(formData.price),
+        price: Number(parseFloat(formData.price).toFixed(2)),
       };
 
       if (isEditMode && service) {
@@ -128,8 +139,8 @@ export function ServiceDialog({
       setFormData({
         name: service.name ?? "",
         price:
-          typeof service.price === "number"
-            ? (service.price / 100).toFixed(2)
+          service.price !== undefined && service.price !== null
+            ? Number(service.price).toFixed(2)
             : "",
         duration:
           service.duration !== undefined ? String(service.duration) : "",
@@ -177,6 +188,7 @@ export function ServiceDialog({
               name="price"
               step="0.01"
               min="0"
+              max="99999999.99"
               placeholder="Ex: 30.00"
               value={formData.price}
               onChange={handleInputChange}

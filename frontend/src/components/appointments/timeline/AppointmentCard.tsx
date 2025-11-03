@@ -145,7 +145,9 @@ export function AppointmentCard({
               <p>
                 {startTimeStr} - {endTimeStr}
               </p>
-              <p className="text-green-600">R$ {appointment.service.price}</p>
+              <p className="text-green-600">
+                R$ {Number(appointment.service.price).toFixed(2)}
+              </p>
               {appointment.notes && (
                 <p className="text-gray-500 italic">{appointment.notes}</p>
               )}

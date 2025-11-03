@@ -33,7 +33,7 @@ export interface Service {
   businessId: string;
   name: string;
   durationMin: number;
-  priceCents: number;
+  price: number;
   active: boolean;
   createdAt: string;
   updatedAt: string;

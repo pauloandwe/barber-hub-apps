@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import * as path from 'path';
 import { AuthModule } from './modules/auth/auth.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { UnavailabilityModule } from './modules/unavailability/unavailability.module';
@@ -32,7 +33,11 @@ import { RemindersModule } from './modules/reminders/reminders.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: [
+        path.resolve(__dirname, '../.env'),
+        path.resolve(__dirname, '../../.env'),
+        '.env',
+      ],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

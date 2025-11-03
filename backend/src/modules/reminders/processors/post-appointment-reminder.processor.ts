@@ -1,6 +1,7 @@
 import { Processor, OnWorkerEvent, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
@@ -22,8 +23,8 @@ interface PostAppointmentReminderJob {
 @Processor(REMINDER_QUEUE_NAMES.POST_APPOINTMENT)
 export class PostAppointmentReminderProcessor extends WorkerHost {
   private readonly logger = new Logger(PostAppointmentReminderProcessor.name);
-  private readonly whatsappServiceUrl = process.env.WHATSAPP_BOT_URL || 'http://localhost:3000';
-  private readonly whatsappWebhookSecret = process.env.WHATSAPP_WEBHOOK_SECRET || '';
+  private readonly whatsappServiceUrl: string;
+  private readonly whatsappWebhookSecret: string;
 
   constructor(
     @InjectRepository(AppointmentEntity)
@@ -33,8 +34,12 @@ export class PostAppointmentReminderProcessor extends WorkerHost {
     @InjectRepository(ReminderTemplateEntity)
     private reminderTemplateRepository: Repository<ReminderTemplateEntity>,
     private reminderService: RemindersService,
+    private readonly configService: ConfigService,
   ) {
     super();
+    this.whatsappServiceUrl =
+      this.configService.get<string>('WHATSAPP_BOT_URL', 'http://localhost:3000') ?? 'http://localhost:3000';
+    this.whatsappWebhookSecret = (this.configService.get<string>('WHATSAPP_WEBHOOK_SECRET') || '').trim();
   }
 
   async process(job: Job<PostAppointmentReminderJob>) {
