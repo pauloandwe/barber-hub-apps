@@ -1,5 +1,5 @@
 ================================================================================
-                    BARBER HUB FRONTEND ARCHITECTURE
+                    PROFESSIONAL HUB FRONTEND ARCHITECTURE
 ================================================================================
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -20,7 +20,7 @@
 │  │           ├─ /login                  → Login                            │
 │  │           ├─ /register               → Register                         │
 │  │           ├─ /admin                  → AdminDashboard (AuthGuard)        │
-│  │           ├─ /barbershop             → BarbershopDashboard (AuthGuard)   │
+│  │           ├─ /business             → BusinessDashboard (AuthGuard)   │
 │  │           ├─ /client                 → ClientDashboard (AuthGuard)       │
 │  │           ├─ /profile                → Profile (AuthGuard)               │
 │  │           └─ *                       → NotFound                         │
@@ -67,8 +67,8 @@
 └──────────────────┘ └──────────────────┘ └──────────────────────┘
 
 Additional API Modules:
-• barbers.ts       - Barber CRUD + specialties
-• business.ts      - Barbershop CRUD
+• professionals.ts       - Professional CRUD + specialties
+• business.ts      - Business CRUD
 • users.ts         - User management (Admin only)
 • hairhub-tools.ts - AI integrations
 
@@ -124,7 +124,7 @@ Additional API Modules:
 │                                                                              │
 │  • AppointmentDialog.tsx       - Create/Edit appointment dialog            │
 │  • AppointmentSummary.tsx      - Display appointment details               │
-│  • BarberSelector.tsx          - Select barber dropdown                    │
+│  • ProfessionalSelector.tsx          - Select professional dropdown                    │
 │  • ClientSelector.tsx          - Select client dropdown                    │
 │  • DateTimePicker.tsx          - Date and time selection                   │
 │  • ServiceSelector.tsx         - Select service dropdown                   │
@@ -132,7 +132,7 @@ Additional API Modules:
 │  └─ timeline/                                                              │
 │     • AppointmentTimelineView.tsx  - Main timeline component               │
 │     • TimelineGrid.tsx             - Grid layout                           │
-│     • BarberColumn.tsx             - Column per barber                     │
+│     • ProfessionalColumn.tsx             - Column per professional                     │
 │     • TimeScale.tsx                - Time axis                            │
 │     • AppointmentCard.tsx          - Individual appointment                │
 │     • TimeSlot.tsx                 - Hourly slot                           │
@@ -348,15 +348,15 @@ User Logs In
        ├─ If role = "ADMIN"
        │  └─ Redirect to /admin → AdminDashboard
        │
-       ├─ If role = "BARBERSHOP"
-       │  └─ Redirect to /barbershop → BarbershopDashboard
+       ├─ If role = "BUSINESS"
+       │  └─ Redirect to /business → BusinessDashboard
        │
        └─ If role = "CLIENT"
           └─ Redirect to /client → ClientDashboard
 
 Protected Routes:
     /admin           → Only ADMIN role
-    /barbershop      → Only BARBERSHOP_MANAGER role
+    /business      → Only BARBERSHOP_MANAGER role
     /client          → Only CLIENT role
     /profile         → All authenticated users
 

@@ -4,11 +4,11 @@ import { Repository, Between, In } from 'typeorm';
 import {
   BusinessEntity,
   ServiceEntity,
-  BarberEntity,
+  ProfessionalEntity,
   AppointmentEntity,
   AppointmentStatus,
   WorkingHoursEntity,
-  BarberWorkingHoursEntity,
+  ProfessionalWorkingHoursEntity,
 } from '../../database/entities';
 import { CreateBusinessDto } from '../../common/dtos/create-business.dto';
 import { UpdateBusinessDto } from '../../common/dtos/update-business.dto';
@@ -18,7 +18,7 @@ type TimeInterval = {
   end: Date;
 };
 
-export interface BarberAvailability {
+export interface ProfessionalAvailability {
   id: number;
   name: string;
   specialties: string[] | null;
@@ -28,13 +28,13 @@ export interface BarberAvailability {
 export interface AvailabilityResponse {
   date: string;
   slotDurationMinutes: number;
-  barbers: BarberAvailability[];
+  professionals: ProfessionalAvailability[];
 }
 
-export interface SingleBarberAvailabilityResponse {
+export interface SingleProfessionalAvailabilityResponse {
   date: string;
   slotDurationMinutes: number;
-  barber: BarberAvailability;
+  professional: ProfessionalAvailability;
 }
 
 export interface AvailableDay {
@@ -44,8 +44,8 @@ export interface AvailableDay {
 }
 
 export interface AvailableDaysResponse {
-  barberId: number;
-  barberName: string;
+  professionalId: number;
+  professionalName: string;
   availableDays: AvailableDay[];
 }
 
@@ -63,8 +63,8 @@ export class BusinessService {
     private readonly businessRepository: Repository<BusinessEntity>,
     @InjectRepository(ServiceEntity)
     private readonly serviceRepository: Repository<ServiceEntity>,
-    @InjectRepository(BarberEntity)
-    private readonly barberRepository: Repository<BarberEntity>,
+    @InjectRepository(ProfessionalEntity)
+    private readonly professionalRepository: Repository<ProfessionalEntity>,
     @InjectRepository(AppointmentEntity)
     private readonly appointmentRepository: Repository<AppointmentEntity>,
   ) {}
@@ -96,10 +96,10 @@ export class BusinessService {
     });
   }
 
-  async findBarbersByPhone(phone: string): Promise<BarberEntity[]> {
+  async findProfessionalsByPhone(phone: string): Promise<ProfessionalEntity[]> {
     const business = await this.getBusinessByPhoneOrThrow(phone);
 
-    return this.barberRepository.find({
+    return this.professionalRepository.find({
       where: { businessId: business.id, active: true },
       order: { name: 'ASC' },
     });
@@ -118,70 +118,70 @@ export class BusinessService {
 
     const slotDurationMinutes = await this.resolveSlotDuration(serviceId, business.id);
 
-    const barbers = await this.barberRepository.find({
+    const professionals = await this.professionalRepository.find({
       where: { businessId: business.id, active: true },
-      relations: ['bloqueios', 'workingHours'],
+      relations: ['unavailability', 'workingHours'],
       order: { name: 'ASC' },
     });
 
-    if (!barbers.length) {
+    if (!professionals.length) {
       return {
         date: this.formatDate(startOfDay),
         slotDurationMinutes,
-        barbers: [],
+        professionals: [],
       };
     }
 
     const dayOfWeek = startOfDay.getDay();
     const businessWorkingDay = business.workingHours?.find((wh) => wh.dayOfWeek === dayOfWeek);
 
-    const barberIds = barbers.map((barber) => barber.id);
+    const professionalIds = professionals.map((professional) => professional.id);
 
-    const appointments = barberIds.length
+    const appointments = professionalIds.length
       ? await this.appointmentRepository.find({
           where: {
             businessId: business.id,
-            barberId: In(barberIds),
+            professionalId: In(professionalIds),
             startDate: Between(startOfDay, endOfDay),
             status: In([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED]),
           },
         })
       : [];
 
-    const appointmentsByBarber = appointments.reduce<Map<number, AppointmentEntity[]>>(
+    const appointmentsByProfessional = appointments.reduce<Map<number, AppointmentEntity[]>>(
       (acc, appointment) => {
-        const list = acc.get(appointment.barberId) ?? [];
+        const list = acc.get(appointment.professionalId) ?? [];
         list.push(appointment);
-        acc.set(appointment.barberId, list);
+        acc.set(appointment.professionalId, list);
         return acc;
       },
       new Map(),
     );
 
-    const availability: BarberAvailability[] = barbers.map((barber) =>
-      this.calculateAvailabilityForBarber({
-        barber,
+    const availability: ProfessionalAvailability[] = professionals.map((professional) =>
+      this.calculateAvailabilityForProfessional({
+        professional,
         businessWorkingDay: businessWorkingDay ?? null,
         dayOfWeek,
         startOfDay,
         endOfDay,
         slotDurationMinutes,
-        appointments: appointmentsByBarber.get(barber.id) ?? [],
+        appointments: appointmentsByProfessional.get(professional.id) ?? [],
       }),
     );
 
     return {
       date: this.formatDate(startOfDay),
       slotDurationMinutes,
-      barbers: availability,
+      professionals: availability,
     };
   }
 
-  async findBarberSlotsByPhone(
+  async findProfessionalSlotsByPhone(
     phone: string,
-    barberId: number,
+    professionalId: number,
     options: { date?: string; serviceId?: number } = {},
-  ): Promise<SingleBarberAvailabilityResponse> {
+  ): Promise<SingleProfessionalAvailabilityResponse> {
     const { date, serviceId } = options;
     const business = await this.getBusinessByPhoneOrThrow(phone, ['workingHours']);
     const targetDate = this.resolveTargetDate(date);
@@ -191,13 +191,13 @@ export class BusinessService {
 
     const slotDurationMinutes = await this.resolveSlotDuration(serviceId, business.id);
 
-    const barber = await this.barberRepository.findOne({
-      where: { id: barberId, businessId: business.id, active: true },
-      relations: ['bloqueios', 'workingHours'],
+    const professional = await this.professionalRepository.findOne({
+      where: { id: professionalId, businessId: business.id, active: true },
+      relations: ['unavailability', 'workingHours'],
     });
 
-    if (!barber) {
-      throw new NotFoundException('Barber not found for this business');
+    if (!professional) {
+      throw new NotFoundException('Professional not found for this business');
     }
 
     const dayOfWeek = startOfDay.getDay();
@@ -206,14 +206,14 @@ export class BusinessService {
     const appointments = await this.appointmentRepository.find({
       where: {
         businessId: business.id,
-        barberId: barber.id,
+        professionalId: professional.id,
         startDate: Between(startOfDay, endOfDay),
         status: In([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED]),
       },
     });
 
-    const barberAvailability = this.calculateAvailabilityForBarber({
-      barber,
+    const professionalAvailability = this.calculateAvailabilityForProfessional({
+      professional,
       businessWorkingDay: businessWorkingDay ?? null,
       dayOfWeek,
       startOfDay,
@@ -225,25 +225,25 @@ export class BusinessService {
     return {
       date: this.formatDate(startOfDay),
       slotDurationMinutes,
-      barber: barberAvailability,
+      professional: professionalAvailability,
     };
   }
 
   async findAvailableDaysByPhone(
     phone: string,
-    barberId: number,
+    professionalId: number,
     options: { serviceId?: number; days?: number } = {},
   ): Promise<AvailableDaysResponse> {
     const { serviceId, days = 15 } = options;
     const business = await this.getBusinessByPhoneOrThrow(phone, ['workingHours']);
 
-    const barber = await this.barberRepository.findOne({
-      where: { id: barberId, businessId: business.id, active: true },
-      relations: ['bloqueios', 'workingHours'],
+    const professional = await this.professionalRepository.findOne({
+      where: { id: professionalId, businessId: business.id, active: true },
+      relations: ['unavailability', 'workingHours'],
     });
 
-    if (!barber) {
-      throw new NotFoundException('Barber not found for this business');
+    if (!professional) {
+      throw new NotFoundException('Professional not found for this business');
     }
 
     const availableDays: AvailableDay[] = [];
@@ -260,12 +260,12 @@ export class BusinessService {
         continue;
       }
 
-      const availabilityResponse = await this.findBarberSlotsByPhone(phone, barberId, {
+      const availabilityResponse = await this.findProfessionalSlotsByPhone(phone, professionalId, {
         date: dateStr,
         serviceId,
       });
 
-      const slotsCount = availabilityResponse.barber.slots.length;
+      const slotsCount = availabilityResponse.professional.slots.length;
 
       if (slotsCount > 0) {
         const dayOfWeek = checkDate.getDay();
@@ -280,8 +280,8 @@ export class BusinessService {
     }
 
     return {
-      barberId,
-      barberName: barber.name,
+      professionalId,
+      professionalName: professional.name,
       availableDays,
     };
   }
@@ -291,7 +291,7 @@ export class BusinessService {
       createBusinessDto.token = this.generateToken();
     }
     if (!createBusinessDto.type) {
-      createBusinessDto.type = 'BARBERSHOP';
+      createBusinessDto.type = 'BUSINESS';
     }
     const business = this.businessRepository.create(createBusinessDto);
     return this.businessRepository.save(business);
@@ -370,8 +370,8 @@ export class BusinessService {
     return service.duration;
   }
 
-  private calculateAvailabilityForBarber({
-    barber,
+  private calculateAvailabilityForProfessional({
+    professional,
     businessWorkingDay,
     dayOfWeek,
     startOfDay,
@@ -379,25 +379,25 @@ export class BusinessService {
     slotDurationMinutes,
     appointments,
   }: {
-    barber: BarberEntity;
+    professional: ProfessionalEntity;
     businessWorkingDay: WorkingHoursEntity | null;
     dayOfWeek: number;
     startOfDay: Date;
     endOfDay: Date;
     slotDurationMinutes: number;
     appointments: AppointmentEntity[];
-  }): BarberAvailability {
-    const workingDay = this.resolveWorkingHoursForBarber(
-      barber.workingHours ?? [],
+  }): ProfessionalAvailability {
+    const workingDay = this.resolveWorkingHoursForProfessional(
+      professional.workingHours ?? [],
       businessWorkingDay,
       dayOfWeek,
     );
 
     if (!workingDay) {
       return {
-        id: barber.id,
-        name: barber.name,
-        specialties: barber.specialties ?? null,
+        id: professional.id,
+        name: professional.name,
+        specialties: professional.specialties ?? null,
         slots: [],
       };
     }
@@ -406,9 +406,9 @@ export class BusinessService {
 
     if (!baseIntervals.length) {
       return {
-        id: barber.id,
-        name: barber.name,
-        specialties: barber.specialties ?? null,
+        id: professional.id,
+        name: professional.name,
+        specialties: professional.specialties ?? null,
         slots: [],
       };
     }
@@ -426,10 +426,10 @@ export class BusinessService {
       }
     }
 
-    const bloqueios = barber.bloqueios ?? [];
-    for (const bloqueio of bloqueios) {
+    const unavailability = professional.unavailability ?? [];
+    for (const block of unavailability) {
       const blockedInterval = this.clampInterval(
-        { start: bloqueio.data_inicio, end: bloqueio.data_fim },
+        { start: block.data_inicio, end: block.data_fim },
         startOfDay,
         endOfDay,
       );
@@ -445,35 +445,35 @@ export class BusinessService {
     }));
 
     return {
-      id: barber.id,
-      name: barber.name,
-      specialties: barber.specialties ?? null,
+      id: professional.id,
+      name: professional.name,
+      specialties: professional.specialties ?? null,
       slots: futureSlots,
     };
   }
 
-  private resolveWorkingHoursForBarber(
-    barberWorkingHours: BarberWorkingHoursEntity[],
+  private resolveWorkingHoursForProfessional(
+    professionalWorkingHours: ProfessionalWorkingHoursEntity[],
     businessWorkingDay: WorkingHoursEntity | null,
     dayOfWeek: number,
   ): WorkingHoursLike | null {
-    const barberDay = barberWorkingHours.find((wh) => wh.dayOfWeek === dayOfWeek);
+    const professionalDay = professionalWorkingHours.find((wh) => wh.dayOfWeek === dayOfWeek);
 
-    if (barberDay) {
-      if (barberDay.closed) {
+    if (professionalDay) {
+      if (professionalDay.closed) {
         return null;
       }
 
-      if (!barberDay.openTime || !barberDay.closeTime) {
+      if (!professionalDay.openTime || !professionalDay.closeTime) {
         return null;
       }
 
       return {
-        openTime: barberDay.openTime,
-        closeTime: barberDay.closeTime,
-        breakStart: barberDay.breakStart ?? undefined,
-        breakEnd: barberDay.breakEnd ?? undefined,
-        closed: barberDay.closed,
+        openTime: professionalDay.openTime,
+        closeTime: professionalDay.closeTime,
+        breakStart: professionalDay.breakStart ?? undefined,
+        breakEnd: professionalDay.breakEnd ?? undefined,
+        closed: professionalDay.closed,
       };
     }
 

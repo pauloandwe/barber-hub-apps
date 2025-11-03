@@ -8,7 +8,7 @@ import { format } from "date-fns";
 interface UseTimelineDataOptions {
   businessId: number;
   date: Date;
-  barberIds?: number[];
+  professionalIds?: number[];
   status?: "pending" | "confirmed" | "canceled";
   serviceId?: number;
   enabled?: boolean;
@@ -17,7 +17,7 @@ interface UseTimelineDataOptions {
 export function useTimelineData({
   businessId,
   date,
-  barberIds,
+  professionalIds,
   status,
   serviceId,
   enabled = true,
@@ -29,7 +29,7 @@ export function useTimelineData({
       "appointmentTimeline",
       businessId,
       dateString,
-      barberIds,
+      professionalIds,
       status,
       serviceId,
     ],
@@ -37,7 +37,7 @@ export function useTimelineData({
       appointmentsAPI.getTimeline(
         businessId,
         dateString,
-        barberIds,
+        professionalIds,
         status,
         serviceId
       ),
@@ -54,7 +54,7 @@ export function useRefreshTimelineData() {
     invalidateTimelineData: (
       businessId: number,
       date: Date,
-      barberIds?: number[]
+      professionalIds?: number[]
     ) => {
       const dateString = format(date, "yyyy-MM-dd");
       queryClient.invalidateQueries({

@@ -6,7 +6,7 @@ export function getDashboardRoute(role: UserRole): string {
     case UserRole.ADMIN:
       return ROUTES.ADMIN;
     case UserRole.BARBERSHOP_MANAGER:
-      return ROUTES.BARBERSHOP;
+      return ROUTES.BUSINESS;
     case UserRole.CLIENT:
       return ROUTES.CLIENT;
     default:
@@ -15,7 +15,7 @@ export function getDashboardRoute(role: UserRole): string {
 }
 
 export function getAllDashboardRoutes(): string[] {
-  return [ROUTES.ADMIN, ROUTES.BARBERSHOP, ROUTES.CLIENT];
+  return [ROUTES.ADMIN, ROUTES.BUSINESS, ROUTES.CLIENT];
 }
 
 export function isDashboardRoute(route: string): boolean {
@@ -26,7 +26,7 @@ export function getRequiredRoleForRoute(route: string): UserRole | null {
   switch (route) {
     case ROUTES.ADMIN:
       return UserRole.ADMIN;
-    case ROUTES.BARBERSHOP:
+    case ROUTES.BUSINESS:
       return UserRole.BARBERSHOP_MANAGER;
     case ROUTES.CLIENT:
       return UserRole.CLIENT;

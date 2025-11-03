@@ -13,7 +13,7 @@ class AppointmentTimelineServiceDto {
 
 export class AppointmentTimelineCardDto {
   id: number;
-  barberId: number;
+  professionalId: number;
   startDate: string;
   endDate: string;
   status: AppointmentStatus;
@@ -23,7 +23,7 @@ export class AppointmentTimelineCardDto {
   service: AppointmentTimelineServiceDto;
 }
 
-export class BarberWorkingHourDto {
+export class ProfessionalWorkingHourDto {
   dayOfWeek: number;
   openTime: string | null;
   closeTime: string | null;
@@ -32,23 +32,23 @@ export class BarberWorkingHourDto {
   closed: boolean;
 }
 
-export class BarberTimelineDto {
+export class ProfessionalTimelineDto {
   id: number;
   name: string;
   specialties: string[];
   appointments: AppointmentTimelineCardDto[];
-  workingHours: BarberWorkingHourDto;
+  workingHours: ProfessionalWorkingHourDto;
 }
 
 export class AppointmentTimelineResponseDto {
   date: string;
-  barbers: BarberTimelineDto[];
+  professionals: ProfessionalTimelineDto[];
   slotDurationMinutes: number;
 }
 
 export class AppointmentTimelineQueryDto {
   date: string;
-  barberIds?: number[];
+  professionalIds?: number[];
   status?: 'pending' | 'confirmed' | 'canceled';
   serviceId?: number;
 }

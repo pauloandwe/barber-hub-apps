@@ -1,24 +1,24 @@
 import { useState, useCallback } from "react";
 import { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-import { AppointmentTimelineCard, BarberTimeline } from "@/api/appointments";
+import { AppointmentTimelineCard, ProfessionalTimeline } from "@/api/appointments";
 import { appointmentsAPI } from "@/api/appointments";
 import { toast } from "sonner";
 
 interface DragDropPayload {
   appointmentId: number;
-  originalBarberId: number;
+  originalProfessionalId: number;
   originalStartDate: string;
 }
 
 interface UseDragAndDropOptions {
   businessId: number;
-  barbers: BarberTimeline[];
+  professionals: ProfessionalTimeline[];
   onAppointmentUpdate?: (appointmentId: number) => void;
 }
 
 export function useDragAndDrop({
   businessId,
-  barbers,
+  professionals,
   onAppointmentUpdate,
 }: UseDragAndDropOptions) {
   const [isDragging, setIsDragging] = useState(false);
@@ -32,7 +32,7 @@ export function useDragAndDrop({
       setIsDragging(true);
       setDraggedAppointment({
         appointmentId: active.data.current.appointmentId,
-        originalBarberId: active.data.current.barberId,
+        originalProfessionalId: active.data.current.professionalId,
         originalStartDate: active.data.current.startDate,
       });
     }
@@ -55,7 +55,7 @@ export function useDragAndDrop({
         return;
       }
 
-      const targetBarberId = overData.barberId;
+      const targetBarberId = overData.professionalId;
       const targetSlotTime = overData.slotTime;
 
       if (!targetBarberId || !targetSlotTime) {
@@ -65,7 +65,7 @@ export function useDragAndDrop({
       }
 
       const originalAppointment = findAppointment(
-        barbers,
+        professionals,
         draggedAppointment.appointmentId
       );
 
@@ -93,7 +93,7 @@ export function useDragAndDrop({
           businessId,
           draggedAppointment.appointmentId,
           {
-            barberId: targetBarberId,
+            professionalId: targetBarberId,
             startDate: newStartDate.toISOString(),
             endDate: newEndDate.toISOString(),
           }
@@ -108,7 +108,7 @@ export function useDragAndDrop({
         setDraggedAppointment(null);
       }
     },
-    [draggedAppointment, businessId, barbers, onAppointmentUpdate]
+    [draggedAppointment, businessId, professionals, onAppointmentUpdate]
   );
 
   return {
@@ -120,11 +120,11 @@ export function useDragAndDrop({
 }
 
 function findAppointment(
-  barbers: BarberTimeline[],
+  professionals: ProfessionalTimeline[],
   appointmentId: number
 ): AppointmentTimelineCard | null {
-  for (const barber of barbers) {
-    const appointment = barber.appointments.find(
+  for (const professional of professionals) {
+    const appointment = professional.appointments.find(
       (apt) => apt.id === appointmentId
     );
     if (appointment) {
@@ -135,7 +135,7 @@ function findAppointment(
 }
 
 export function isTimeSlotAvailable(
-  barber: BarberTimeline,
+  professional: ProfessionalTimeline,
   startTime: string,
   durationMinutes: number,
   excludeAppointmentId?: number
@@ -144,7 +144,7 @@ export function isTimeSlotAvailable(
   const slotStartMinutes = startHour * 60 + startMinute;
   const slotEndMinutes = slotStartMinutes + durationMinutes;
 
-  for (const apt of barber.appointments) {
+  for (const apt of professional.appointments) {
     if (excludeAppointmentId && apt.id === excludeAppointmentId) {
       continue;
     }
@@ -165,14 +165,14 @@ export function isTimeSlotAvailable(
     }
   }
 
-  if (barber.workingHours.closed || !barber.workingHours.openTime) {
+  if (professional.workingHours.closed || !professional.workingHours.openTime) {
     return false;
   }
 
-  const [openHour, openMin] = barber.workingHours.openTime
+  const [openHour, openMin] = professional.workingHours.openTime
     .split(":")
     .map(Number);
-  const [closeHour, closeMin] = barber.workingHours
+  const [closeHour, closeMin] = professional.workingHours
     .closeTime!.split(":")
     .map(Number);
 
@@ -183,11 +183,11 @@ export function isTimeSlotAvailable(
     return false;
   }
 
-  if (barber.workingHours.breakStart && barber.workingHours.breakEnd) {
-    const [breakStartHour, breakStartMin] = barber.workingHours.breakStart
+  if (professional.workingHours.breakStart && professional.workingHours.breakEnd) {
+    const [breakStartHour, breakStartMin] = professional.workingHours.breakStart
       .split(":")
       .map(Number);
-    const [breakEndHour, breakEndMin] = barber.workingHours.breakEnd
+    const [breakEndHour, breakEndMin] = professional.workingHours.breakEnd
       .split(":")
       .map(Number);
 

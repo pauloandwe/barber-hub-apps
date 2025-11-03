@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { BarberWorkingHour } from "@/api/appointments";
+import { ProfessionalWorkingHour } from "@/api/appointments";
 
 export interface TimeSlot {
   startTime: string;
@@ -9,7 +9,7 @@ export interface TimeSlot {
 }
 
 interface UseTimeSlotsOptions {
-  workingHours: BarberWorkingHour;
+  workingHours: ProfessionalWorkingHour;
   slotDurationMinutes?: number;
 }
 
@@ -100,13 +100,13 @@ export function useTimeSlots({
 }
 
 export function useAllTimeSlots(
-  barberWorkingHours: BarberWorkingHour[],
+  professionalWorkingHours: ProfessionalWorkingHour[],
   slotDurationMinutes: number = 30
 ): TimeSlot[] {
   return useMemo(() => {
     const allSlots = new Map<string, TimeSlot>();
 
-    barberWorkingHours.forEach((hours) => {
+    professionalWorkingHours.forEach((hours) => {
       const slots = buildTimeSlots({
         workingHours: hours,
         slotDurationMinutes,
@@ -122,5 +122,5 @@ export function useAllTimeSlots(
       }
       return a.startMinute - b.startMinute;
     });
-  }, [barberWorkingHours, slotDurationMinutes]);
+  }, [professionalWorkingHours, slotDurationMinutes]);
 }

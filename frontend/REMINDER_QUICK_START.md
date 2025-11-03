@@ -1,6 +1,6 @@
 # Quick Start Guide: Creating Reminder Configuration Pages
 
-This guide provides a step-by-step template for creating reminder configuration pages following Barber Hub's established patterns.
+This guide provides a step-by-step template for creating reminder configuration pages following Professional Hub's established patterns.
 
 ## Step 1: Create API Module
 
@@ -350,7 +350,7 @@ export function ReminderConfig() {
     if (roleLoading) return;
 
     if (!barbershopId) {
-      toast.error("Não foi possível identificar sua barbearia");
+      toast.error("Não foi possível identificar sua business");
       setIsLoading(false);
       return;
     }

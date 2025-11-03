@@ -42,14 +42,14 @@ export class BusinessController {
     return await this.businessService.findServicesByPhone(phone);
   }
 
-  @Get('phone/:phone/barbers')
-  @ApiOperation({ summary: 'Get barbers by business phone' })
-  async findBarbersByPhone(@Param('phone') phone: string) {
-    return await this.businessService.findBarbersByPhone(phone);
+  @Get('phone/:phone/professionals')
+  @ApiOperation({ summary: 'Get professionals by business phone' })
+  async findProfessionalsByPhone(@Param('phone') phone: string) {
+    return await this.businessService.findProfessionalsByPhone(phone);
   }
 
   @Get('phone/:phone/free-slots')
-  @ApiOperation({ summary: 'Get available slots for all barbers by business phone' })
+  @ApiOperation({ summary: 'Get available slots for all professionals by business phone' })
   async findAvailableSlotsByPhone(
     @Param('phone') phone: string,
     @Query('date') date?: string,
@@ -69,17 +69,17 @@ export class BusinessController {
     });
   }
 
-  @Get('phone/:phone/barbers/:barberId/free-slots')
-  @ApiOperation({ summary: 'Get available slots for a specific barber by business phone' })
-  async findBarberSlotsByPhone(
+  @Get('phone/:phone/professionals/:professionalId/free-slots')
+  @ApiOperation({ summary: 'Get available slots for a specific professional by business phone' })
+  async findProfessionalSlotsByPhone(
     @Param('phone') phone: string,
-    @Param('barberId') barberId: string,
+    @Param('professionalId') professionalId: string,
     @Query('date') date?: string,
     @Query('serviceId') serviceId?: string,
   ) {
-    const parsedBarberId = Number(barberId);
-    if (Number.isNaN(parsedBarberId)) {
-      throw new BadRequestException('barberId must be a valid number');
+    const parsedProfessionalId = Number(professionalId);
+    if (Number.isNaN(parsedProfessionalId)) {
+      throw new BadRequestException('professionalId must be a valid number');
     }
 
     let parsedServiceId: number | undefined;
@@ -90,23 +90,23 @@ export class BusinessController {
       }
     }
 
-    return await this.businessService.findBarberSlotsByPhone(phone, parsedBarberId, {
+    return await this.businessService.findProfessionalSlotsByPhone(phone, parsedProfessionalId, {
       date,
       serviceId: parsedServiceId,
     });
   }
 
-  @Get('phone/:phone/barbers/:barberId/available-days')
-  @ApiOperation({ summary: 'Get available days for a specific barber (next N days with slots)' })
+  @Get('phone/:phone/professionals/:professionalId/available-days')
+  @ApiOperation({ summary: 'Get available days for a specific professional (next N days with slots)' })
   async findAvailableDaysByPhone(
     @Param('phone') phone: string,
-    @Param('barberId') barberId: string,
+    @Param('professionalId') professionalId: string,
     @Query('serviceId') serviceId?: string,
     @Query('days') days: string = '15',
   ) {
-    const parsedBarberId = Number(barberId);
-    if (Number.isNaN(parsedBarberId)) {
-      throw new BadRequestException('barberId must be a valid number');
+    const parsedProfessionalId = Number(professionalId);
+    if (Number.isNaN(parsedProfessionalId)) {
+      throw new BadRequestException('professionalId must be a valid number');
     }
 
     let parsedServiceId: number | undefined;
@@ -122,7 +122,7 @@ export class BusinessController {
       throw new BadRequestException('days must be a number between 1 and 365');
     }
 
-    return await this.businessService.findAvailableDaysByPhone(phone, parsedBarberId, {
+    return await this.businessService.findAvailableDaysByPhone(phone, parsedProfessionalId, {
       serviceId: parsedServiceId,
       days: parsedDays,
     });
@@ -130,7 +130,7 @@ export class BusinessController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BUSINESS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new business' })
   async create(@Body() createBusinessDto: CreateBusinessDto) {
@@ -139,7 +139,7 @@ export class BusinessController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BUSINESS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a business' })
   async update(@Param('id') id: number, @Body() updateBusinessDto: UpdateBusinessDto) {

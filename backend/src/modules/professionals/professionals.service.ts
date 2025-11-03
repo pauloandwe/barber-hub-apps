@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BarberEntity } from '../../database/entities/barber.entity';
-import { CreateBarberDto, UpdateBarberDto, BarberResponseDto } from '../../common/dtos/barber.dto';
+import { ProfessionalEntity } from '../../database/entities/professional.entity';
+import { CreateProfessionalDto, UpdateProfessionalDto, ProfessionalResponseDto } from '../../common/dtos/professional.dto';
 
 @Injectable()
-export class BarbersService {
+export class ProfessionalsService {
   constructor(
-    @InjectRepository(BarberEntity)
-    private readonly barberRepository: Repository<BarberEntity>,
+    @InjectRepository(ProfessionalEntity)
+    private readonly professionalRepository: Repository<ProfessionalEntity>,
   ) {}
 
   async findAll({
@@ -17,60 +17,60 @@ export class BarbersService {
   }: {
     businessId?: number;
     businessPhone?: string;
-  }): Promise<BarberEntity[]> {
+  }): Promise<ProfessionalEntity[]> {
     if (businessId) {
-      return this.barberRepository.find({
+      return this.professionalRepository.find({
         where: { businessId },
         order: { name: 'ASC' },
       });
     } else if (businessPhone) {
-      return this.barberRepository.find({
+      return this.professionalRepository.find({
         where: { business: { phone: businessPhone } },
         order: { name: 'ASC' },
         relations: ['business'],
       });
     }
-    return this.barberRepository.find({
+    return this.professionalRepository.find({
       order: { name: 'ASC' },
     });
   }
 
-  async findById(id: number): Promise<BarberEntity> {
-    const barber = await this.barberRepository.findOne({
+  async findById(id: number): Promise<ProfessionalEntity> {
+    const professional = await this.professionalRepository.findOne({
       where: { id },
     });
 
-    if (!barber) {
-      throw new NotFoundException(`Barber with ID ${id} not found`);
+    if (!professional) {
+      throw new NotFoundException(`Professional with ID ${id} not found`);
     }
 
-    return barber;
+    return professional;
   }
 
-  async findByBusinessId(businessId: number): Promise<BarberEntity[]> {
-    return this.barberRepository.find({
+  async findByBusinessId(businessId: number): Promise<ProfessionalEntity[]> {
+    return this.professionalRepository.find({
       where: { businessId },
       order: { name: 'ASC' },
     });
   }
 
-  async create(createBarberDto: CreateBarberDto): Promise<BarberEntity> {
+  async create(createBarberDto: CreateProfessionalDto): Promise<ProfessionalEntity> {
     if (!createBarberDto.businessId) {
       throw new BadRequestException('businessId is required');
     }
 
-    const barber = this.barberRepository.create({
+    const professional = this.professionalRepository.create({
       businessId: createBarberDto.businessId,
       name: createBarberDto.name,
       specialties: createBarberDto.specialties,
       active: createBarberDto.active !== undefined ? createBarberDto.active : true,
     });
 
-    return this.barberRepository.save(barber);
+    return this.professionalRepository.save(professional);
   }
 
-  async update(id: number, updateBarberDto: UpdateBarberDto): Promise<BarberEntity> {
-    const barber = await this.findById(id);
+  async update(id: number, updateBarberDto: UpdateProfessionalDto): Promise<ProfessionalEntity> {
+    const professional = await this.findById(id);
 
     const updateData: any = {};
     if (updateBarberDto.name) updateData.name = updateBarberDto.name;
@@ -78,12 +78,12 @@ export class BarbersService {
     if (updateBarberDto.specialties) updateData.specialties = updateBarberDto.specialties;
     if (updateBarberDto.active !== undefined) updateData.active = updateBarberDto.active;
 
-    await this.barberRepository.update(id, updateData);
+    await this.professionalRepository.update(id, updateData);
     return this.findById(id);
   }
 
   async delete(id: number): Promise<void> {
-    const barber = await this.findById(id);
-    await this.barberRepository.delete(id);
+    const professional = await this.findById(id);
+    await this.professionalRepository.delete(id);
   }
 }

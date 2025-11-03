@@ -46,7 +46,7 @@ describe('Appointments (e2e)', () => {
       const appointmentData = {
         businessId: 1,
         serviceId: 1,
-        barberId: 1,
+        professionalId: 1,
         clientName: 'John Doe',
         clientPhone: '5511999999999',
         appointmentDate: '2025-01-15',
@@ -68,7 +68,7 @@ describe('Appointments (e2e)', () => {
       const appointmentData = {
         businessId: 2,
         serviceId: 1,
-        barberId: 1,
+        professionalId: 1,
         clientName: 'John Doe',
         clientPhone: '5511999999999',
         appointmentDate: '2025-01-15',

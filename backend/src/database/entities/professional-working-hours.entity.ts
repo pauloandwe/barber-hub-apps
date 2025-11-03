@@ -6,16 +6,16 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { BarberEntity } from './barber.entity';
+import { ProfessionalEntity } from './professional.entity';
 
-@Entity('barber_working_hours')
-@Unique(['barberId', 'dayOfWeek'])
-export class BarberWorkingHoursEntity {
+@Entity('professional_working_hours')
+@Unique(['professionalId', 'dayOfWeek'])
+export class ProfessionalWorkingHoursEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'int' })
-  barberId: number;
+  professionalId: number;
 
   @Column({ type: 'int' })
   dayOfWeek: number;
@@ -35,10 +35,10 @@ export class BarberWorkingHoursEntity {
   @Column({ type: 'boolean', default: false })
   closed: boolean;
 
-  @ManyToOne(() => BarberEntity, (barber) => barber.workingHours, {
+  @ManyToOne(() => ProfessionalEntity, (professional) => professional.workingHours, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'barberId' })
-  barber: BarberEntity;
+  @JoinColumn({ name: 'professionalId' })
+  professional: ProfessionalEntity;
 }
 

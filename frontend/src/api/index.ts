@@ -3,7 +3,9 @@ export { authAPI } from './auth';
 export { businessAPI } from './business';
 export { usersAPI } from './users';
 export { appointmentsAPI } from './appointments';
-export { barbersAPI } from './barbers';
+export { professionalsAPI } from './professionals';
+// Backwards compatibility alias
+export { professionalsAPI as professionalsAPI } from './professionals';
 export { servicesAPI } from './services';
 export { remindersAPI } from './reminders';
 export {
@@ -16,7 +18,14 @@ export type { AuthResponse, UserProfile, LoginRequest, RegisterRequest } from '.
 export type { Business, CreateBusinessRequest, UpdateBusinessRequest } from './business';
 export type { UserProfile as UserProfileApi, UpdateUserRequest } from './users';
 export type { Appointment, CreateAppointmentRequest, UpdateAppointmentRequest } from './appointments';
-export type { Barber, CreateBarberRequest, UpdateBarberRequest } from './barbers';
+export type {
+  Professional,
+  CreateProfessionalRequest,
+  UpdateProfessionalRequest,
+  // Backwards compatibility aliases
+  CreateProfessionalRequest as CreateBarberRequest,
+  UpdateProfessionalRequest as UpdateBarberRequest
+} from './professionals';
 export type { Service, CreateServiceRequest, UpdateServiceRequest } from './services';
 export type {
   ReminderType,

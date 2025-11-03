@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from "react";
 import {
   AppointmentTimelineCard,
   Appointment,
-  BarberTimeline,
+  ProfessionalTimeline,
   appointmentsAPI,
 } from "@/api/appointments";
 import { useTimelineData } from "@/hooks/useTimelineData";
@@ -23,7 +23,7 @@ export function AppointmentTimelineView({
   businessId,
 }: AppointmentTimelineViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedBarberIds, setSelectedBarberIds] = useState<
+  const [selectedProfessionalIds, setSelectedProfessionalIds] = useState<
     number[] | undefined
   >();
   const [selectedStatus, setSelectedStatus] = useState<
@@ -34,8 +34,8 @@ export function AppointmentTimelineView({
   >(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<{
-    barberId: number;
-    barberName: string;
+    professionalId: number;
+    professionalName: string;
     slotTime: string;
   } | null>(null);
 
@@ -47,13 +47,13 @@ export function AppointmentTimelineView({
   } = useTimelineData({
     businessId,
     date: currentDate,
-    barberIds: selectedBarberIds,
+    professionalIds: selectedProfessionalIds,
     status: selectedStatus,
   });
 
   const { isDragging, handleDragStart, handleDragEnd } = useDragAndDrop({
     businessId,
-    barbers: timelineData?.barbers || [],
+    professionals: timelineData?.professionals || [],
     onAppointmentUpdate: () => {
       refetch();
     },
@@ -62,8 +62,8 @@ export function AppointmentTimelineView({
   const editingAppointment = useMemo(() => {
     if (!editingAppointmentId || !timelineData) return null;
 
-    for (const barber of timelineData.barbers) {
-      const apt = barber.appointments.find(
+    for (const professional of timelineData.professionals) {
+      const apt = professional.appointments.find(
         (a) => a.id === editingAppointmentId
       );
       if (apt) {
@@ -71,7 +71,7 @@ export function AppointmentTimelineView({
           id: apt.id,
           businessId,
           serviceId: 0,
-          barberId: apt.barberId,
+          professionalId: apt.professionalId,
           clientId: null,
           clientContactId: null,
           startDate: apt.startDate,
@@ -91,11 +91,11 @@ export function AppointmentTimelineView({
   }, [editingAppointmentId, timelineData, businessId]);
 
   const handleSlotClick = useCallback(
-    ({ barber, slot }: { barber: BarberTimeline; slot: TimeSlot }) => {
+    ({ professional, slot }: { professional: ProfessionalTimeline; slot: TimeSlot }) => {
       setEditingAppointmentId(null);
       setSelectedSlot({
-        barberId: barber.id,
-        barberName: barber.name,
+        professionalId: professional.id,
+        professionalName: professional.name,
         slotTime: slot.startTime,
       });
       setIsDialogOpen(true);
@@ -168,9 +168,9 @@ export function AppointmentTimelineView({
       <TimelineHeader
         currentDate={currentDate}
         onDateChange={setCurrentDate}
-        barbers={timelineData?.barbers || []}
-        selectedBarberIds={selectedBarberIds}
-        onBarberFilterChange={setSelectedBarberIds}
+        professionals={timelineData?.professionals || []}
+        selectedProfessionalIds={selectedProfessionalIds}
+        onBarberFilterChange={setSelectedProfessionalIds}
         selectedStatus={selectedStatus}
         onStatusFilterChange={setSelectedStatus}
         isLoading={isLoading}
@@ -179,7 +179,7 @@ export function AppointmentTimelineView({
       />
 
       <TimelineGrid
-        barbers={timelineData?.barbers || []}
+        professionals={timelineData?.professionals || []}
         slotDurationMinutes={timelineData?.slotDurationMinutes}
         slotHeightPx={48}
         onSlotClick={handleSlotClick}
@@ -194,14 +194,14 @@ export function AppointmentTimelineView({
       <AppointmentDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        barbershopId={businessId.toString()}
+        businessId={businessId.toString()}
         onSuccess={handleAppointmentSaved}
         appointment={editingAppointment}
         initialSelection={
           selectedSlot
             ? {
-                barberId: selectedSlot.barberId,
-                barberName: selectedSlot.barberName,
+                professionalId: selectedSlot.professionalId,
+                professionalName: selectedSlot.professionalName,
                 date: new Date(currentDate),
                 time: selectedSlot.slotTime,
               }

@@ -18,7 +18,7 @@ export interface Service {
 }
 
 interface ServiceSelectorProps {
-  barbershopId: string;
+  businessId: string;
   value: string;
   onChange: (serviceId: string) => void;
   disabled?: boolean;
@@ -26,7 +26,7 @@ interface ServiceSelectorProps {
 }
 
 export function ServiceSelector({
-  barbershopId,
+  businessId,
   value,
   onChange,
   disabled,
@@ -37,13 +37,13 @@ export function ServiceSelector({
 
   useEffect(() => {
     fetchServices();
-  }, [barbershopId]);
+  }, [businessId]);
 
   const fetchServices = async () => {
     setIsLoading(true);
     try {
-      const barbershopIdNum = parseInt(barbershopId, 10);
-      const data = await servicesAPI.getAll(barbershopIdNum);
+      const businessIdNum = parseInt(businessId, 10);
+      const data = await servicesAPI.getAll(businessIdNum);
       const mapped = data.map((s: any) => ({
         id: s.id.toString(),
         name: s.name,

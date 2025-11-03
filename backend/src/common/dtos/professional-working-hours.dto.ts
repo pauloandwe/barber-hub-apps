@@ -12,7 +12,7 @@ import {
 
 const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-export class BarberWorkingHourItemDto {
+export class ProfessionalWorkingHourItemDto {
   @IsInt()
   @Min(0)
   @Max(6)
@@ -38,16 +38,16 @@ export class BarberWorkingHourItemDto {
   closed: boolean;
 }
 
-export class UpsertBarberWorkingHoursDto {
+export class UpsertProfessionalWorkingHoursDto {
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => BarberWorkingHourItemDto)
-  items: BarberWorkingHourItemDto[];
+  @Type(() => ProfessionalWorkingHourItemDto)
+  items: ProfessionalWorkingHourItemDto[];
 }
 
-export class BarberWorkingHoursResponseDto {
+export class ProfessionalWorkingHoursResponseDto {
   id: number;
-  barberId: number;
+  professionalId: number;
   dayOfWeek: number;
   openTime: string | null;
   closeTime: string | null;

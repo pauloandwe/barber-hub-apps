@@ -1,21 +1,21 @@
-import { BarberTimeline, AppointmentTimelineCard } from "@/api/appointments";
+import { ProfessionalTimeline, AppointmentTimelineCard } from "@/api/appointments";
 import { TimeSlot } from "@/hooks/useTimeSlots";
 import { TimeSlot as TimeSlotComponent } from "./TimeSlot";
 import { AppointmentCard } from "./AppointmentCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface BarberColumnProps {
-  barber: BarberTimeline;
+  professional: ProfessionalTimeline;
   timeSlots: TimeSlot[];
   slotDurationMinutes: number;
   slotHeightPx: number;
-  onSlotClick?: (payload: { barber: BarberTimeline; slot: TimeSlot }) => void;
+  onSlotClick?: (payload: { professional: ProfessionalTimeline; slot: TimeSlot }) => void;
   onAppointmentEdit?: (appointment: AppointmentTimelineCard) => void;
   onAppointmentDelete?: (appointment: AppointmentTimelineCard) => void;
 }
 
-export function BarberColumn({
-  barber,
+export function ProfessionalColumn({
+  professional,
   timeSlots,
   slotDurationMinutes,
   slotHeightPx,
@@ -26,17 +26,17 @@ export function BarberColumn({
   const effectiveSlotDuration = Math.max(slotDurationMinutes, 1);
 
   const isSlotAvailable = (slotTime: string): boolean => {
-    if (barber.workingHours.closed || !barber.workingHours.openTime) {
+    if (professional.workingHours.closed || !professional.workingHours.openTime) {
       return false;
     }
 
     const [slotHour, slotMin] = slotTime.split(":").map(Number);
     const slotMinutes = slotHour * 60 + slotMin;
 
-    const [openHour, openMin] = barber.workingHours.openTime
+    const [openHour, openMin] = professional.workingHours.openTime
       .split(":")
       .map(Number);
-    const [closeHour, closeMin] = (barber.workingHours.closeTime || "")
+    const [closeHour, closeMin] = (professional.workingHours.closeTime || "")
       .split(":")
       .map(Number);
 
@@ -47,11 +47,11 @@ export function BarberColumn({
       return false;
     }
 
-    if (barber.workingHours.breakStart && barber.workingHours.breakEnd) {
-      const [breakStartHour, breakStartMin] = barber.workingHours.breakStart
+    if (professional.workingHours.breakStart && professional.workingHours.breakEnd) {
+      const [breakStartHour, breakStartMin] = professional.workingHours.breakStart
         .split(":")
         .map(Number);
-      const [breakEndHour, breakEndMin] = barber.workingHours.breakEnd
+      const [breakEndHour, breakEndMin] = professional.workingHours.breakEnd
         .split(":")
         .map(Number);
 
@@ -73,7 +73,7 @@ export function BarberColumn({
     const slotStartMinutes = slotHour * 60 + slotMin;
     const slotEndMinutes = slotStartMinutes + effectiveSlotDuration;
 
-    return (barber.appointments ?? []).filter((apt) => {
+    return (professional.appointments ?? []).filter((apt) => {
       const aptStart = new Date(apt.startDate);
       const aptEnd = new Date(apt.endDate);
 
@@ -103,14 +103,14 @@ export function BarberColumn({
       <div className="flex items-center justify-center gap-2 h-[60px] border-b border-gray-200 bg-white px-3 py-2">
         <Avatar className="h-8 w-8">
           <AvatarFallback className="text-xs">
-            {getInitials(barber.name)}
+            {getInitials(professional.name)}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm truncate">{barber.name}</p>
-          {barber.specialties.length > 0 && (
+          <p className="font-semibold text-sm truncate">{professional.name}</p>
+          {professional.specialties.length > 0 && (
             <p className="text-xs text-gray-500 truncate">
-              {barber.specialties.join(", ")}
+              {professional.specialties.join(", ")}
             </p>
           )}
         </div>
@@ -124,15 +124,15 @@ export function BarberColumn({
 
           return (
             <TimeSlotComponent
-              key={`${barber.id}-${slot.startTime}-${index}`}
+              key={`${professional.id}-${slot.startTime}-${index}`}
               slotHeightPx={slotHeightPx}
               isOccupied={isOccupied}
               isWorkingHours={isWorking}
-              barberId={barber.id}
+              professionalId={professional.id}
               slotTime={slot.startTime}
               onClick={() =>
                 onSlotClick?.({
-                  barber,
+                  professional,
                   slot,
                 })
               }

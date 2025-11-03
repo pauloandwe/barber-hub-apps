@@ -75,7 +75,7 @@ export class ServicesController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BUSINESS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new service' })
   @ApiResponse({
@@ -93,7 +93,7 @@ export class ServicesController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BUSINESS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a service' })
   @ApiResponse({
@@ -110,7 +110,7 @@ export class ServicesController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.BARBERSHOP)
+  @Roles(UserRole.ADMIN, UserRole.BUSINESS)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a service' })
   @ApiResponse({

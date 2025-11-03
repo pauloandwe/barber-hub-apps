@@ -39,15 +39,15 @@ const AVAILABLE_VARIABLES = [
   { key: "clientName", label: "Nome do Cliente" },
   { key: "appointmentDate", label: "Data do Agendamento" },
   { key: "appointmentTime", label: "Horário do Agendamento" },
-  { key: "barberName", label: "Nome do Barbeiro" },
+  { key: "professionalName", label: "Nome do Professional" },
   { key: "serviceName", label: "Nome do Serviço" },
 ];
 
 const DEFAULT_TEMPLATES: Record<string, string> = {
   [ReminderType.CONFIRMATION]:
-    "Olá {clientName}! Confirmamos seu agendamento para {appointmentDate} às {appointmentTime} com {barberName}. Até lá! ✂️",
+    "Olá {clientName}! Confirmamos seu agendamento para {appointmentDate} às {appointmentTime} com {professionalName}. Até lá! ✂️",
   [ReminderType.PRE_APPOINTMENT]:
-    "Oi {clientName}! Lembrete: seu horário é {appointmentDate} às {appointmentTime} com {barberName}. Confirme respondendo SIM.",
+    "Oi {clientName}! Lembrete: seu horário é {appointmentDate} às {appointmentTime} com {professionalName}. Confirme respondendo SIM.",
   [ReminderType.POST_APPOINTMENT]:
     "E aí {clientName}! Gostou do atendimento? Avalie-nos e agende seu próximo horário! 🌟",
   [ReminderType.RESCHEDULING]:
@@ -220,7 +220,7 @@ export function ReminderTemplateDialog({
                 .replace("{clientName}", "João Silva")
                 .replace("{appointmentDate}", "15/12/2024")
                 .replace("{appointmentTime}", "10:30")
-                .replace("{barberName}", "Carlos")
+                .replace("{professionalName}", "Carlos")
                 .replace("{serviceName}", "Corte e Barba")}
             </div>
           </div>

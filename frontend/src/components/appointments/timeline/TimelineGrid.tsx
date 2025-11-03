@@ -1,16 +1,16 @@
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-import { BarberTimeline, AppointmentTimelineCard } from "@/api/appointments";
+import { ProfessionalTimeline, AppointmentTimelineCard } from "@/api/appointments";
 import { TimeSlot, useAllTimeSlots } from "@/hooks/useTimeSlots";
 import { TimeScale } from "./TimeScale";
-import { BarberColumn } from "./BarberColumn";
+import { ProfessionalColumn } from "./ProfessionalColumn";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 interface TimelineGridProps {
-  barbers: BarberTimeline[];
+  professionals: ProfessionalTimeline[];
   slotDurationMinutes?: number;
   slotHeightPx?: number;
-  onSlotClick?: (payload: { barber: BarberTimeline; slot: TimeSlot }) => void;
+  onSlotClick?: (payload: { professional: ProfessionalTimeline; slot: TimeSlot }) => void;
   onAppointmentEdit?: (appointment: AppointmentTimelineCard) => void;
   onAppointmentDelete?: (appointment: AppointmentTimelineCard) => void;
   onDragStart?: (event: DragStartEvent) => void;
@@ -22,7 +22,7 @@ interface TimelineGridProps {
 const DEFAULT_SLOT_HEIGHT = 48;
 
 export function TimelineGrid({
-  barbers,
+  professionals,
   slotDurationMinutes = 30,
   slotHeightPx = DEFAULT_SLOT_HEIGHT,
   onSlotClick,
@@ -34,7 +34,7 @@ export function TimelineGrid({
   isLoading = false,
 }: TimelineGridProps) {
   const timeSlots = useAllTimeSlots(
-    barbers.map((b) => b.workingHours),
+    professionals.map((b) => b.workingHours),
     slotDurationMinutes
   );
 
@@ -49,11 +49,11 @@ export function TimelineGrid({
     );
   }
 
-  if (barbers.length === 0) {
+  if (professionals.length === 0) {
     return (
       <div className="flex items-center justify-center h-96">
         <p className="text-gray-600">
-          Nenhum barbeiro disponível para esta data
+          Nenhum professional disponível para esta data
         </p>
       </div>
     );
@@ -82,10 +82,10 @@ export function TimelineGrid({
             <TimeScale slots={timeSlots} slotHeightPx={slotHeightPx} />
 
             <div className="flex flex-1">
-              {barbers.map((barber) => (
-                <BarberColumn
-                  key={barber.id}
-                  barber={barber}
+              {professionals.map((professional) => (
+                <ProfessionalColumn
+                  key={professional.id}
+                  professional={professional}
                   timeSlots={timeSlots}
                   slotDurationMinutes={slotDurationMinutes}
                   slotHeightPx={slotHeightPx}

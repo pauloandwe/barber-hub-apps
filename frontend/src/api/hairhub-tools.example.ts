@@ -20,7 +20,7 @@ export async function exampleShowAllAppointments() {
       console.log(`
         Service: ${apt.service}
         Date: ${apt.date} at ${apt.time}
-        Barber: ${apt.barber}
+        Professional: ${apt.professional}
         Status: ${apt.status}
       `);
     });
@@ -48,7 +48,7 @@ export async function exampleGetUpcomingAppointments() {
     console.log("Upcoming appointments:");
     result.data?.forEach((apt: any) => {
       console.log(`
-        ${apt.service} with ${apt.barber}
+        ${apt.service} with ${apt.professional}
         📅 ${apt.date} at ${apt.time}
       `);
     });
@@ -85,7 +85,7 @@ export async function handleWhatsAppBotMessage(
       result.data.forEach((apt: any, index: number) => {
         response += `${index + 1}. ${apt.service}\n`;
         response += `   📍 ${apt.date} às ${apt.time}\n`;
-        response += `   👨‍💼 Barbeiro: ${apt.barber}\n`;
+        response += `   👨‍💼 Professional: ${apt.professional}\n`;
         response += `   Status: ${apt.status}\n\n`;
       });
       return response;
@@ -119,7 +119,7 @@ export async function handleWhatsAppBotMessage(
       result.data.forEach((apt: any) => {
         response += `🔸 ${apt.service}\n`;
         response += `   ${apt.date} às ${apt.time}\n`;
-        response += `   ${apt.barber}\n\n`;
+        response += `   ${apt.professional}\n\n`;
       });
       return response;
     } else if (result.success) {
@@ -142,7 +142,7 @@ export function formatAppointmentsForWhatsApp(appointments: any[]): string {
   appointments.forEach((apt, index) => {
     message += `*${index + 1}. ${apt.service}*\n`;
     message += `📅 ${apt.date} às ${apt.time}\n`;
-    message += `👨‍💼 ${apt.barber}\n`;
+    message += `👨‍💼 ${apt.professional}\n`;
     message += `⏱️ Duração: ${apt.duration} minutos\n`;
     message += `🔔 Status: ${apt.status}\n`;
     if (apt.notes) {

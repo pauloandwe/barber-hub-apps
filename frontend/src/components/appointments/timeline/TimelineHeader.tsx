@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BarberTimeline } from "@/api/appointments";
+import { ProfessionalTimeline } from "@/api/appointments";
 import { format, addDays, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -21,9 +21,9 @@ import {
 interface TimelineHeaderProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
-  barbers: BarberTimeline[];
-  selectedBarberIds?: number[];
-  onBarberFilterChange?: (barberIds: number[]) => void;
+  professionals: ProfessionalTimeline[];
+  selectedProfessionalIds?: number[];
+  onBarberFilterChange?: (professionalIds: number[]) => void;
   selectedStatus?: "pending" | "confirmed" | "canceled" | undefined;
   onStatusFilterChange?: (
     status: "pending" | "confirmed" | "canceled" | undefined
@@ -36,8 +36,8 @@ interface TimelineHeaderProps {
 export function TimelineHeader({
   currentDate,
   onDateChange,
-  barbers,
-  selectedBarberIds,
+  professionals,
+  selectedProfessionalIds,
   onBarberFilterChange,
   selectedStatus,
   onStatusFilterChange,
@@ -46,7 +46,7 @@ export function TimelineHeader({
   isRefreshing = false,
 }: TimelineHeaderProps) {
   const [isAllBarbers, setIsAllBarbers] = useState(
-    !selectedBarberIds || selectedBarberIds.length === barbers.length
+    !selectedProfessionalIds || selectedProfessionalIds.length === professionals.length
   );
 
   const handlePreviousDay = () => {
@@ -61,19 +61,19 @@ export function TimelineHeader({
     onDateChange(new Date());
   };
 
-  const handleBarberToggle = (barberId: number) => {
+  const handleBarberToggle = (professionalId: number) => {
     if (!onBarberFilterChange) return;
 
-    const newSelected = selectedBarberIds ? [...selectedBarberIds] : [];
-    const index = newSelected.indexOf(barberId);
+    const newSelected = selectedProfessionalIds ? [...selectedProfessionalIds] : [];
+    const index = newSelected.indexOf(professionalId);
 
     if (index > -1) {
       newSelected.splice(index, 1);
     } else {
-      newSelected.push(barberId);
+      newSelected.push(professionalId);
     }
 
-    setIsAllBarbers(newSelected.length === barbers.length);
+    setIsAllBarbers(newSelected.length === professionals.length);
     onBarberFilterChange(newSelected.length > 0 ? newSelected : undefined);
   };
 
@@ -84,7 +84,7 @@ export function TimelineHeader({
       onBarberFilterChange(undefined);
       setIsAllBarbers(false);
     } else {
-      onBarberFilterChange(barbers.map((b) => b.id));
+      onBarberFilterChange(professionals.map((b) => b.id));
       setIsAllBarbers(true);
     }
   };
@@ -157,18 +157,18 @@ export function TimelineHeader({
           >
             Todos
           </Button>
-          {barbers.map((barber) => {
+          {professionals.map((professional) => {
             const isSelected =
-              !selectedBarberIds || selectedBarberIds.includes(barber.id);
+              !selectedProfessionalIds || selectedProfessionalIds.includes(professional.id);
             return (
               <Button
-                key={barber.id}
+                key={professional.id}
                 variant={isSelected ? "default" : "outline"}
                 size="sm"
-                onClick={() => handleBarberToggle(barber.id)}
+                onClick={() => handleBarberToggle(professional.id)}
                 disabled={isLoading}
               >
-                {barber.name}
+                {professional.name}
               </Button>
             );
           })}

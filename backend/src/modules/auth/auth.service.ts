@@ -32,14 +32,14 @@ export class AuthService {
     const profile = await this.profileRepository.findOne({
       where: {
         businessId: business.id,
-        role: UserRole.BARBERSHOP,
+        role: UserRole.BUSINESS,
       },
     });
 
     const tokenPayload = {
       id: profile?.id ?? business.id,
       email: profile?.email ?? `${business.phone}@barberhub.local`,
-      role: profile?.role ?? UserRole.BARBERSHOP,
+      role: profile?.role ?? UserRole.BUSINESS,
       businessId: business.id,
       phone: profile?.phone ?? business.phone,
     };

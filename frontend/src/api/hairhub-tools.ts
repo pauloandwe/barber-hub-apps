@@ -16,7 +16,7 @@ export interface HairHubToolResult {
 export const showAppointmentsTool = {
   name: "show_appointments",
   description:
-    "Retrieves all appointments for a customer based on their phone number. Returns appointment details including date, time, service, barber, and status.",
+    "Retrieves all appointments for a customer based on their phone number. Returns appointment details including date, time, service, professional, and status.",
 
   inputSchema: {
     type: "object",
@@ -69,7 +69,7 @@ export const showAppointmentsTool = {
           minute: "2-digit",
         }),
         service: apt.service?.name || "Serviço não especificado",
-        barber: apt.barber?.name || "Barbeiro não especificado",
+        professional: apt.professional?.name || "Professional não especificado",
         duration: apt.service?.duration || 0,
         status: apt.status,
         notes: apt.notes || "",
@@ -154,7 +154,7 @@ export const getUpcomingAppointmentsTool = {
           minute: "2-digit",
         }),
         service: apt.service?.name || "Serviço não especificado",
-        barber: apt.barber?.name || "Barbeiro não especificado",
+        professional: apt.professional?.name || "Professional não especificado",
         status: apt.status,
       }));
 

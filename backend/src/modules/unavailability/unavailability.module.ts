@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { BloqueiosController } from './bloqueios.controller';
-import { BloqueiosService } from './bloqueios.service';
-import { BloqueioEntity, BarberEntity } from 'src/database/entities';
+import { UnavailabilityController } from './unavailability.controller';
+import { UnavailabilityService } from './unavailability.service';
+import { UnavailabilityEntity, ProfessionalEntity } from 'src/database/entities';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BloqueioEntity, BarberEntity]),
+    TypeOrmModule.forFeature([UnavailabilityEntity, ProfessionalEntity]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -19,8 +19,8 @@ import { BloqueioEntity, BarberEntity } from 'src/database/entities';
       }),
     }),
   ],
-  controllers: [BloqueiosController],
-  providers: [BloqueiosService],
-  exports: [BloqueiosService],
+  controllers: [UnavailabilityController],
+  providers: [UnavailabilityService],
+  exports: [UnavailabilityService],
 })
-export class BloqueiosModule {}
+export class UnavailabilityModule {}

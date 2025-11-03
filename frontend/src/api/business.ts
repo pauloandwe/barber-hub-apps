@@ -28,28 +28,28 @@ export interface UpdateBusinessRequest {
   token?: string;
 }
 
-export interface BarberAvailabilitySlot {
+export interface ProfessionalAvailabilitySlot {
   start: string;
   end: string;
 }
 
-export interface BarberAvailability {
+export interface ProfessionalAvailability {
   id: number;
   name: string;
   specialties?: string[] | null;
-  slots: BarberAvailabilitySlot[];
+  slots: ProfessionalAvailabilitySlot[];
 }
 
 export interface AvailabilityResponse {
   date: string;
   slotDurationMinutes: number;
-  barbers: BarberAvailability[];
+  professionals: ProfessionalAvailability[];
 }
 
-export interface SingleBarberAvailabilityResponse {
+export interface SingleProfessionalAvailabilityResponse {
   date: string;
   slotDurationMinutes: number;
-  barber: BarberAvailability;
+  professional: ProfessionalAvailability;
 }
 
 const extractResponseData = (response: any) => {
@@ -106,13 +106,13 @@ export const businessAPI = {
     return extractResponseData(response);
   },
 
-  async getBarberFreeSlotsByPhone(
+  async getProfessionalFreeSlotsByPhone(
     phone: string,
-    barberId: number,
+    professionalId: number,
     params: { date?: string; serviceId?: number }
-  ): Promise<SingleBarberAvailabilityResponse> {
+  ): Promise<SingleProfessionalAvailabilityResponse> {
     const response = await apiClient.get(
-      `/business/phone/${phone}/barbers/${barberId}/free-slots`,
+      `/business/phone/${phone}/professionals/${professionalId}/free-slots`,
       {
         params,
       }

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Barber } from "@/api/barbers";
+import { Professional } from "@/api/professionals";
 import {
-  barberWorkingHoursAPI,
-  BarberWorkingHour,
-  BarberWorkingHourInput,
-} from "@/api/barberWorkingHours";
+  professionalWorkingHoursAPI,
+  ProfessionalWorkingHour,
+  ProfessionalWorkingHourInput,
+} from "@/api/professionalWorkingHours";
 import {
   Dialog,
   DialogContent,
@@ -20,8 +20,8 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { DialogProps } from "@/types/shared.types";
 
-interface BarberScheduleDialogProps extends DialogProps {
-  barber: Barber | null;
+interface ProfessionalScheduleDialogProps extends DialogProps {
+  professional: Professional | null;
   onSaved?: () => void;
 }
 
@@ -58,12 +58,12 @@ const minutesSinceMidnight = (value: string): number => {
   return (hours ?? 0) * 60 + (minutes ?? 0);
 };
 
-export function BarberScheduleDialog({
-  barber,
+export function ProfessionalScheduleDialog({
+  professional,
   open,
   onOpenChange,
   onSaved,
-}: BarberScheduleDialogProps) {
+}: ProfessionalScheduleDialogProps) {
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -88,14 +88,14 @@ export function BarberScheduleDialog({
       return;
     }
 
-    if (!barber) {
+    if (!professional) {
       return;
     }
 
     const loadSchedule = async () => {
       setIsLoading(true);
       try {
-        const data = await barberWorkingHoursAPI.getAll(barber.id);
+        const data = await professionalWorkingHoursAPI.getAll(professional.id);
         if (!Array.isArray(data) || data.length === 0) {
           setSchedule(initialSchedule);
           return;
@@ -103,7 +103,7 @@ export function BarberScheduleDialog({
 
         const mapped = initialSchedule.map((day) => {
           const record = data.find(
-            (item: BarberWorkingHour) => item.dayOfWeek === day.dayOfWeek
+            (item: ProfessionalWorkingHour) => item.dayOfWeek === day.dayOfWeek
           );
           if (!record) {
             return day;
@@ -122,7 +122,7 @@ export function BarberScheduleDialog({
         setSchedule(mapped);
       } catch (error) {
         if (process.env.NODE_ENV === "development") {
-          console.error("Error loading barber schedule", error);
+          console.error("Error loading professional schedule", error);
         }
         toast.error("Erro ao carregar horário");
         setSchedule(initialSchedule);
@@ -132,7 +132,7 @@ export function BarberScheduleDialog({
     };
 
     loadSchedule();
-  }, [open, barber, initialSchedule]);
+  }, [open, professional, initialSchedule]);
 
   const handleToggleDay = (dayOfWeek: number, closed: boolean) => {
     setSchedule((prev) =>
@@ -220,7 +220,7 @@ export function BarberScheduleDialog({
   };
 
   const handleSave = async () => {
-    if (!barber) {
+    if (!professional) {
       return;
     }
 
@@ -230,7 +230,7 @@ export function BarberScheduleDialog({
 
     setIsSaving(true);
     try {
-      const payload: BarberWorkingHourInput[] = schedule.map((entry) => {
+      const payload: ProfessionalWorkingHourInput[] = schedule.map((entry) => {
         const openTime = entry.closed ? null : entry.openTime.trim();
         const closeTime = entry.closed ? null : entry.closeTime.trim();
         const breakStart = entry.closed
@@ -248,7 +248,7 @@ export function BarberScheduleDialog({
         };
       });
 
-      await barberWorkingHoursAPI.upsert(barber.id, payload);
+      await professionalWorkingHoursAPI.upsert(professional.id, payload);
       toast.success("Horário salvo com sucesso!");
       onSaved?.();
       onOpenChange(false);
@@ -263,12 +263,12 @@ export function BarberScheduleDialog({
   };
 
   const handleClear = async () => {
-    if (!barber) {
+    if (!professional) {
       return;
     }
 
     const confirmed = window.confirm(
-      `Isso limpará todos os horários de trabalho para ${barber.name}. Continuar?`
+      `Isso limpará todos os horários de trabalho para ${professional.name}. Continuar?`
     );
 
     if (!confirmed) {
@@ -277,7 +277,7 @@ export function BarberScheduleDialog({
 
     setIsClearing(true);
     try {
-      await barberWorkingHoursAPI.clear(barber.id);
+      await professionalWorkingHoursAPI.clear(professional.id);
       toast.success("Horário limpo com sucesso!");
       onSaved?.();
       onOpenChange(false);
@@ -295,11 +295,11 @@ export function BarberScheduleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Horário do Barbeiro</DialogTitle>
+          <DialogTitle>Horário do Professional</DialogTitle>
           <DialogDescription>
-            {barber
-              ? `Configure os horários de trabalho semanais para ${barber.name}`
-              : "Selecione um barbeiro para gerenciar horários"}
+            {professional
+              ? `Configure os horários de trabalho semanais para ${professional.name}`
+              : "Selecione um professional para gerenciar horários"}
           </DialogDescription>
         </DialogHeader>{" "}
         {isLoading ? (
@@ -323,7 +323,7 @@ export function BarberScheduleDialog({
                     onCheckedChange={(checked) =>
                       handleToggleDay(entry.dayOfWeek, !checked)
                     }
-                    disabled={isSaving || !barber}
+                    disabled={isSaving || !professional}
                   />
                   <span className="text-sm text-muted-foreground">
                     {entry.closed ? "Fechado" : "Aberto"}
@@ -333,7 +333,7 @@ export function BarberScheduleDialog({
                   <Input
                     type="time"
                     value={entry.openTime}
-                    disabled={entry.closed || isSaving || !barber}
+                    disabled={entry.closed || isSaving || !professional}
                     onChange={(event) =>
                       handleTimeChange(
                         entry.dayOfWeek,
@@ -348,7 +348,7 @@ export function BarberScheduleDialog({
                   <Input
                     type="time"
                     value={entry.closeTime}
-                    disabled={entry.closed || isSaving || !barber}
+                    disabled={entry.closed || isSaving || !professional}
                     onChange={(event) =>
                       handleTimeChange(
                         entry.dayOfWeek,
@@ -364,7 +364,7 @@ export function BarberScheduleDialog({
                     type="time"
                     value={entry.breakStart}
                     placeholder="Break start"
-                    disabled={entry.closed || isSaving || !barber}
+                    disabled={entry.closed || isSaving || !professional}
                     onChange={(event) =>
                       handleTimeChange(
                         entry.dayOfWeek,
@@ -380,7 +380,7 @@ export function BarberScheduleDialog({
                     type="time"
                     value={entry.breakEnd}
                     placeholder="Break end"
-                    disabled={entry.closed || isSaving || !barber}
+                    disabled={entry.closed || isSaving || !professional}
                     onChange={(event) =>
                       handleTimeChange(
                         entry.dayOfWeek,
@@ -400,7 +400,7 @@ export function BarberScheduleDialog({
             type="button"
             variant="destructive"
             onClick={handleClear}
-            disabled={isSaving || isClearing || !barber}
+            disabled={isSaving || isClearing || !professional}
           >
             {isClearing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Limpar horário
@@ -415,7 +415,7 @@ export function BarberScheduleDialog({
           </Button>
           <Button
             onClick={handleSave}
-            disabled={isSaving || isClearing || !barber}
+            disabled={isSaving || isClearing || !professional}
           >
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar horário

@@ -13,7 +13,7 @@ import { AppointmentEntity } from './appointment.entity';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
-  BARBERSHOP = 'BARBERSHOP',
+  BUSINESS = 'BUSINESS',
   CLIENT = 'CLIENT',
 }
 

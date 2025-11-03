@@ -3,9 +3,9 @@ import { authAPI } from "@/api/auth";
 import { appointmentsAPI, Appointment } from "@/api/appointments";
 import { businessAPI } from "@/api/business";
 import {
-  barberWorkingHoursAPI,
-  BarberWorkingHour,
-} from "@/api/barberWorkingHours";
+  professionalWorkingHoursAPI,
+  ProfessionalWorkingHour,
+} from "@/api/professionalWorkingHours";
 import {
   Dialog,
   DialogContent,
@@ -23,18 +23,18 @@ import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { DialogProps } from "@/types/shared.types";
 import { formatTime } from "@/utils/date.utils";
 import { ServiceSelector, Service } from "./appointments/ServiceSelector";
-import { BarberSelector } from "./appointments/BarberSelector";
+import { ProfessionalSelector } from "./appointments/ProfessionalSelector";
 import { ClientSelector, ClientSelection } from "./appointments/ClientSelector";
 import { DateTimePicker } from "./appointments/DateTimePicker";
 import { AppointmentSummary } from "./appointments/AppointmentSummary";
 
 interface AppointmentDialogProps extends DialogProps {
-  barbershopId: string;
+  businessId: string;
   onSuccess: () => void;
   appointment?: Appointment | null;
   initialSelection?: {
-    barberId?: number;
-    barberName?: string;
+    professionalId?: number;
+    professionalName?: string;
     date?: Date;
     time?: string;
   };
@@ -50,7 +50,7 @@ const DAY_LABELS = [
   "Sábado",
 ];
 
-type BarberScheduleItem = {
+type ProfessionalScheduleItem = {
   label: string;
   text: string;
   dayOfWeek: number;
@@ -68,13 +68,13 @@ const normalizePhoneDigits = (phone?: string | null): string | undefined => {
 export function AppointmentDialog({
   open,
   onOpenChange,
-  barbershopId,
+  businessId,
   onSuccess,
   appointment,
   initialSelection,
 }: AppointmentDialogProps) {
   const [selectedService, setSelectedService] = useState<string>("");
-  const [selectedBarber, setSelectedBarber] = useState<string>("");
+  const [selectedProfessional, setSelectedProfessional] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [notes, setNotes] = useState("");
@@ -83,10 +83,10 @@ export function AppointmentDialog({
   const [isLoadingTimes, setIsLoadingTimes] = useState(false);
   const [services, setServices] = useState<Map<string, Service>>(new Map());
   const [businessPhone, setBusinessPhone] = useState<string | null>(null);
-  const [barberWorkingHours, setBarberWorkingHours] = useState<
-    BarberWorkingHour[]
+  const [professionalWorkingHours, setProfessionalWorkingHours] = useState<
+    ProfessionalWorkingHour[]
   >([]);
-  const [isLoadingBarberHours, setIsLoadingBarberHours] = useState(false);
+  const [isLoadingProfessionalHours, setIsLoadingBarberHours] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ClientSelection | null>(
     null
   );
@@ -104,7 +104,7 @@ export function AppointmentDialog({
   const originalTime = originalStartDate
     ? formatTime(originalStartDate)
     : undefined;
-  const originalBarberId = appointment?.barberId ?? undefined;
+  const originalProfessionalId = appointment?.professionalId ?? undefined;
 
   useEffect(() => {
     if (open && isEditMode && appointment) {
@@ -112,11 +112,11 @@ export function AppointmentDialog({
       const serviceId = appointment.serviceId
         ? String(appointment.serviceId)
         : "";
-      const barberId = appointment.barberId ? String(appointment.barberId) : "";
+      const professionalId = appointment.professionalId ? String(appointment.professionalId) : "";
       const appointmentTime = originalTime ?? "";
 
       setSelectedService(serviceId);
-      setSelectedBarber(barberId);
+      setSelectedProfessional(professionalId);
       setSelectedDate(start ?? undefined);
       setSelectedTime(appointmentTime);
       setNotes(appointment.notes ?? "");
@@ -145,7 +145,7 @@ export function AppointmentDialog({
 
     if (!initialSelection) {
       setSelectedService("");
-      setSelectedBarber("");
+      setSelectedProfessional("");
       setSelectedDate(undefined);
       setSelectedTime("");
       setAvailableTimes([]);
@@ -155,8 +155,8 @@ export function AppointmentDialog({
 
     setSelectedService("");
     setNotes("");
-    setSelectedBarber(
-      initialSelection.barberId ? String(initialSelection.barberId) : ""
+    setSelectedProfessional(
+      initialSelection.professionalId ? String(initialSelection.professionalId) : ""
     );
     setSelectedDate(
       initialSelection.date ? new Date(initialSelection.date) : undefined
@@ -175,7 +175,7 @@ export function AppointmentDialog({
     const fetchAvailableTimes = async () => {
       if (
         !selectedDate ||
-        !selectedBarber ||
+        !selectedProfessional ||
         !selectedService ||
         !businessPhone ||
         !services.has(selectedService)
@@ -187,23 +187,23 @@ export function AppointmentDialog({
       setIsLoadingTimes(true);
       try {
         const serviceId = parseInt(selectedService, 10);
-        const barberId = parseInt(selectedBarber, 10);
-        if (Number.isNaN(barberId)) {
+        const professionalId = parseInt(selectedProfessional, 10);
+        if (Number.isNaN(professionalId)) {
           setAvailableTimes([]);
           return;
         }
         const dateParam = format(selectedDate, "yyyy-MM-dd");
 
-        const availability = await businessAPI.getBarberFreeSlotsByPhone(
+        const availability = await businessAPI.getProfessionalFreeSlotsByPhone(
           businessPhone,
-          barberId,
+          professionalId,
           {
             date: dateParam,
             serviceId,
           }
         );
 
-        const slotStarts = (availability?.barber?.slots ?? [])
+        const slotStarts = (availability?.professional?.slots ?? [])
           .map((slot) => slot?.start)
           .filter((start): start is string => typeof start === "string");
 
@@ -221,8 +221,8 @@ export function AppointmentDialog({
           originalTime &&
           originalDateKey &&
           dateParam === originalDateKey &&
-          originalBarberId !== undefined &&
-          originalBarberId === barberId &&
+          originalProfessionalId !== undefined &&
+          originalProfessionalId === professionalId &&
           !orderedSlots.includes(originalTime)
         ) {
           orderedSlots = [...orderedSlots, originalTime].sort(
@@ -241,11 +241,11 @@ export function AppointmentDialog({
       }
     };
 
-    if (selectedBarber && selectedDate && selectedService && businessPhone) {
+    if (selectedProfessional && selectedDate && selectedService && businessPhone) {
       fetchAvailableTimes();
     }
   }, [
-    selectedBarber,
+    selectedProfessional,
     selectedDate,
     selectedService,
     services,
@@ -253,7 +253,7 @@ export function AppointmentDialog({
     isEditMode,
     originalTime,
     originalDateKey,
-    originalBarberId,
+    originalProfessionalId,
   ]);
 
   useEffect(() => {
@@ -264,51 +264,51 @@ export function AppointmentDialog({
 
     const loadBusiness = async () => {
       try {
-        const barbershopIdNum = parseInt(barbershopId, 10);
-        const response = await businessAPI.getById(barbershopIdNum);
+        const businessIdNum = parseInt(businessId, 10);
+        const response = await businessAPI.getById(businessIdNum);
         const business = response?.data;
         setBusinessPhone(business.phone || null);
       } catch (error) {
         if (process.env.NODE_ENV === "development") {
           console.error("Error loading business info:", error);
         }
-        toast.error("Erro ao carregar informações da barbearia");
+        toast.error("Erro ao carregar informações da business");
       }
     };
 
     loadBusiness();
-  }, [open, barbershopId]);
+  }, [open, businessId]);
 
   useEffect(() => {
-    if (!selectedBarber) {
-      setBarberWorkingHours([]);
+    if (!selectedProfessional) {
+      setProfessionalWorkingHours([]);
       return;
     }
 
-    const barberId = parseInt(selectedBarber, 10);
-    if (Number.isNaN(barberId)) {
-      setBarberWorkingHours([]);
+    const professionalId = parseInt(selectedProfessional, 10);
+    if (Number.isNaN(professionalId)) {
+      setProfessionalWorkingHours([]);
       return;
     }
 
     const loadWorkingHours = async () => {
       setIsLoadingBarberHours(true);
       try {
-        const data = await barberWorkingHoursAPI.getAll(barberId);
-        setBarberWorkingHours(Array.isArray(data) ? data : []);
+        const data = await professionalWorkingHoursAPI.getAll(professionalId);
+        setProfessionalWorkingHours(Array.isArray(data) ? data : []);
       } catch (error) {
         if (process.env.NODE_ENV === "development") {
-          console.error("Error loading barber working hours:", error);
+          console.error("Error loading professional working hours:", error);
         }
-        toast.error("Erro ao carregar horário do barbeiro");
-        setBarberWorkingHours([]);
+        toast.error("Erro ao carregar horário do professional");
+        setProfessionalWorkingHours([]);
       } finally {
         setIsLoadingBarberHours(false);
       }
     };
 
     loadWorkingHours();
-  }, [selectedBarber]);
+  }, [selectedProfessional]);
 
   useEffect(() => {
     if (!selectedTime) {
@@ -343,7 +343,7 @@ export function AppointmentDialog({
   ]);
 
   const handleSubmit = async () => {
-    if (!selectedService || !selectedBarber || !selectedDate || !selectedTime) {
+    if (!selectedService || !selectedProfessional || !selectedDate || !selectedTime) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
@@ -393,9 +393,9 @@ export function AppointmentDialog({
       }
 
       const serviceIdNum = parseInt(selectedService, 10);
-      const barberIdNum = parseInt(selectedBarber, 10);
-      if (Number.isNaN(serviceIdNum) || Number.isNaN(barberIdNum)) {
-        toast.error("Serviço ou barbeiro inválido selecionado");
+      const professionalIdNum = parseInt(selectedProfessional, 10);
+      if (Number.isNaN(serviceIdNum) || Number.isNaN(professionalIdNum)) {
+        toast.error("Serviço ou professional inválido selecionado");
         return;
       }
 
@@ -422,18 +422,18 @@ export function AppointmentDialog({
 
       const endDateTime = addMinutes(startDateTime, service.durationMin);
 
-      const barbershopIdNum = parseInt(barbershopId, 10);
+      const businessIdNum = parseInt(businessId, 10);
 
       const basePayload = {
         serviceId: serviceIdNum,
-        barberId: barberIdNum,
+        professionalId: professionalIdNum,
         startDate: startDateTime.toISOString(),
         endDate: endDateTime.toISOString(),
         notes: notes || undefined,
       };
 
       if (isEditMode && appointment) {
-        await appointmentsAPI.update(barbershopIdNum, appointment.id, {
+        await appointmentsAPI.update(businessIdNum, appointment.id, {
           ...basePayload,
           clientId: clientIdPayload,
           clientPhone: clientPhonePayload,
@@ -442,8 +442,8 @@ export function AppointmentDialog({
         });
         toast.success("Agendamento atualizado com sucesso!");
       } else {
-        await appointmentsAPI.create(barbershopIdNum, {
-          businessId: barbershopIdNum,
+        await appointmentsAPI.create(businessIdNum, {
+          businessId: businessIdNum,
           ...basePayload,
           clientId: clientIdPayload ?? undefined,
           clientPhone: clientPhonePayload,
@@ -477,12 +477,12 @@ export function AppointmentDialog({
 
   const resetForm = () => {
     setSelectedService("");
-    setSelectedBarber("");
+    setSelectedProfessional("");
     setSelectedDate(undefined);
     setSelectedTime("");
     setNotes("");
     setAvailableTimes([]);
-    setBarberWorkingHours([]);
+    setProfessionalWorkingHours([]);
     setSelectedClient(null);
   };
 
@@ -495,13 +495,13 @@ export function AppointmentDialog({
   const selectedServiceData = services.get(selectedService);
   const selectedDayIndex = selectedDate?.getDay();
 
-  const barberScheduleSummary = useMemo<BarberScheduleItem[]>(() => {
-    if (!barberWorkingHours.length) {
+  const professionalScheduleSummary = useMemo<ProfessionalScheduleItem[]>(() => {
+    if (!professionalWorkingHours.length) {
       return [];
     }
 
     return DAY_LABELS.map((label, index) => {
-      const record = barberWorkingHours.find(
+      const record = professionalWorkingHours.find(
         (item) => item.dayOfWeek === index
       );
 
@@ -526,7 +526,7 @@ export function AppointmentDialog({
 
       return { label, text: range, dayOfWeek: index };
     });
-  }, [barberWorkingHours]);
+  }, [professionalWorkingHours]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -544,7 +544,7 @@ export function AppointmentDialog({
 
         <div className="space-y-4 py-4">
           <ServiceSelector
-            barbershopId={barbershopId}
+            businessId={businessId}
             value={selectedService}
             onChange={(serviceId) => {
               setSelectedService(serviceId);
@@ -557,31 +557,31 @@ export function AppointmentDialog({
           />
 
           <ClientSelector
-            barbershopId={barbershopId}
+            businessId={businessId}
             value={selectedClient}
             onChange={setSelectedClient}
             disabled={isLoading}
           />
 
-          <BarberSelector
-            barbershopId={barbershopId}
-            value={selectedBarber}
-            onChange={setSelectedBarber}
+          <ProfessionalSelector
+            businessId={businessId}
+            value={selectedProfessional}
+            onChange={setSelectedProfessional}
             disabled={isLoading}
           />
 
-          {selectedBarber && (
+          {selectedProfessional && (
             <div className="space-y-2">
-              <Label>Horário do barbeiro</Label>
-              {isLoadingBarberHours ? (
+              <Label>Horário do professional</Label>
+              {isLoadingProfessionalHours ? (
                 <LoadingSpinner size="small" />
-              ) : !barberScheduleSummary.length ? (
+              ) : !professionalScheduleSummary.length ? (
                 <p className="text-sm text-muted-foreground">
-                  Este barbeiro não tem horários de trabalho configurados.
+                  Este professional não tem horários de trabalho configurados.
                 </p>
               ) : (
                 <div className="grid gap-2 sm:grid-cols-2">
-                  {barberScheduleSummary.map((item) => (
+                  {professionalScheduleSummary.map((item) => (
                     <div
                       key={item.label}
                       className={`rounded-md border px-3 py-2 text-sm ${
@@ -637,7 +637,7 @@ export function AppointmentDialog({
             disabled={
               isLoading ||
               !selectedService ||
-              !selectedBarber ||
+              !selectedProfessional ||
               !selectedDate ||
               !selectedTime
             }

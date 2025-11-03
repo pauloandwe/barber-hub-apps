@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { BusinessEntity } from './business.entity';
 import { ServiceEntity } from './service.entity';
-import { BarberEntity } from './barber.entity';
+import { ProfessionalEntity } from './professional.entity';
 import { ProfileEntity } from './profile.entity';
 import { ClientContactEntity } from './client-contact.entity';
 
@@ -36,7 +36,7 @@ export class AppointmentEntity {
   serviceId: number;
 
   @Column({ type: 'int' })
-  barberId: number;
+  professionalId: number;
 
   @Column({ type: 'int', nullable: true })
   clientId: number | null;
@@ -86,11 +86,11 @@ export class AppointmentEntity {
   @JoinColumn({ name: 'serviceId' })
   service: ServiceEntity;
 
-  @ManyToOne(() => BarberEntity, (barber) => barber.appointments, {
+  @ManyToOne(() => ProfessionalEntity, (professional) => professional.appointments, {
     onDelete: 'SET NULL',
   })
-  @JoinColumn({ name: 'barberId' })
-  barber: BarberEntity;
+  @JoinColumn({ name: 'professionalId' })
+  professional: ProfessionalEntity;
 
   @ManyToOne(() => ProfileEntity, (profile) => profile.appointments, {
     onDelete: 'CASCADE',

@@ -37,36 +37,36 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ROUTES } from "@/constants/routes";
 
-interface Barbershop {
+interface Business {
   id: string;
   name: string;
 }
 
-type DashboardAppointment = AppointmentModel & { barbershopName?: string };
+type DashboardAppointment = AppointmentModel & { businessName?: string };
 
 export function ClientDashboard() {
   const navigate = useNavigate();
-  const [barbershops, setBarbershops] = useState<Barbershop[]>([]);
-  const [selectedBarbershop, setSelectedBarbershop] = useState<string>("");
+  const [businesses, setProfessionalshops] = useState<Business[]>([]);
+  const [selectedProfessionalshop, setSelectedProfessionalshop] = useState<string>("");
   const [appointments, setAppointments] = useState<DashboardAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAppointmentDialogOpen, setIsAppointmentDialogOpen] = useState(false);
   const [appointmentBeingEdited, setAppointmentBeingEdited] =
     useState<DashboardAppointment | null>(null);
 
-  const dialogBarbershopId = appointmentBeingEdited
+  const dialogBusinessId = appointmentBeingEdited
     ? appointmentBeingEdited.businessId.toString()
-    : selectedBarbershop;
+    : selectedProfessionalshop;
 
   useEffect(() => {
-    fetchBarbershops();
+    fetchProfessionalshops();
     fetchMyAppointments();
   }, []);
 
-  const fetchBarbershops = async () => {
+  const fetchProfessionalshops = async () => {
     try {
       const businesses = await businessAPI.getAll();
-      setBarbershops(
+      setProfessionalshops(
         businesses.map((b) => ({
           id: b.id.toString(),
           name: b.name,
@@ -74,7 +74,7 @@ export function ClientDashboard() {
       );
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error("Error fetching barbershops:", error);
+        console.error("Error fetching businesses:", error);
       }
       toast.error("Erro ao carregar barbearias");
     } finally {
@@ -109,7 +109,7 @@ export function ClientDashboard() {
         userAppointments.forEach((apt) => {
           allAppointments.push({
             ...apt,
-            barbershopName: business.name,
+            businessName: business.name,
           });
         });
       }
@@ -184,37 +184,37 @@ export function ClientDashboard() {
       <main className="container mx-auto p-4 md:p-6 space-y-6">
         <div className="space-y-4">
           <div>
-            <h2 className="text-3xl font-bold">Selecione uma Barbearia</h2>
+            <h2 className="text-3xl font-bold">Selecione uma Business</h2>
             <p className="text-muted-foreground">
-              Escolha uma barbearia para agendar um horário
+              Escolha uma business para agendar um horário
             </p>
           </div>
 
           <Card>
             <CardHeader>
               <CardTitle>Barbearias Disponíveis</CardTitle>
-              <CardDescription>Escolha sua barbearia preferida</CardDescription>
+              <CardDescription>Escolha sua business preferida</CardDescription>
             </CardHeader>
             <CardContent>
               <Select
-                value={selectedBarbershop}
-                onValueChange={setSelectedBarbershop}
+                value={selectedProfessionalshop}
+                onValueChange={setSelectedProfessionalshop}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecionar uma barbearia" />
+                  <SelectValue placeholder="Selecionar uma business" />
                 </SelectTrigger>
                 <SelectContent>
-                  {barbershops.map((barbershop) => (
-                    <SelectItem key={barbershop.id} value={barbershop.id}>
+                  {businesses.map((business) => (
+                    <SelectItem key={business.id} value={business.id}>
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4" />
-                        {barbershop.name}
+                        {business.name}
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {selectedBarbershop && (
+              {selectedProfessionalshop && (
                 <Button
                   className="w-full mt-4"
                   onClick={() => {
@@ -275,16 +275,16 @@ export function ClientDashboard() {
                 <CardContent className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Building2 className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Barbearia:</span>
+                    <span className="font-medium">Business:</span>
                     <span>
-                      {appointment.barbershopName || "Barbearia não disponível"}
+                      {appointment.businessName || "Business não disponível"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Scissors className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Barbeiro:</span>
+                    <span className="font-medium">Professional:</span>
                     <span>
-                      {appointment.barber?.name || "Barbeiro não disponível"}
+                      {appointment.professional?.name || "Professional não disponível"}
                     </span>
                   </div>
                   {appointment.notes && (
@@ -316,7 +316,7 @@ export function ClientDashboard() {
             setAppointmentBeingEdited(null);
           }
         }}
-        barbershopId={dialogBarbershopId}
+        businessId={dialogBusinessId}
         onSuccess={fetchMyAppointments}
         appointment={appointmentBeingEdited}
       />

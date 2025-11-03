@@ -6,9 +6,9 @@ import { CreateReminderTemplateDto, UpdateReminderTemplateDto } from './dtos';
 
 export const DEFAULT_TEMPLATES = {
   [ReminderType.CONFIRMATION]:
-    'Olá {clientName}! Confirmamos seu agendamento para {appointmentDate} às {appointmentTime} com {barberName}. Até lá! ✂️',
+    'Olá {clientName}! Confirmamos seu agendamento para {appointmentDate} às {appointmentTime} com {professionalName}. Até lá! ✂️',
   [ReminderType.PRE_APPOINTMENT]:
-    'Oi {clientName}! Lembrete: seu horário é {appointmentDate} às {appointmentTime} com {barberName}. Confirme respondendo SIM.',
+    'Oi {clientName}! Lembrete: seu horário é {appointmentDate} às {appointmentTime} com {professionalName}. Confirme respondendo SIM.',
   [ReminderType.POST_APPOINTMENT]:
     'E aí {clientName}! Gostou do atendimento? Avalie-nos e agende seu próximo horário! 🌟',
   [ReminderType.RESCHEDULING]:

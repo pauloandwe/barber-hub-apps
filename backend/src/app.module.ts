@@ -3,28 +3,28 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
-import { BloqueiosModule } from './modules/bloqueios/bloqueios.module';
+import { UnavailabilityModule } from './modules/unavailability/unavailability.module';
 import { UsersModule } from './modules/users/users.module';
 import { BusinessModule } from './modules/business/business.module';
-import { BarbersModule } from './modules/barbers/barbers.module';
+import { ProfessionalsModule } from './modules/professionals/professionals.module';
 import { ServicesModule } from './modules/services/services.module';
 import { getDatabaseConfig } from './config/database.config';
 import {
   BusinessEntity,
   WorkingHoursEntity,
   ServiceEntity,
-  BarberEntity,
+  ProfessionalEntity,
   SettingsEntity,
   AppointmentEntity,
   ProfileEntity,
-  BloqueioEntity,
-  BarberWorkingHoursEntity,
+  UnavailabilityEntity,
+  ProfessionalWorkingHoursEntity,
   ReminderSettingsEntity,
   ReminderTemplateEntity,
   ReminderLogEntity,
   ClientPreferencesEntity,
 } from './database/entities';
-import { BarberWorkingHoursModule } from './modules/barber-working-hours/barber-working-hours.module';
+import { ProfessionalWorkingHoursModule } from './modules/professional-working-hours/professional-working-hours.module';
 import { QueueModule } from './queue/queue.module';
 import { RemindersModule } from './modules/reminders/reminders.module';
 
@@ -43,12 +43,12 @@ import { RemindersModule } from './modules/reminders/reminders.module';
       BusinessEntity,
       WorkingHoursEntity,
       ServiceEntity,
-      BarberEntity,
+      ProfessionalEntity,
       SettingsEntity,
       AppointmentEntity,
       ProfileEntity,
-      BloqueioEntity,
-      BarberWorkingHoursEntity,
+      UnavailabilityEntity,
+      ProfessionalWorkingHoursEntity,
       ReminderSettingsEntity,
       ReminderTemplateEntity,
       ReminderLogEntity,
@@ -58,12 +58,12 @@ import { RemindersModule } from './modules/reminders/reminders.module';
     RemindersModule,
     AuthModule,
     AppointmentsModule,
-    BloqueiosModule,
+    UnavailabilityModule,
     UsersModule,
     BusinessModule,
-    BarbersModule,
+    ProfessionalsModule,
     ServicesModule,
-    BarberWorkingHoursModule,
+    ProfessionalWorkingHoursModule,
   ],
 })
 export class AppModule {}

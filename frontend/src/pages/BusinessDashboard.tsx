@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { authAPI } from "@/api/auth";
-import { Barber, barbersAPI } from "@/api/barbers";
+import { Professional, professionalsAPI } from "@/api/professionals";
 import { Service as ServiceModel, servicesAPI } from "@/api/services";
 import { businessAPI, Business } from "@/api/business";
 import { Button } from "@/components/ui/button";
@@ -34,45 +34,45 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { ServiceDialog } from "@/components/ServiceDialog";
-import { BarberDialog } from "@/components/BarberDialog";
-import { BarberCard } from "@/components/BarberCard";
-import { BarberScheduleDialog } from "@/components/BarberScheduleDialog";
+import { ProfessionalDialog } from "@/components/ProfessionalDialog";
+import { ProfessionalCard } from "@/components/ProfessionalCard";
+import { ProfessionalScheduleDialog } from "@/components/ProfessionalScheduleDialog";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { AppointmentTimelineView } from "@/components/appointments/timeline/AppointmentTimelineView";
 import { ROUTES } from "@/constants/routes";
 
-export function BarbershopDashboard() {
+export function BusinessDashboard() {
   const navigate = useNavigate();
-  const { barbershopId, isLoading: roleLoading } = useUserRole();
+  const { businessId, isLoading: roleLoading } = useUserRole();
   const [services, setServices] = useState<ServiceModel[]>([]);
-  const [barbers, setBarbers] = useState<Barber[]>([]);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [barbershopInfo, setBarbershopInfo] = useState<
+  const [barbershopInfo, setProfessionalshopInfo] = useState<
     (Business & { nome?: string }) | null
   >(null);
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
-  const [isBarberDialogOpen, setIsBarberDialogOpen] = useState(false);
+  const [isProfessionalDialogOpen, setIsProfessionalDialogOpen] = useState(false);
   const [serviceDialogData, setServiceDialogData] =
     useState<ServiceModel | null>(null);
-  const [barberDialogData, setBarberDialogData] = useState<Barber | null>(null);
+  const [professionalDialogData, setProfessionalDialogData] = useState<Professional | null>(null);
   const [isBusinessDialogOpen, setIsBusinessDialogOpen] = useState(false);
   const [businessForm, setBusinessForm] = useState({ name: "", phone: "" });
   const [isSavingBusiness, setIsSavingBusiness] = useState(false);
-  const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
+  const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [scheduleVersion, setScheduleVersion] = useState(0);
   const hasWarnedWithoutBarbershop = useRef(false);
   const barbershopDisplayName =
-    barbershopInfo?.name || (barbershopInfo as any)?.nome || "My Barbershop";
+    barbershopInfo?.name || (barbershopInfo as any)?.nome || "My Business";
 
   useEffect(() => {
     if (roleLoading) return;
 
-    if (!barbershopId) {
+    if (!businessId) {
       if (!hasWarnedWithoutBarbershop.current) {
         toast.error(
-          "Não foi possível encontrar uma barbearia vinculada ao seu usuário"
+          "Não foi possível encontrar uma business vinculada ao seu usuário"
         );
         hasWarnedWithoutBarbershop.current = true;
       }
@@ -81,24 +81,24 @@ export function BarbershopDashboard() {
     }
     hasWarnedWithoutBarbershop.current = false;
 
-    fetchData(barbershopId);
-  }, [barbershopId, roleLoading]);
+    fetchData(businessId);
+  }, [businessId, roleLoading]);
 
   const fetchData = async (targetBarbershopId: string | number) => {
     try {
-      const barbershopIdNum =
+      const businessIdNum =
         typeof targetBarbershopId === "string"
           ? parseInt(targetBarbershopId, 10)
           : targetBarbershopId;
 
-      const business = await businessAPI.getById(barbershopIdNum);
-      setBarbershopInfo(business);
+      const business = await businessAPI.getById(businessIdNum);
+      setProfessionalshopInfo(business);
 
-      const svcs = await servicesAPI.getAll(barbershopIdNum);
+      const svcs = await servicesAPI.getAll(businessIdNum);
       setServices(svcs);
 
-      const brbs = await barbersAPI.getAll(barbershopIdNum);
-      setBarbers(brbs);
+      const brbs = await professionalsAPI.getAll(businessIdNum);
+      setProfessionals(brbs);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.error("Error fetching data:", error);
@@ -129,33 +129,33 @@ export function BarbershopDashboard() {
   const handleUpdateBusiness = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!barbershopId) {
-      toast.error("Nenhuma barbearia associada a esta conta");
+    if (!businessId) {
+      toast.error("Nenhuma business associada a esta conta");
       return;
     }
 
-    const barbershopIdNum = parseInt(barbershopId, 10);
-    if (Number.isNaN(barbershopIdNum)) {
-      toast.error("Identificador de barbearia inválido");
+    const businessIdNum = parseInt(businessId, 10);
+    if (Number.isNaN(businessIdNum)) {
+      toast.error("Identificador de business inválido");
       return;
     }
 
     setIsSavingBusiness(true);
     try {
-      await businessAPI.update(barbershopIdNum, {
+      await businessAPI.update(businessIdNum, {
         name: businessForm.name,
         phone: businessForm.phone || undefined,
       });
 
-      toast.success("Barbearia atualizada com sucesso!");
+      toast.success("Business atualizada com sucesso!");
       setIsBusinessDialogOpen(false);
       resetBusinessForm();
-      fetchData(barbershopIdNum);
+      fetchData(businessIdNum);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error("Error updating barbershop:", error);
+        console.error("Error updating business:", error);
       }
-      toast.error("Erro ao atualizar barbearia");
+      toast.error("Erro ao atualizar business");
     } finally {
       setIsSavingBusiness(false);
     }
@@ -166,9 +166,9 @@ export function BarbershopDashboard() {
     setIsServiceDialogOpen(true);
   };
 
-  const openBarberDialog = (barber?: Barber | null) => {
-    setBarberDialogData(barber ?? null);
-    setIsBarberDialogOpen(true);
+  const openBarberDialog = (professional?: Professional | null) => {
+    setProfessionalDialogData(professional ?? null);
+    setIsProfessionalDialogOpen(true);
   };
 
   const handleLogout = () => {
@@ -202,7 +202,7 @@ export function BarbershopDashboard() {
               disabled={!barbershopInfo}
             >
               <Building2 className="mr-2 h-4 w-4" />
-              Editar Barbearia
+              Editar Business
             </Button>
             <Button variant="outline" onClick={() => navigate(ROUTES.PROFILE)}>
               <User className="mr-2 h-4 w-4" />
@@ -221,12 +221,12 @@ export function BarbershopDashboard() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="timeline">📅 Agenda</TabsTrigger>
             <TabsTrigger value="services">Serviços</TabsTrigger>
-            <TabsTrigger value="barbers">Barbeiros</TabsTrigger>
+            <TabsTrigger value="professionals">Barbeiros</TabsTrigger>
           </TabsList>
 
           <TabsContent value="timeline" className="space-y-4">
-            {barbershopId && (
-              <AppointmentTimelineView businessId={parseInt(barbershopId, 10)} />
+            {businessId && (
+              <AppointmentTimelineView businessId={parseInt(businessId, 10)} />
             )}
           </TabsContent>
 
@@ -287,7 +287,7 @@ export function BarbershopDashboard() {
             )}
           </TabsContent>
 
-          <TabsContent value="barbers" className="space-y-4">
+          <TabsContent value="professionals" className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold">Barbeiros</h2>
@@ -297,29 +297,29 @@ export function BarbershopDashboard() {
               </div>
               <Button onClick={() => openBarberDialog()}>
                 <Plus className="mr-2 h-4 w-4" />
-                Novo Barbeiro
+                Novo Professional
               </Button>
             </div>
 
             <div className="grid gap-4">
-              {barbers?.map((barber) => (
-                <BarberCard
-                  key={barber.id}
-                  barber={barber}
-                  onViewSchedule={(barber) => {
-                    setSelectedBarber(barber);
+              {professionals?.map((professional) => (
+                <ProfessionalCard
+                  key={professional.id}
+                  professional={professional}
+                  onViewSchedule={(professional) => {
+                    setSelectedProfessional(professional);
                     setIsScheduleDialogOpen(true);
                   }}
-                  onEdit={(barber) => openBarberDialog(barber)}
+                  onEdit={(professional) => openBarberDialog(professional)}
                   scheduleVersion={scheduleVersion}
                 />
               ))}
             </div>
 
-            {barbers.length === 0 && (
+            {professionals.length === 0 && (
               <EmptyState
-                title="Nenhum barbeiro registrado"
-                description="Adicione seu primeiro barbeiro à equipe"
+                title="Nenhum professional registrado"
+                description="Adicione seu primeiro professional à equipe"
                 icon="👨‍💼"
               />
             )}
@@ -338,9 +338,9 @@ export function BarbershopDashboard() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editar Barbearia</DialogTitle>
+            <DialogTitle>Editar Business</DialogTitle>
             <DialogDescription>
-              Atualize as informações de sua barbearia abaixo
+              Atualize as informações de sua business abaixo
             </DialogDescription>
           </DialogHeader>
 
@@ -402,37 +402,37 @@ export function BarbershopDashboard() {
             setServiceDialogData(null);
           }
         }}
-        barbershopId={barbershopId || ""}
-        onSuccess={() => fetchData(barbershopId || "")}
+        businessId={businessId || ""}
+        onSuccess={() => fetchData(businessId || "")}
         service={serviceDialogData}
       />
 
-      <BarberDialog
-        open={isBarberDialogOpen}
+      <ProfessionalDialog
+        open={isProfessionalDialogOpen}
         onOpenChange={(open) => {
-          setIsBarberDialogOpen(open);
+          setIsProfessionalDialogOpen(open);
           if (!open) {
-            setBarberDialogData(null);
+            setProfessionalDialogData(null);
           }
         }}
-        barbershopId={barbershopId || ""}
-        onSuccess={() => fetchData(barbershopId || "")}
-        barber={barberDialogData}
+        businessId={businessId || ""}
+        onSuccess={() => fetchData(businessId || "")}
+        professional={professionalDialogData}
       />
 
-      <BarberScheduleDialog
+      <ProfessionalScheduleDialog
         open={isScheduleDialogOpen}
         onOpenChange={(open) => {
           setIsScheduleDialogOpen(open);
           if (!open) {
-            setSelectedBarber(null);
+            setSelectedProfessional(null);
           }
         }}
-        barber={selectedBarber}
+        professional={selectedProfessional}
         onSaved={() => setScheduleVersion((value) => value + 1)}
       />
     </div>
   );
 }
 
-export default BarbershopDashboard;
+export default BusinessDashboard;

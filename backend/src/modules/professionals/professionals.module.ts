@@ -2,15 +2,15 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { BarbersService } from './barbers.service';
-import { BarbersController } from './barbers.controller';
-import { BarberEntity } from '../../database/entities/barber.entity';
+import { ProfessionalsService } from './professionals.service';
+import { ProfessionalsController } from './professionals.controller';
+import { ProfessionalEntity } from '../../database/entities/professional.entity';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BarberEntity]),
+    TypeOrmModule.forFeature([ProfessionalEntity]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -21,8 +21,8 @@ import { RolesGuard } from '../../common/guards/roles.guard';
       }),
     }),
   ],
-  providers: [BarbersService, JwtAuthGuard, RolesGuard],
-  controllers: [BarbersController],
-  exports: [BarbersService],
+  providers: [ProfessionalsService, JwtAuthGuard, RolesGuard],
+  controllers: [ProfessionalsController],
+  exports: [ProfessionalsService],
 })
-export class BarbersModule {}
+export class ProfessionalsModule {}

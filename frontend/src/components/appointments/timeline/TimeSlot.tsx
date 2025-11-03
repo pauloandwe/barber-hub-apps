@@ -8,7 +8,7 @@ interface TimeSlotProps {
   isWorkingHours: boolean;
   children?: ReactNode;
   onClick?: () => void;
-  barberId: number;
+  professionalId: number;
   slotTime: string;
 }
 
@@ -18,19 +18,19 @@ export function TimeSlot({
   isWorkingHours,
   children,
   onClick,
-  barberId,
+  professionalId,
   slotTime,
 }: TimeSlotProps) {
   const droppableId = useMemo(
-    () => `timeline-slot-${barberId}-${slotTime}`,
-    [barberId, slotTime]
+    () => `timeline-slot-${professionalId}-${slotTime}`,
+    [professionalId, slotTime]
   );
 
   const { setNodeRef, isOver } = useDroppable({
     id: droppableId,
     data: {
       type: "slot",
-      barberId,
+      professionalId,
       slotTime,
     },
     disabled: !isWorkingHours,

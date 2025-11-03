@@ -17,11 +17,11 @@ import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatDateTime } from "@/utils/date.utils";
-import { Barber as BarberModel } from "@/api/barbers";
+import { Professional as BarberModel } from "@/api/professionals";
 import {
-  barberWorkingHoursAPI,
-  BarberWorkingHour,
-} from "@/api/barberWorkingHours";
+  professionalWorkingHoursAPI,
+  ProfessionalWorkingHour,
+} from "@/api/professionalWorkingHours";
 import { appointmentsAPI } from "@/api/appointments";
 
 const DAY_LABELS = [
@@ -34,7 +34,7 @@ const DAY_LABELS = [
   "Sábado",
 ];
 
-export interface BarberAppointment {
+export interface ProfessionalAppointment {
   id: string;
   startDate: string;
   endDate: string;
@@ -43,23 +43,23 @@ export interface BarberAppointment {
   service: { name: string; duration: number };
 }
 
-interface BarberCardProps {
-  barber: BarberModel;
-  onViewSchedule?: (barber: BarberModel) => void;
-  onEdit?: (barber: BarberModel) => void;
+interface ProfessionalCardProps {
+  professional: BarberModel;
+  onViewSchedule?: (professional: BarberModel) => void;
+  onEdit?: (professional: BarberModel) => void;
   scheduleVersion?: number;
 }
 
-export function BarberCard({
-  barber,
+export function ProfessionalCard({
+  professional,
   onViewSchedule,
   onEdit,
   scheduleVersion = 0,
-}: BarberCardProps) {
+}: ProfessionalCardProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [appointments, setAppointments] = useState<BarberAppointment[]>([]);
+  const [appointments, setAppointments] = useState<ProfessionalAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [workingHours, setWorkingHours] = useState<BarberWorkingHour[]>([]);
+  const [workingHours, setWorkingHours] = useState<ProfessionalWorkingHour[]>([]);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
 
   useEffect(() => {
@@ -70,24 +70,24 @@ export function BarberCard({
 
   useEffect(() => {
     loadWorkingHours();
-  }, [barber.id, scheduleVersion]);
+  }, [professional.id, scheduleVersion]);
 
   const fetchAppointments = async () => {
     setIsLoading(true);
     try {
       setAppointments([]);
 
-      if (!barber.businessId) {
+      if (!professional.businessId) {
         setAppointments([]);
         return;
       }
 
-      const data = await appointmentsAPI.getAll(barber.businessId);
+      const data = await appointmentsAPI.getAll(professional.businessId);
       const filteredAppointments = data.filter(
-        (appointment) => appointment.barberId === barber.id
+        (appointment) => appointment.professionalId === professional.id
       );
 
-      const normalizedAppointments: BarberAppointment[] =
+      const normalizedAppointments: ProfessionalAppointment[] =
         filteredAppointments.map((appointment) => ({
           id: String(appointment.id),
           startDate: appointment.startDate,
@@ -98,7 +98,7 @@ export function BarberCard({
               appointment.client?.name ||
               appointment.clientContact?.name ||
               appointment.clientContact?.phone ||
-              appointment.barber?.name ||
+              appointment.professional?.name ||
               "Cliente não disponível",
           },
           service: appointment.service
@@ -127,7 +127,7 @@ export function BarberCard({
   const loadWorkingHours = async () => {
     setIsLoadingSchedule(true);
     try {
-      const data = await barberWorkingHoursAPI.getAll(barber.id);
+      const data = await professionalWorkingHoursAPI.getAll(professional.id);
       setWorkingHours(Array.isArray(data) ? data : []);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
@@ -164,7 +164,7 @@ export function BarberCard({
 
   const handleViewSchedule = () => {
     if (onViewSchedule) {
-      onViewSchedule(barber);
+      onViewSchedule(professional);
     }
   };
 
@@ -176,29 +176,29 @@ export function BarberCard({
             <div className="space-y-1 flex-1">
               <CardTitle className="flex items-center gap-2">
                 <UserIcon className="h-5 w-5" />
-                {barber.name}
+                {professional.name}
               </CardTitle>
-              {barber.specialties && barber.specialties.length > 0 && (
+              {professional.specialties && professional.specialties.length > 0 && (
                 <CardDescription>
-                  {barber.specialties.join(", ")}
+                  {professional.specialties.join(", ")}
                 </CardDescription>
               )}
             </div>
             <div className="flex gap-2 ml-4 items-center">
               <span
                 className={`text-xs px-2 py-1 rounded whitespace-nowrap ${
-                  barber.active
+                  professional.active
                     ? "bg-green-100 text-green-800"
                     : "bg-gray-100 text-gray-800"
                 }`}
               >
-                {barber.active ? "Ativo" : "Inativo"}
+                {professional.active ? "Ativo" : "Inativo"}
               </span>
               {onEdit && (
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onEdit(barber)}
+                  onClick={() => onEdit(professional)}
                 >
                   Editar
                 </Button>
@@ -246,7 +246,7 @@ export function BarberCard({
             ) : appointments.length === 0 ? (
               <EmptyState
                 title="Nenhum agendamento agendado"
-                description="Não há agendamentos programados para este barbeiro ainda."
+                description="Não há agendamentos programados para este professional ainda."
               />
             ) : (
               <div className="space-y-3">
@@ -285,4 +285,4 @@ export function BarberCard({
   );
 }
 
-export default BarberCard;
+export default ProfessionalCard;

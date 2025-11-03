@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { WorkingHoursEntity } from './working-hours.entity';
 import { ServiceEntity } from './service.entity';
-import { BarberEntity } from './barber.entity';
+import { ProfessionalEntity } from './professional.entity';
 import { SettingsEntity } from './settings.entity';
 import { AppointmentEntity } from './appointment.entity';
 import { ClientContactEntity } from './client-contact.entity';
@@ -58,11 +58,11 @@ export class BusinessEntity {
   })
   services: ServiceEntity[];
 
-  @OneToMany(() => BarberEntity, (barber) => barber.business, {
+  @OneToMany(() => ProfessionalEntity, (professional) => professional.business, {
     cascade: true,
     eager: true,
   })
-  barbers: BarberEntity[];
+  professionals: ProfessionalEntity[];
 
   @OneToOne(() => SettingsEntity, (settings) => settings.business, {
     cascade: true,

@@ -18,14 +18,14 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { formatUtcDateTime } from "@/utils/date.utils";
 
-export interface Barber {
+export interface Professional {
   id: string;
   name: string;
   bio?: string | null;
   active: boolean;
 }
 
-export interface BarberAppointment {
+export interface ProfessionalAppointment {
   id: string;
   startDate: string;
   endDate: string;
@@ -34,14 +34,14 @@ export interface BarberAppointment {
   service: { name: string; duration: number };
 }
 
-interface BarberCardProps {
-  barber: Barber;
-  onViewSchedule?: (barberId: string) => void;
+interface ProfessionalCardProps {
+  professional: Professional;
+  onViewSchedule?: (professionalId: string) => void;
 }
 
-export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
+export function ProfessionalCard({ professional, onViewSchedule }: ProfessionalCardProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [appointments, setAppointments] = useState<BarberAppointment[]>([]);
+  const [appointments, setAppointments] = useState<ProfessionalAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
 
   const handleViewSchedule = () => {
     if (onViewSchedule) {
-      onViewSchedule(barber.id);
+      onViewSchedule(professional.id);
     }
   };
 
@@ -77,19 +77,19 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
             <div className="space-y-1 flex-1">
               <CardTitle className="flex items-center gap-2">
                 <UserIcon className="h-5 w-5" />
-                {barber.name}
+                {professional.name}
               </CardTitle>
-              {barber.bio && <CardDescription>{barber.bio}</CardDescription>}
+              {professional.bio && <CardDescription>{professional.bio}</CardDescription>}
             </div>
             <div className="flex gap-2 ml-4">
               <span
                 className={`text-xs px-2 py-1 rounded whitespace-nowrap ${
-                  barber.active
+                  professional.active
                     ? "bg-green-100 text-green-800"
                     : "bg-gray-100 text-gray-800"
                 }`}
               >
-                {barber.active ? "Ativo" : "Inativo"}
+                {professional.active ? "Ativo" : "Inativo"}
               </span>
             </div>
           </div>
@@ -107,7 +107,7 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
             ) : appointments.length === 0 ? (
               <EmptyState
                 title="Nenhum agendamento programado"
-                description="Não há agendamentos programados para este barbeiro ainda."
+                description="Não há agendamentos programados para este professional ainda."
               />
             ) : (
               <div className="space-y-3">
@@ -146,4 +146,4 @@ export function BarberCard({ barber, onViewSchedule }: BarberCardProps) {
   );
 }
 
-export default BarberCard;
+export default ProfessionalCard;

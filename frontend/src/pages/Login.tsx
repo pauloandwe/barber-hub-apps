@@ -103,9 +103,9 @@ export function Login() {
             <Scissors className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-3xl">Barber Hub</CardTitle>
+            <CardTitle className="text-3xl">Professional Hub</CardTitle>
             <CardDescription className="mt-2">
-              Gerenciar sua barbearia profissionalmente
+              Gerenciar sua business profissionalmente
             </CardDescription>
           </div>
         </CardHeader>

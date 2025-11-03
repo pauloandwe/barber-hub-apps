@@ -1,12 +1,12 @@
 export { BusinessEntity } from './business.entity';
 export { WorkingHoursEntity } from './working-hours.entity';
 export { ServiceEntity } from './service.entity';
-export { BarberEntity } from './barber.entity';
+export { ProfessionalEntity } from './professional.entity';
 export { SettingsEntity } from './settings.entity';
 export { AppointmentEntity, AppointmentStatus, AppointmentOrigin } from './appointment.entity';
 export { ProfileEntity, UserRole } from './profile.entity';
-export { BloqueioEntity } from './bloqueio.entity';
-export { BarberWorkingHoursEntity } from './barber-working-hours.entity';
+export { UnavailabilityEntity } from './unavailability.entity';
+export { ProfessionalWorkingHoursEntity } from './professional-working-hours.entity';
 export { ClientContactEntity } from './client-contact.entity';
 export { ReminderSettingsEntity, ReminderType } from './reminder-settings.entity';
 export { ReminderTemplateEntity } from './reminder-template.entity';

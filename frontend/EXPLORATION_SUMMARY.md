@@ -45,7 +45,7 @@ src/
 
 ### 1. API Architecture
 - **Axios Client** with request/response interceptors
-- **Modular API services** (auth, appointments, barbers, services, etc.)
+- **Modular API services** (auth, appointments, professionals, services, etc.)
 - **Centralized token management** in localStorage
 - **Auto-logout on 401** errors
 - **Nested response data extraction** to handle various API response formats
@@ -54,7 +54,7 @@ src/
 - **shadcn/ui library** for all UI components (70+ available)
 - **CVA (Class Variance Authority)** for component variants
 - **Shared components** for common patterns (LoadingSpinner, EmptyState, etc.)
-- **Domain-specific components** (appointment, barber, service dialogs)
+- **Domain-specific components** (appointment, professional, service dialogs)
 - **Composition over inheritance**
 
 ### 3. State Management
@@ -89,7 +89,7 @@ src/
 3. **src/api/services.ts** - Example API module pattern
 4. **src/components/AuthGuard.tsx** - Route protection logic
 5. **src/hooks/useUserRole.tsx** - User context hook
-6. **src/pages/BarbershopDashboard.tsx** - Complete page example
+6. **src/pages/BusinessDashboard.tsx** - Complete page example
 
 ### Reference (Common Patterns)
 
@@ -353,7 +353,7 @@ npm run preview
 
 ## Conclusion
 
-The Barber Hub frontend is **well-architected and production-ready** with:
+The Professional Hub frontend is **well-architected and production-ready** with:
 
 - Clear separation of concerns (API, Components, Pages, Hooks)
 - Consistent patterns throughout (dialogs, forms, API calls)

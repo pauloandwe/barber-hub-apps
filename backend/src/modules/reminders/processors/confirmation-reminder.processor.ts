@@ -62,7 +62,7 @@ export class ConfirmationReminderProcessor extends WorkerHost {
       // Busca appointment com relacionamentos
       const appointment = await this.appointmentRepository.findOne({
         where: { id: appointmentId },
-        relations: ['clientContact', 'barber', 'service', 'business'],
+        relations: ['clientContact', 'professional', 'service', 'business'],
       });
 
       if (!appointment) {
@@ -116,7 +116,7 @@ export class ConfirmationReminderProcessor extends WorkerHost {
           hour: '2-digit',
           minute: '2-digit',
         }),
-        barberName: appointment.barber?.name || 'Barbeiro',
+        professionalName: appointment.professional?.name || 'Profissional',
         serviceName: appointment.service?.name || 'Serviço',
       });
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { barbersAPI } from "@/api/barbers";
+import { professionalsAPI } from "@/api/professionals";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -10,37 +10,37 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
-export interface Barber {
+export interface Professional {
   id: string;
   name: string;
 }
 
-interface BarberSelectorProps {
-  barbershopId: string;
+interface ProfessionalSelectorProps {
+  businessId: string;
   value: string;
-  onChange: (barberId: string) => void;
+  onChange: (professionalId: string) => void;
   disabled?: boolean;
 }
 
-export function BarberSelector({
-  barbershopId,
+export function ProfessionalSelector({
+  businessId,
   value,
   onChange,
   disabled,
-}: BarberSelectorProps) {
-  const [barbers, setBarbers] = useState<Barber[]>([]);
+}: ProfessionalSelectorProps) {
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    fetchBarbers();
-  }, [barbershopId]);
+    fetchProfessionals();
+  }, [businessId]);
 
-  const fetchBarbers = async () => {
+  const fetchProfessionals = async () => {
     setIsLoading(true);
     try {
-      const barbershopIdNum = parseInt(barbershopId, 10);
-      const data = await barbersAPI.getAll(barbershopIdNum);
-      setBarbers(
+      const businessIdNum = parseInt(businessId, 10);
+      const data = await professionalsAPI.getAll(businessIdNum);
+      setProfessionals(
         data.map((b: any) => ({
           id: b.id.toString(),
           name: b.name,
@@ -48,7 +48,7 @@ export function BarberSelector({
       );
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error("Error fetching barbers:", error);
+        console.error("Error fetching professionals:", error);
       }
       toast.error("Erro ao carregar barbeiros");
     } finally {
@@ -58,19 +58,19 @@ export function BarberSelector({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="barber">Barbeiro *</Label>
+      <Label htmlFor="professional">Professional *</Label>
       <Select
         value={value}
         onValueChange={onChange}
         disabled={disabled || isLoading}
       >
-        <SelectTrigger id="barber">
-          <SelectValue placeholder="Selecione um barbeiro" />
+        <SelectTrigger id="professional">
+          <SelectValue placeholder="Selecione um professional" />
         </SelectTrigger>
         <SelectContent>
-          {barbers.map((barber) => (
-            <SelectItem key={barber.id} value={barber.id}>
-              {barber.name}
+          {professionals.map((professional) => (
+            <SelectItem key={professional.id} value={professional.id}>
+              {professional.name}
             </SelectItem>
           ))}
         </SelectContent>

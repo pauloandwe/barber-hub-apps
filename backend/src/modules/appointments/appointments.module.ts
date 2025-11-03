@@ -8,10 +8,10 @@ import {
   AppointmentEntity,
   BusinessEntity,
   ServiceEntity,
-  BarberEntity,
+  ProfessionalEntity,
   ProfileEntity,
   ClientContactEntity,
-  BarberWorkingHoursEntity,
+  ProfessionalWorkingHoursEntity,
 } from 'src/database/entities';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -23,10 +23,10 @@ import { RemindersModule } from '../reminders/reminders.module';
       AppointmentEntity,
       BusinessEntity,
       ServiceEntity,
-      BarberEntity,
+      ProfessionalEntity,
       ProfileEntity,
       ClientContactEntity,
-      BarberWorkingHoursEntity,
+      ProfessionalWorkingHoursEntity,
     ]),
     JwtModule.registerAsync({
       inject: [ConfigService],

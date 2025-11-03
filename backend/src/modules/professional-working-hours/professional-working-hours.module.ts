@@ -2,15 +2,15 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BarberWorkingHoursController } from './barber-working-hours.controller';
-import { BarberWorkingHoursService } from './barber-working-hours.service';
-import { BarberEntity, BarberWorkingHoursEntity } from '../../database/entities';
+import { ProfessionalWorkingHoursController } from './professional-working-hours.controller';
+import { ProfessionalWorkingHoursService } from './professional-working-hours.service';
+import { ProfessionalEntity, ProfessionalWorkingHoursEntity } from '../../database/entities';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BarberWorkingHoursEntity, BarberEntity]),
+    TypeOrmModule.forFeature([ProfessionalWorkingHoursEntity, ProfessionalEntity]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -21,9 +21,9 @@ import { RolesGuard } from '../../common/guards/roles.guard';
       }),
     }),
   ],
-  controllers: [BarberWorkingHoursController],
-  providers: [BarberWorkingHoursService, JwtAuthGuard, RolesGuard],
-  exports: [BarberWorkingHoursService],
+  controllers: [ProfessionalWorkingHoursController],
+  providers: [ProfessionalWorkingHoursService, JwtAuthGuard, RolesGuard],
+  exports: [ProfessionalWorkingHoursService],
 })
-export class BarberWorkingHoursModule {}
+export class ProfessionalWorkingHoursModule {}
 

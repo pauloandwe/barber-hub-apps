@@ -7,11 +7,11 @@ import { BusinessController } from './business.controller';
 import {
   BusinessEntity,
   ServiceEntity,
-  BarberEntity,
+  ProfessionalEntity,
   WorkingHoursEntity,
   AppointmentEntity,
-  BloqueioEntity,
-  BarberWorkingHoursEntity,
+  UnavailabilityEntity,
+  ProfessionalWorkingHoursEntity,
 } from '../../database/entities';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -21,11 +21,11 @@ import { RolesGuard } from '../../common/guards/roles.guard';
     TypeOrmModule.forFeature([
       BusinessEntity,
       ServiceEntity,
-      BarberEntity,
+      ProfessionalEntity,
       WorkingHoursEntity,
       AppointmentEntity,
-      BloqueioEntity,
-      BarberWorkingHoursEntity,
+      UnavailabilityEntity,
+      ProfessionalWorkingHoursEntity,
     ]),
     JwtModule.registerAsync({
       inject: [ConfigService],

@@ -6,10 +6,10 @@ import {
   AppointmentStatus,
   BusinessEntity,
   ServiceEntity,
-  BarberEntity,
+  ProfessionalEntity,
   ProfileEntity,
   ClientContactEntity,
-  BarberWorkingHoursEntity,
+  ProfessionalWorkingHoursEntity,
 } from 'src/database/entities';
 import {
   CreateAppointmentDto,
@@ -20,9 +20,9 @@ import {
 } from 'src/common/dtos/appointment.dto';
 import {
   AppointmentTimelineResponseDto,
-  BarberTimelineDto,
+  ProfessionalTimelineDto,
   AppointmentTimelineCardDto,
-  BarberWorkingHourDto,
+  ProfessionalWorkingHourDto,
 } from 'src/common/dtos/appointment-timeline.dto';
 import { RemindersService } from '../reminders/reminders.service';
 
@@ -35,21 +35,21 @@ export class AppointmentsService {
     private businessRepository: Repository<BusinessEntity>,
     @InjectRepository(ServiceEntity)
     private serviceRepository: Repository<ServiceEntity>,
-    @InjectRepository(BarberEntity)
-    private barberRepository: Repository<BarberEntity>,
+    @InjectRepository(ProfessionalEntity)
+    private professionalRepository: Repository<ProfessionalEntity>,
     @InjectRepository(ProfileEntity)
     private profileRepository: Repository<ProfileEntity>,
     @InjectRepository(ClientContactEntity)
     private clientContactRepository: Repository<ClientContactEntity>,
-    @InjectRepository(BarberWorkingHoursEntity)
-    private barberWorkingHoursRepository: Repository<BarberWorkingHoursEntity>,
+    @InjectRepository(ProfessionalWorkingHoursEntity)
+    private professionalWorkingHoursRepository: Repository<ProfessionalWorkingHoursEntity>,
     private remindersService: RemindersService,
   ) {}
 
   async findByBusinessId(businessId: number): Promise<AppointmentResponseDto[]> {
     const appointments = await this.appointmentRepository.find({
       where: { businessId },
-      relations: ['barber', 'client', 'service', 'clientContact'],
+      relations: ['professional', 'client', 'service', 'clientContact'],
       order: { startDate: 'DESC' },
     });
 
@@ -108,7 +108,7 @@ export class AppointmentsService {
 
     const appointments = await this.appointmentRepository.find({
       where,
-      relations: ['barber', 'client', 'service', 'clientContact'],
+      relations: ['professional', 'client', 'service', 'clientContact'],
       order: { startDate: 'DESC' },
     });
 
@@ -121,7 +121,7 @@ export class AppointmentsService {
         id: appointmentId,
         businessId,
       },
-      relations: ['barber', 'client', 'service', 'clientContact'],
+      relations: ['professional', 'client', 'service', 'clientContact'],
     });
 
     if (!appointment) {
@@ -134,7 +134,7 @@ export class AppointmentsService {
   async getTimelineByDate(
     businessId: number,
     date: string,
-    barberIds?: number[],
+    professionalIds?: number[],
     status?: 'pending' | 'confirmed' | 'canceled',
     serviceId?: number,
   ): Promise<AppointmentTimelineResponseDto> {
@@ -147,15 +147,15 @@ export class AppointmentsService {
     const startDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
     const endDate = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
 
-    let barbers = await this.barberRepository.find({
+    let professionals = await this.professionalRepository.find({
       where: {
         businessId,
         active: true,
       },
     });
 
-    if (barberIds && barberIds.length > 0) {
-      barbers = barbers.filter((b) => barberIds.includes(b.id));
+    if (professionalIds && professionalIds.length > 0) {
+      professionals = professionals.filter((b) => professionalIds.includes(b.id));
     }
 
     const appointmentQuery = this.appointmentRepository
@@ -163,7 +163,7 @@ export class AppointmentsService {
       .where('appointment.businessId = :businessId', { businessId })
       .andWhere('appointment.startDate >= :startDate', { startDate })
       .andWhere('appointment.startDate < :endDate', { endDate })
-      .leftJoinAndSelect('appointment.barber', 'barber')
+      .leftJoinAndSelect('appointment.professional', 'professional')
       .leftJoinAndSelect('appointment.service', 'service')
       .leftJoinAndSelect('appointment.clientContact', 'clientContact');
 
@@ -178,37 +178,37 @@ export class AppointmentsService {
     const appointments = await appointmentQuery.getMany();
 
     let workingHours = [];
-    if (barbers.length > 0) {
-      const barberIds = barbers.map((b) => b.id);
-      workingHours = await this.barberWorkingHoursRepository.find({
+    if (professionals.length > 0) {
+      const professionalIds = professionals.map((b) => b.id);
+      workingHours = await this.professionalWorkingHoursRepository.find({
         where: {
-          barberId: In(barberIds),
+          professionalId: In(professionalIds),
         },
       });
     }
 
     const dayOfWeek = new Date(year, month - 1, day).getDay();
 
-    const barberTimelines: BarberTimelineDto[] = barbers.map((barber) => {
-      const barberAppointments = appointments.filter((a) => a.barberId === barber.id);
-      const barberWorkingHour = workingHours.find(
-        (wh) => wh.barberId === barber.id && wh.dayOfWeek === dayOfWeek,
+    const professionalTimelines: ProfessionalTimelineDto[] = professionals.map((professional) => {
+      const professionalAppointments = appointments.filter((a) => a.professionalId === professional.id);
+      const professionalWorkingHour = workingHours.find(
+        (wh) => wh.professionalId === professional.id && wh.dayOfWeek === dayOfWeek,
       );
 
       return {
-        id: barber.id,
-        name: barber.name,
-        specialties: barber.specialties || [],
-        appointments: barberAppointments.map((apt) => this.formatAppointmentTimelineCard(apt)),
-        workingHours: barberWorkingHour
-          ? this.formatWorkingHourDto(barberWorkingHour)
+        id: professional.id,
+        name: professional.name,
+        specialties: professional.specialties || [],
+        appointments: professionalAppointments.map((apt) => this.formatAppointmentTimelineCard(apt)),
+        workingHours: professionalWorkingHour
+          ? this.formatWorkingHourDto(professionalWorkingHour)
           : this.getDefaultClosedHours(),
       };
     });
 
     return {
       date,
-      barbers: barberTimelines,
+      professionals: professionalTimelines,
       slotDurationMinutes: 30,
     };
   }
@@ -218,7 +218,7 @@ export class AppointmentsService {
   ): AppointmentTimelineCardDto {
     return {
       id: appointment.id,
-      barberId: appointment.barberId,
+      professionalId: appointment.professionalId,
       startDate: appointment.startDate.toISOString(),
       endDate: appointment.endDate.toISOString(),
       status: appointment.status,
@@ -247,7 +247,7 @@ export class AppointmentsService {
     };
   }
 
-  private formatWorkingHourDto(workingHour: BarberWorkingHoursEntity): BarberWorkingHourDto {
+  private formatWorkingHourDto(workingHour: ProfessionalWorkingHoursEntity): ProfessionalWorkingHourDto {
     return {
       dayOfWeek: workingHour.dayOfWeek,
       openTime: workingHour.openTime,
@@ -258,7 +258,7 @@ export class AppointmentsService {
     };
   }
 
-  private getDefaultClosedHours(): BarberWorkingHourDto {
+  private getDefaultClosedHours(): ProfessionalWorkingHourDto {
     return {
       dayOfWeek: 0,
       openTime: null,
@@ -292,15 +292,15 @@ export class AppointmentsService {
       throw new NotFoundException('Service not found');
     }
 
-    const barber = await this.barberRepository.findOne({
+    const professional = await this.professionalRepository.findOne({
       where: {
-        id: createAppointmentDto.barberId,
+        id: createAppointmentDto.professionalId,
         businessId: createAppointmentDto.businessId,
       },
     });
 
-    if (!barber) {
-      throw new NotFoundException('Barber not found');
+    if (!professional) {
+      throw new NotFoundException('Professional not found');
     }
 
     const startDate = new Date(createAppointmentDto.startDate);
@@ -308,7 +308,7 @@ export class AppointmentsService {
 
     const existingAppointment = await this.appointmentRepository.findOne({
       where: {
-        barberId: createAppointmentDto.barberId,
+        professionalId: createAppointmentDto.professionalId,
         startDate: startDate,
       },
     });
@@ -329,7 +329,7 @@ export class AppointmentsService {
     const appointment = this.appointmentRepository.create({
       businessId: createAppointmentDto.businessId,
       serviceId: createAppointmentDto.serviceId,
-      barberId: createAppointmentDto.barberId,
+      professionalId: createAppointmentDto.professionalId,
       clientId: clientId ?? null,
       clientContactId: clientContact?.id ?? null,
       startDate: startDate,
@@ -377,17 +377,17 @@ export class AppointmentsService {
     const shouldCheckConflicts =
       updateAppointmentDto.startDate !== undefined ||
       updateAppointmentDto.endDate !== undefined ||
-      updateAppointmentDto.barberId !== undefined;
+      updateAppointmentDto.professionalId !== undefined;
 
     if (shouldCheckConflicts) {
       const newStartTime = updateAppointmentDto.startDate
         ? new Date(updateAppointmentDto.startDate)
         : appointment.startDate;
-      const barberId = updateAppointmentDto.barberId ?? appointment.barberId;
+      const professionalId = updateAppointmentDto.professionalId ?? appointment.professionalId;
 
       const conflict = await this.appointmentRepository.findOne({
         where: {
-          barberId,
+          professionalId,
           businessId,
           startDate: newStartTime,
           id: Not(appointmentId),
@@ -425,8 +425,8 @@ export class AppointmentsService {
       appointment.serviceId = updateAppointmentDto.serviceId;
     }
 
-    if (updateAppointmentDto.barberId !== undefined) {
-      appointment.barberId = updateAppointmentDto.barberId;
+    if (updateAppointmentDto.professionalId !== undefined) {
+      appointment.professionalId = updateAppointmentDto.professionalId;
     }
 
     if (updateAppointmentDto.startDate) {
@@ -647,7 +647,7 @@ export class AppointmentsService {
       id: appointment.id,
       businessId: appointment.businessId,
       serviceId: appointment.serviceId,
-      barberId: appointment.barberId,
+      professionalId: appointment.professionalId,
       clientId: appointment.clientId ?? null,
       clientContactId: appointment.clientContactId ?? null,
       startDate: appointment.startDate,
@@ -657,8 +657,8 @@ export class AppointmentsService {
       status: appointment.status,
       createdAt: appointment.createdAt,
       updatedAt: appointment.updatedAt,
-      barber: appointment.barber
-        ? { id: appointment.barber.id, name: appointment.barber.name }
+      professional: appointment.professional
+        ? { id: appointment.professional.id, name: appointment.professional.name }
         : undefined,
       client: appointment.client
         ? { id: appointment.client.id, name: appointment.client.name }

@@ -7,8 +7,8 @@ NestJS backend for BarberHub - WhatsApp AI Agent integration platform with Postg
 - **Authentication & Business Management**: Get business info with `GET /auth/:businessId/:phone`
 - **Appointments Management**: Full CRUD operations for appointments
 - **Appointment Suggestions**: Auto-complete endpoint for appointment drafts
-- **Working Hours & Availability**: Track business hours and manage barber schedules
-- **Services & Barbers**: Manage services and barber information
+- **Working Hours & Availability**: Track business hours and manage professional schedules
+- **Services & Professionals**: Manage services and professional information
 - **Swagger Documentation**: Interactive API documentation at `/api/docs`
 - **Type Safety**: Full TypeScript support with strict typing
 - **Database**: PostgreSQL with TypeORM
@@ -90,7 +90,7 @@ Access Swagger documentation at: `http://localhost:3001/api/docs`
 - **businesses** - Business/Store information
 - **working_hours** - Operating hours by day of week
 - **services** - Available services (haircut, beard, etc.)
-- **barbers** - Barber/Staff members
+- **professionals** - Professional/Staff members
 - **settings** - Business configuration
 - **appointments** - Booked appointments
 

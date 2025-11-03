@@ -1,7 +1,7 @@
-# Frontend Architecture Summary - Barber Hub
+# Frontend Architecture Summary - Professional Hub
 
 ## Overview
-The Barber Hub frontend is a React TypeScript application built with Vite, featuring role-based access control, responsive design with Tailwind CSS, and a modular component structure using shadcn/ui components.
+The Professional Hub frontend is a React TypeScript application built with Vite, featuring role-based access control, responsive design with Tailwind CSS, and a modular component structure using shadcn/ui components.
 
 ---
 
@@ -14,8 +14,8 @@ src/
 │   ├── client.ts          # Axios HTTP client with interceptors
 │   ├── auth.ts            # Authentication API
 │   ├── appointments.ts    # Appointment management
-│   ├── barbers.ts         # Barber management
-│   ├── business.ts        # Business/Barbershop management
+│   ├── professionals.ts         # Professional management
+│   ├── business.ts        # Business/Business management
 │   ├── services.ts        # Service management
 │   ├── users.ts           # User management
 │   └── hairhub-tools.ts   # AI/Tool integrations
@@ -30,13 +30,13 @@ src/
 │   │   ├── RoleBadge.tsx
 │   │   └── StatusBadge.tsx
 │   ├── AuthGuard.tsx
-│   ├── BarberDialog.tsx
+│   ├── ProfessionalDialog.tsx
 │   ├── ServiceDialog.tsx
 │   └── AppointmentDialog.tsx
 ├── pages/               # Page components (main routes)
 │   ├── App.tsx         # Main router configuration
 │   ├── AdminDashboard.tsx
-│   ├── BarbershopDashboard.tsx
+│   ├── BusinessDashboard.tsx
 │   ├── ClientDashboard.tsx
 │   ├── Login.tsx
 │   ├── Register.tsx
@@ -123,7 +123,7 @@ export function PageName() {
 
 ### Key Pages:
 - **AdminDashboard.tsx**: Manages barbershops and users (Admin only)
-- **BarbershopDashboard.tsx**: Manages services, barbers, schedules (Barbershop Manager)
+- **BusinessDashboard.tsx**: Manages services, professionals, schedules (Business Manager)
 - **ClientDashboard.tsx**: Browse and book appointments (Clients)
 - **Profile.tsx**: User profile management (All roles)
 - **Login.tsx**: Authentication entry point
@@ -172,7 +172,7 @@ export const ROUTES = {
   REGISTER: "/register",
   PROFILE: "/profile",
   ADMIN: "/admin",
-  BARBERSHOP: "/barbershop",
+  BUSINESS: "/business",
   CLIENT: "/client",
   NOT_FOUND: "*",
 } as const;
@@ -276,9 +276,9 @@ function useUserRole(): UseUserRoleReturn {
 
 **Local Data State**:
 ```typescript
-// In BarbershopDashboard.tsx
+// In BusinessDashboard.tsx
 const [services, setServices] = useState<Service[]>([]);
-const [barbers, setBarbers] = useState<Barber[]>([]);
+const [professionals, setBarbers] = useState<Professional[]>([]);
 const [isLoading, setIsLoading] = useState(true);
 
 useEffect(() => {
@@ -465,18 +465,18 @@ export const servicesAPI = {
 ### API Usage Pattern in Components
 
 ```typescript
-// In BarbershopDashboard.tsx
+// In BusinessDashboard.tsx
 const fetchData = async (targetBarbershopId: string | number) => {
   try {
     setIsLoading(true);
     
     const business = await businessAPI.getById(barbershopIdNum);
     const services = await servicesAPI.getAll(barbershopIdNum);
-    const barbers = await barbersAPI.getAll(barbershopIdNum);
+    const professionals = await barbersAPI.getAll(barbershopIdNum);
     
     setBarbershopInfo(business);
     setServices(services);
-    setBarbers(barbers);
+    setBarbers(professionals);
   } catch (error) {
     toast.error("Erro ao carregar dados");
   } finally {
@@ -507,10 +507,10 @@ const extractResponseData = <T>(response: any): T => {
 
 ### API Modules Available
 1. **authAPI** - Login, register, profile
-2. **businessAPI** - Barbershop CRUD
+2. **businessAPI** - Business CRUD
 3. **usersAPI** - User management
 4. **appointmentsAPI** - Appointment CRUD + timeline
-5. **barbersAPI** - Barber management
+5. **barbersAPI** - Professional management
 6. **servicesAPI** - Service CRUD
 7. **hairhubTools** - AI integrations
 
@@ -733,13 +733,13 @@ export default defineConfig(({ mode }) => ({
 ```typescript
 export enum UserRole {
   ADMIN = "ADMIN",
-  BARBERSHOP_MANAGER = "BARBERSHOP",
+  BARBERSHOP_MANAGER = "BUSINESS",
   CLIENT = "CLIENT",
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   [UserRole.ADMIN]: "Administrador",
-  [UserRole.BARBERSHOP_MANAGER]: "Gestor de Barbearia",
+  [UserRole.BARBERSHOP_MANAGER]: "Gestor de Business",
   [UserRole.CLIENT]: "Cliente",
 };
 

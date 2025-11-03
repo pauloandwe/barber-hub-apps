@@ -4,8 +4,8 @@ export const ROUTES = {
   REGISTER: "/register",
   PROFILE: "/profile",
   ADMIN: "/admin",
-  BARBERSHOP: "/barbershop",
-  BARBERSHOP_REMINDERS: "/barbershop/reminders",
+  BUSINESS: "/business",
+  BARBERSHOP_REMINDERS: "/business/reminders",
   CLIENT: "/client",
   NOT_FOUND: "*",
 } as const;
@@ -15,6 +15,6 @@ export const PUBLIC_ROUTES = [ROUTES.LOGIN, ROUTES.REGISTER];
 export const PROTECTED_ROUTES = [
   ROUTES.PROFILE,
   ROUTES.ADMIN,
-  ROUTES.BARBERSHOP,
+  ROUTES.BUSINESS,
   ROUTES.CLIENT,
 ];

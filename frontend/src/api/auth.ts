@@ -17,7 +17,7 @@ export interface AuthResponse {
   email: string;
   name: string;
   phone: string;
-  role: "ADMIN" | "BARBERSHOP" | "CLIENT";
+  role: "ADMIN" | "BUSINESS" | "CLIENT";
   businessId?: number;
   access_token: string;
 }
@@ -27,7 +27,7 @@ export interface UserProfile {
   email: string;
   name: string;
   phone: string;
-  role: "ADMIN" | "BARBERSHOP" | "CLIENT";
+  role: "ADMIN" | "BUSINESS" | "CLIENT";
   businessId?: number;
   createdAt: string;
 }
@@ -86,7 +86,7 @@ export const authAPI = {
       apiClient.setToken(authData.access_token);
       console.log("✅ Token armazenado com sucesso");
 
-      if (authData.role === "BARBERSHOP" && !authData.businessId) {
+      if (authData.role === "BUSINESS" && !authData.businessId) {
         try {
           const profile = await authAPI.getProfile();
           console.log("ℹ️ Perfil carregado após login:", profile);

@@ -5,14 +5,14 @@ import { UserRole, isValidRole } from "@/constants/roles";
 interface UseUserRoleReturn {
   role: UserRole | null;
   isLoading: boolean;
-  barbershopId: string | null;
+  businessId: string | null;
   error: string | null;
 }
 
 export function useUserRole(): UseUserRoleReturn {
   const [role, setRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [barbershopId, setBarbershopId] = useState<string | null>(null);
+  const [businessId, setProfessionalshopId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export function useUserRole(): UseUserRoleReturn {
 
         if (!user) {
           setRole(null);
-          setBarbershopId(null);
+          setProfessionalshopId(null);
           setIsLoading(false);
           return;
         }
@@ -30,7 +30,7 @@ export function useUserRole(): UseUserRoleReturn {
         if (!isValidRole(user.role)) {
           setError("Invalid user role");
           setRole(null);
-          setBarbershopId(null);
+          setProfessionalshopId(null);
           setIsLoading(false);
           return;
         }
@@ -38,12 +38,12 @@ export function useUserRole(): UseUserRoleReturn {
         setRole(user.role);
 
         if (user.role === UserRole.BARBERSHOP_MANAGER) {
-          setBarbershopId(
+          setProfessionalshopId(
             user.businessId?.toString() ||
               null
           );
         } else {
-          setBarbershopId(null);
+          setProfessionalshopId(null);
         }
 
         setError(null);
@@ -56,7 +56,7 @@ export function useUserRole(): UseUserRoleReturn {
         }
         setError(message);
         setRole(null);
-        setBarbershopId(null);
+        setProfessionalshopId(null);
         setIsLoading(false);
       }
     };
@@ -74,5 +74,5 @@ export function useUserRole(): UseUserRoleReturn {
     };
   }, []);
 
-  return { role, isLoading, barbershopId, error };
+  return { role, isLoading, businessId, error };
 }

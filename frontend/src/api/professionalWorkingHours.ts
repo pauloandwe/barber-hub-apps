@@ -1,8 +1,8 @@
 import { apiClient } from "./client";
 
-export interface BarberWorkingHour {
+export interface ProfessionalWorkingHour {
   id?: number;
-  barberId: number;
+  professionalId: number;
   dayOfWeek: number;
   openTime: string | null;
   closeTime: string | null;
@@ -11,7 +11,7 @@ export interface BarberWorkingHour {
   closed: boolean;
 }
 
-export interface BarberWorkingHourInput {
+export interface ProfessionalWorkingHourInput {
   dayOfWeek: number;
   openTime?: string | null;
   closeTime?: string | null;
@@ -20,10 +20,10 @@ export interface BarberWorkingHourInput {
   closed: boolean;
 }
 
-const buildUrl = (barberId: number | string) =>
-  `/barbers/${barberId}/working-hours`;
+const buildUrl = (professionalId: number | string) =>
+  `/professionals/${professionalId}/working-hours`;
 
-const extractWorkingHours = (response: any): BarberWorkingHour[] => {
+const extractWorkingHours = (response: any): ProfessionalWorkingHour[] => {
   const directData = response?.data?.data;
   if (Array.isArray(directData)) {
     return directData;
@@ -37,9 +37,9 @@ const extractWorkingHours = (response: any): BarberWorkingHour[] => {
   return [];
 };
 
-export const barberWorkingHoursAPI = {
-  async getAll(barberId: number): Promise<BarberWorkingHour[]> {
-    const response = await apiClient.get(buildUrl(barberId));
+export const professionalWorkingHoursAPI = {
+  async getAll(professionalId: number): Promise<ProfessionalWorkingHour[]> {
+    const response = await apiClient.get(buildUrl(professionalId));
     const extract = extractWorkingHours(response);
     console.log("Upserted working hours:", response, extract);
 
@@ -47,16 +47,16 @@ export const barberWorkingHoursAPI = {
   },
 
   async upsert(
-    barberId: number,
-    items: BarberWorkingHourInput[]
-  ): Promise<BarberWorkingHour[]> {
-    const response = await apiClient.put(buildUrl(barberId), { items });
+    professionalId: number,
+    items: ProfessionalWorkingHourInput[]
+  ): Promise<ProfessionalWorkingHour[]> {
+    const response = await apiClient.put(buildUrl(professionalId), { items });
     const extract = extractWorkingHours(response);
     console.log("Upserted working hours:", response, extract);
     return extract;
   },
 
-  async clear(barberId: number): Promise<void> {
-    await apiClient.delete(buildUrl(barberId));
+  async clear(professionalId: number): Promise<void> {
+    await apiClient.delete(buildUrl(professionalId));
   },
 };

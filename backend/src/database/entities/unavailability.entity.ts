@@ -6,15 +6,15 @@ import {
   JoinColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { BarberEntity } from './barber.entity';
+import { ProfessionalEntity } from './professional.entity';
 
-@Entity('bloqueios')
-export class BloqueioEntity {
+@Entity('unavailability')
+export class UnavailabilityEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'int' })
-  barbeiro_id: number;
+  professional_id: number;
 
   @Column({ type: 'timestamp with time zone' })
   data_inicio: Date;
@@ -28,9 +28,9 @@ export class BloqueioEntity {
   @CreateDateColumn()
   created_at: Date;
 
-  @ManyToOne(() => BarberEntity, (barber) => barber.bloqueios, {
+  @ManyToOne(() => ProfessionalEntity, (professional) => professional.unavailability, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'barbeiro_id' })
-  barbeiro: BarberEntity;
+  @JoinColumn({ name: 'professional_id' })
+  professional: ProfessionalEntity;
 }

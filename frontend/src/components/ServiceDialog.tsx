@@ -15,7 +15,7 @@ import { Loader2 } from "lucide-react";
 import { DialogProps } from "@/types/shared.types";
 
 interface ServiceDialogProps extends DialogProps {
-  barbershopId: string;
+  businessId: string;
   onSuccess: () => void;
   service?: Service | null;
 }
@@ -35,7 +35,7 @@ const INITIAL_FORM_STATE: ServiceFormData = {
 export function ServiceDialog({
   open,
   onOpenChange,
-  barbershopId,
+  businessId,
   onSuccess,
   service,
 }: ServiceDialogProps) {
@@ -92,9 +92,9 @@ export function ServiceDialog({
         await servicesAPI.update(service.id, payload);
         toast.success("Serviço atualizado com sucesso!");
       } else {
-        const barbershopIdNum = parseInt(barbershopId, 10);
+        const businessIdNum = parseInt(businessId, 10);
         await servicesAPI.create({
-          businessId: barbershopIdNum,
+          businessId: businessIdNum,
           ...payload,
           active: true,
         });
@@ -150,7 +150,7 @@ export function ServiceDialog({
           <DialogDescription>
             {isEditMode
               ? "Atualize os detalhes do serviço abaixo"
-              : "Crie um novo serviço para sua barbearia"}
+              : "Crie um novo serviço para sua business"}
           </DialogDescription>
         </DialogHeader>
 

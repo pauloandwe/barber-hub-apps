@@ -7,7 +7,7 @@ export class CreateInitialTables1700000000000 implements MigrationInterface {
     await queryRunner.query('DROP TYPE IF EXISTS "user_role_enum" CASCADE');
 
     await queryRunner.query(
-      "CREATE TYPE \"user_role_enum\" AS ENUM ('ADMIN', 'BARBERSHOP', 'CLIENT')",
+      "CREATE TYPE \"user_role_enum\" AS ENUM ('ADMIN', 'BUSINESS', 'CLIENT')",
     );
     await queryRunner.query(
       "CREATE TYPE \"appointment_status_enum\" AS ENUM ('pending', 'confirmed', 'canceled')",
@@ -69,7 +69,7 @@ export class CreateInitialTables1700000000000 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TABLE IF NOT EXISTS "barbers" (
+      CREATE TABLE IF NOT EXISTS "professionals" (
         "id" SERIAL PRIMARY KEY,
         "businessId" INTEGER NOT NULL REFERENCES "businesses"("id") ON DELETE CASCADE,
         "name" VARCHAR(255) NOT NULL,
@@ -100,7 +100,7 @@ export class CreateInitialTables1700000000000 implements MigrationInterface {
         "id" SERIAL PRIMARY KEY,
         "businessId" INTEGER NOT NULL REFERENCES "businesses"("id") ON DELETE CASCADE,
         "serviceId" INTEGER REFERENCES "services"("id") ON DELETE SET NULL,
-        "barberId" INTEGER REFERENCES "barbers"("id") ON DELETE SET NULL,
+        "professionalId" INTEGER REFERENCES "professionals"("id") ON DELETE SET NULL,
         "clientId" INTEGER NOT NULL REFERENCES "profiles"("id") ON DELETE CASCADE,
         "startDate" TIMESTAMP WITH TIME ZONE NOT NULL,
         "endDate" TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -113,9 +113,9 @@ export class CreateInitialTables1700000000000 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TABLE IF NOT EXISTS "bloqueios" (
+      CREATE TABLE IF NOT EXISTS "unavailability" (
         "id" SERIAL PRIMARY KEY,
-        "barbeiro_id" INTEGER NOT NULL REFERENCES "barbers"("id") ON DELETE CASCADE,
+        "professional_id" INTEGER NOT NULL REFERENCES "professionals"("id") ON DELETE CASCADE,
         "data_inicio" TIMESTAMP WITH TIME ZONE NOT NULL,
         "data_fim" TIMESTAMP WITH TIME ZONE NOT NULL,
         "motivo" TEXT,
@@ -127,7 +127,7 @@ export class CreateInitialTables1700000000000 implements MigrationInterface {
       `CREATE INDEX IF NOT EXISTS "idx_appointments_client" ON "appointments"("clientId")`,
     );
     await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS "idx_appointments_barber" ON "appointments"("barberId")`,
+      `CREATE INDEX IF NOT EXISTS "idx_appointments_barber" ON "appointments"("professionalId")`,
     );
     await queryRunner.query(
       `CREATE INDEX IF NOT EXISTS "idx_appointments_business" ON "appointments"("businessId")`,
@@ -136,7 +136,7 @@ export class CreateInitialTables1700000000000 implements MigrationInterface {
       `CREATE INDEX IF NOT EXISTS "idx_appointments_startDate" ON "appointments"("startDate")`,
     );
     await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS "idx_barbers_business" ON "barbers"("businessId")`,
+      `CREATE INDEX IF NOT EXISTS "idx_barbers_business" ON "professionals"("businessId")`,
     );
     await queryRunner.query(
       `CREATE INDEX IF NOT EXISTS "idx_services_business" ON "services"("businessId")`,
@@ -145,7 +145,7 @@ export class CreateInitialTables1700000000000 implements MigrationInterface {
       `CREATE INDEX IF NOT EXISTS "idx_profiles_email" ON "profiles"("email")`,
     );
     await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS "idx_bloqueios_barber" ON "bloqueios"("barbeiro_id")`,
+      `CREATE INDEX IF NOT EXISTS "idx_bloqueios_barber" ON "unavailability"("professional_id")`,
     );
   }
 
@@ -159,10 +159,10 @@ export class CreateInitialTables1700000000000 implements MigrationInterface {
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_appointments_barber"`);
     await queryRunner.query(`DROP INDEX IF EXISTS "idx_appointments_client"`);
 
-    await queryRunner.query(`DROP TABLE IF EXISTS "bloqueios"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "unavailability"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "appointments"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "settings"`);
-    await queryRunner.query(`DROP TABLE IF EXISTS "barbers"`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "professionals"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "services"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "working_hours"`);
     await queryRunner.query(`DROP TABLE IF EXISTS "profiles"`);

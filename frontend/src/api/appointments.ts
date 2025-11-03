@@ -4,7 +4,7 @@ export interface Appointment {
   id: number;
   businessId: number;
   serviceId: number;
-  barberId?: number;
+  professionalId?: number;
   clientId: number | null;
   clientContactId: number | null;
   startDate: string;
@@ -13,7 +13,7 @@ export interface Appointment {
   source: "web" | "whatsapp" | null;
   notes?: string;
   createdAt?: string;
-  barber?: { name: string };
+  professional?: { name: string };
   client?: { id?: number; name: string };
   clientContact?: { id: number; name: string | null; phone: string };
   service?: { name: string; duration: number };
@@ -22,7 +22,7 @@ export interface Appointment {
 export interface CreateAppointmentRequest {
   businessId: number;
   serviceId: number;
-  barberId: number;
+  professionalId: number;
   clientId?: number;
   clientPhone?: string;
   clientName?: string;
@@ -34,7 +34,7 @@ export interface CreateAppointmentRequest {
 
 export interface UpdateAppointmentRequest {
   serviceId?: number;
-  barberId?: number;
+  professionalId?: number;
   clientId?: number;
   clientPhone?: string;
   clientName?: string;
@@ -46,7 +46,7 @@ export interface UpdateAppointmentRequest {
 
 export interface AppointmentTimelineCard {
   id: number;
-  barberId: number;
+  professionalId: number;
   startDate: string;
   endDate: string;
   status: "pending" | "confirmed" | "canceled";
@@ -63,7 +63,7 @@ export interface AppointmentTimelineCard {
   };
 }
 
-export interface BarberWorkingHour {
+export interface ProfessionalWorkingHour {
   dayOfWeek: number;
   openTime: string | null;
   closeTime: string | null;
@@ -72,17 +72,17 @@ export interface BarberWorkingHour {
   closed: boolean;
 }
 
-export interface BarberTimeline {
+export interface ProfessionalTimeline {
   id: number;
   name: string;
   specialties: string[];
   appointments: AppointmentTimelineCard[];
-  workingHours: BarberWorkingHour;
+  workingHours: ProfessionalWorkingHour;
 }
 
 export interface AppointmentTimelineResponse {
   date: string;
-  barbers: BarberTimeline[];
+  professionals: ProfessionalTimeline[];
   slotDurationMinutes: number;
 }
 
@@ -158,14 +158,14 @@ export const appointmentsAPI = {
   async getTimeline(
     businessId: number,
     date: string,
-    barberIds?: number[],
+    professionalIds?: number[],
     status?: "pending" | "confirmed" | "canceled",
     serviceId?: number
   ): Promise<AppointmentTimelineResponse> {
     const params = new URLSearchParams();
     params.append("date", date);
-    if (barberIds && barberIds.length > 0) {
-      params.append("barberIds", barberIds.join(","));
+    if (professionalIds && professionalIds.length > 0) {
+      params.append("professionalIds", professionalIds.join(","));
     }
     if (status) {
       params.append("status", status);

@@ -1,18 +1,18 @@
 export enum UserRole {
   ADMIN = "ADMIN",
-  BARBERSHOP_MANAGER = "BARBERSHOP",
+  BARBERSHOP_MANAGER = "BUSINESS",
   CLIENT = "CLIENT",
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   [UserRole.ADMIN]: "Administrador",
-  [UserRole.BARBERSHOP_MANAGER]: "Gestor de Barbearia",
+  [UserRole.BARBERSHOP_MANAGER]: "Gestor de Business",
   [UserRole.CLIENT]: "Cliente",
 };
 
 export const ROLE_TRANSLATIONS: Record<UserRole, string> = {
   [UserRole.ADMIN]: "Administrador",
-  [UserRole.BARBERSHOP_MANAGER]: "Gestor de Barbearia",
+  [UserRole.BARBERSHOP_MANAGER]: "Gestor de Business",
   [UserRole.CLIENT]: "Cliente",
 };
 

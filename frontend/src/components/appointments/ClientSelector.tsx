@@ -35,7 +35,7 @@ export type ClientSelection =
     };
 
 interface ClientSelectorProps {
-  barbershopId: string;
+  businessId: string;
   value: ClientSelection | null;
   onChange: (client: ClientSelection | null) => void;
   disabled?: boolean;
@@ -141,7 +141,7 @@ const buildClientOptions = (appointments: Appointment[]): ClientOption[] => {
 };
 
 export function ClientSelector({
-  barbershopId,
+  businessId,
   value,
   onChange,
   disabled,
@@ -154,7 +154,7 @@ export function ClientSelector({
     const loadClients = async () => {
       setIsLoading(true);
       try {
-        const businessIdNum = parseInt(barbershopId, 10);
+        const businessIdNum = parseInt(businessId, 10);
         if (Number.isNaN(businessIdNum)) {
           setOptions([]);
           return;
@@ -174,7 +174,7 @@ export function ClientSelector({
     };
 
     loadClients();
-  }, [barbershopId]);
+  }, [businessId]);
 
   const manualName = value?.type === "manual" ? value.name : "";
   const manualPhone = value?.type === "manual" ? value.phone : "";

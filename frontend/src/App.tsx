@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminDashboard from "./pages/AdminDashboard";
-import BarbershopDashboard from "./pages/BarbershopDashboard";
+import BusinessDashboard from "./pages/BusinessDashboard";
 import ClientDashboard from "./pages/ClientDashboard";
 import Profile from "./pages/Profile";
 import { RemindersSettings } from "./pages/RemindersSettings";
@@ -36,10 +36,10 @@ const App = () => (
             }
           />
           <Route
-            path={ROUTES.BARBERSHOP}
+            path={ROUTES.BUSINESS}
             element={
               <AuthGuard requiredRole={UserRole.BARBERSHOP_MANAGER}>
-                <BarbershopDashboard />
+                <BusinessDashboard />
               </AuthGuard>
             }
           />

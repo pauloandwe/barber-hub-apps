@@ -37,7 +37,7 @@ import { ReminderAnalyticsChart } from "@/components/reminders/ReminderAnalytics
 
 export function RemindersSettings() {
   const navigate = useNavigate();
-  const { barbershopId, isLoading: roleLoading } = useUserRole();
+  const { businessId, isLoading: roleLoading } = useUserRole();
 
   // State Management
   const [settings, setSettings] = useState<ReminderSettings[]>([]);
@@ -61,14 +61,14 @@ export function RemindersSettings() {
   useEffect(() => {
     if (roleLoading) return;
 
-    if (!barbershopId) {
-      toast.error("Não foi possível encontrar uma barbearia vinculada ao seu usuário");
+    if (!businessId) {
+      toast.error("Não foi possível encontrar uma business vinculada ao seu usuário");
       setIsLoading(false);
       return;
     }
 
-    fetchAllData(barbershopId);
-  }, [barbershopId, roleLoading]);
+    fetchAllData(businessId);
+  }, [businessId, roleLoading]);
 
   // Data Fetching
   const fetchAllData = async (id: string | number) => {
@@ -96,10 +96,10 @@ export function RemindersSettings() {
   };
 
   const handleRefresh = async () => {
-    if (!barbershopId) return;
+    if (!businessId) return;
     try {
       setIsRefreshing(true);
-      const businessId = typeof barbershopId === "string" ? parseInt(barbershopId, 10) : barbershopId;
+      const businessId = typeof businessId === "string" ? parseInt(businessId, 10) : businessId;
       await fetchAllData(businessId);
       toast.success("Dados atualizados com sucesso");
     } catch (error) {
@@ -117,8 +117,8 @@ export function RemindersSettings() {
         setSettings(settings.map(s => s.id === updated.id ? updated : s));
         toast.success("Configuração atualizada com sucesso");
       } else {
-        if (!barbershopId) return;
-        const businessId = typeof barbershopId === "string" ? parseInt(barbershopId, 10) : barbershopId;
+        if (!businessId) return;
+        const businessId = typeof businessId === "string" ? parseInt(businessId, 10) : businessId;
         const created = await remindersAPI.createSettings(businessId, data);
         setSettings([...settings, created]);
         toast.success("Configuração criada com sucesso");
@@ -160,8 +160,8 @@ export function RemindersSettings() {
         setTemplates(templates.map(t => t.id === updated.id ? updated : t));
         toast.success("Template atualizado com sucesso");
       } else {
-        if (!barbershopId) return;
-        const businessId = typeof barbershopId === "string" ? parseInt(barbershopId, 10) : barbershopId;
+        if (!businessId) return;
+        const businessId = typeof businessId === "string" ? parseInt(businessId, 10) : businessId;
         const created = await remindersAPI.createTemplate(businessId, data);
         setTemplates([...templates, created]);
         toast.success("Template criado com sucesso");
@@ -211,12 +211,12 @@ export function RemindersSettings() {
     return <LoadingSpinner />;
   }
 
-  if (!barbershopId) {
+  if (!businessId) {
     return (
       <EmptyState
         icon={<AlertCircle className="h-12 w-12" />}
         title="Erro ao carregar"
-        description="Não foi possível encontrar uma barbearia vinculada ao seu usuário"
+        description="Não foi possível encontrar uma business vinculada ao seu usuário"
       />
     );
   }
@@ -229,7 +229,7 @@ export function RemindersSettings() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate("/barbershop")}
+                onClick={() => navigate("/business")}
                 className="rounded-lg p-2 hover:bg-gray-100"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -511,8 +511,8 @@ export function RemindersSettings() {
                 logs={logs}
                 onResendSuccess={() => {
                   // Refetch logs after successful resend
-                  if (barbershopId) {
-                    const businessId = typeof barbershopId === "string" ? parseInt(barbershopId, 10) : barbershopId;
+                  if (businessId) {
+                    const businessId = typeof businessId === "string" ? parseInt(businessId, 10) : businessId;
                     remindersAPI.getLogs(businessId, logsPage, logsPerPage)
                       .then((data) => setLogs(data.data))
                       .catch(() => toast.error("Erro ao atualizar histórico"));

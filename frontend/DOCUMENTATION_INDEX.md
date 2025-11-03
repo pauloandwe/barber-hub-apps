@@ -1,6 +1,6 @@
-# Barber Hub Frontend - Documentation Index
+# Professional Hub Frontend - Documentation Index
 
-Complete documentation of the frontend architecture and patterns for the Barber Hub application.
+Complete documentation of the frontend architecture and patterns for the Professional Hub application.
 
 ## Overview Documents
 
@@ -93,7 +93,7 @@ Plus:
 ### For Implementation
 1. Check **FRONTEND_ARCHITECTURE.md** section 10 (Common Patterns)
 2. Use **REMINDER_QUICK_START.md** as code template
-3. Reference existing code in `src/pages/BarbershopDashboard.tsx` and `src/components/ServiceDialog.tsx`
+3. Reference existing code in `src/pages/BusinessDashboard.tsx` and `src/components/ServiceDialog.tsx`
 
 ### For Understanding Specific Areas
 
@@ -123,7 +123,7 @@ Plus:
 
 ## File Locations in Project
 
-All documentation is saved in `/home/pauloand/Desktop/git/barber-hub/apps/frontend/`:
+All documentation is saved in `/home/pauloand/Desktop/git/professional-hub/apps/frontend/`:
 
 ```
 apps/frontend/
@@ -144,7 +144,7 @@ apps/frontend/
 │   │   ├── appointments/           (Domain-specific)
 │   │   └── ... (other components)
 │   ├── pages/
-│   │   ├── BarbershopDashboard.tsx (Complete page example)
+│   │   ├── BusinessDashboard.tsx (Complete page example)
 │   │   ├── App.tsx                 (Router configuration)
 │   │   └── ... (other pages)
 │   ├── hooks/
@@ -219,7 +219,7 @@ npm run preview
 ### Adding a New Page
 - Reference: FRONTEND_ARCHITECTURE.md section 2
 - Template: REMINDER_QUICK_START.md steps 4-6
-- Example: src/pages/BarbershopDashboard.tsx
+- Example: src/pages/BusinessDashboard.tsx
 
 ### Adding an API Call
 - Reference: FRONTEND_ARCHITECTURE.md section 7
@@ -241,7 +241,7 @@ npm run preview
 ## Project Structure Overview
 
 ```
-barber-hub/
+professional-hub/
 ├── apps/
 │   ├── backend/           (NestJS API server)
 │   └── frontend/          (React + TypeScript app - YOU ARE HERE)

@@ -1,11 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BusinessEntity } from './business.entity';
 import { AppointmentEntity } from './appointment.entity';
-import { BloqueioEntity } from './bloqueio.entity';
-import { BarberWorkingHoursEntity } from './barber-working-hours.entity';
+import { UnavailabilityEntity } from './unavailability.entity';
+import { ProfessionalWorkingHoursEntity } from './professional-working-hours.entity';
 
-@Entity('barbers')
-export class BarberEntity {
+@Entity('professionals')
+export class ProfessionalEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -24,20 +24,20 @@ export class BarberEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @ManyToOne(() => BusinessEntity, (business) => business.barbers, {
+  @ManyToOne(() => BusinessEntity, (business) => business.professionals, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'businessId' })
   business: BusinessEntity;
 
-  @OneToMany(() => AppointmentEntity, (appointment) => appointment.barber)
+  @OneToMany(() => AppointmentEntity, (appointment) => appointment.professional)
   appointments: AppointmentEntity[];
 
-  @OneToMany(() => BloqueioEntity, (bloqueio) => bloqueio.barbeiro)
-  bloqueios: BloqueioEntity[];
+  @OneToMany(() => UnavailabilityEntity, (unavailability) => unavailability.professional)
+  unavailability: UnavailabilityEntity[];
 
-  @OneToMany(() => BarberWorkingHoursEntity, (workingHour) => workingHour.barber, {
+  @OneToMany(() => ProfessionalWorkingHoursEntity, (workingHour) => workingHour.professional, {
     cascade: ['remove'],
   })
-  workingHours: BarberWorkingHoursEntity[];
+  workingHours: ProfessionalWorkingHoursEntity[];
 }

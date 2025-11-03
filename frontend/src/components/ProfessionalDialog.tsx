@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Barber, barbersAPI } from "@/api/barbers";
+import { Professional, professionalsAPI } from "@/api/professionals";
 import {
   Dialog,
   DialogContent,
@@ -16,34 +16,34 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { DialogProps } from "@/types/shared.types";
 
-interface BarberDialogProps extends DialogProps {
-  barbershopId: string;
+interface ProfessionalDialogProps extends DialogProps {
+  businessId: string;
   onSuccess: () => void;
-  barber?: Barber | null;
+  professional?: Professional | null;
 }
 
-interface BarberFormData {
+interface ProfessionalFormData {
   name: string;
   specialties: string;
   active: boolean;
 }
 
-const INITIAL_FORM_STATE: BarberFormData = {
+const INITIAL_FORM_STATE: ProfessionalFormData = {
   name: "",
   specialties: "",
   active: true,
 };
 
-export function BarberDialog({
+export function ProfessionalDialog({
   open,
   onOpenChange,
-  barbershopId,
+  businessId,
   onSuccess,
-  barber,
-}: BarberDialogProps) {
-  const [formData, setFormData] = useState<BarberFormData>(INITIAL_FORM_STATE);
+  professional,
+}: ProfessionalDialogProps) {
+  const [formData, setFormData] = useState<ProfessionalFormData>(INITIAL_FORM_STATE);
   const [isLoading, setIsLoading] = useState(false);
-  const isEditMode = Boolean(barber);
+  const isEditMode = Boolean(professional);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -68,7 +68,7 @@ export function BarberDialog({
 
   const validateForm = (): boolean => {
     if (!formData.name || formData.name.trim().length === 0) {
-      toast.error("Por favor, digite o nome do barbeiro");
+      toast.error("Por favor, digite o nome do professional");
       return false;
     }
 
@@ -95,16 +95,16 @@ export function BarberDialog({
         active: formData.active,
       };
 
-      if (isEditMode && barber) {
-        await barbersAPI.update(barber.id, payload);
-        toast.success("Barbeiro atualizado com sucesso!");
+      if (isEditMode && professional) {
+        await professionalsAPI.update(professional.id, payload);
+        toast.success("Professional atualizado com sucesso!");
       } else {
-        const barbershopIdNum = parseInt(barbershopId, 10);
-        await barbersAPI.create({
-          businessId: barbershopIdNum,
+        const businessIdNum = parseInt(businessId, 10);
+        await professionalsAPI.create({
+          businessId: businessIdNum,
           ...payload,
         });
-        toast.success("Barbeiro criado com sucesso!");
+        toast.success("Professional criado com sucesso!");
       }
 
       onSuccess();
@@ -113,12 +113,12 @@ export function BarberDialog({
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.error(
-          isEditMode ? "Error updating barber:" : "Error creating barber:",
+          isEditMode ? "Error updating professional:" : "Error creating professional:",
           error
         );
       }
       toast.error(
-        isEditMode ? "Erro ao atualizar barbeiro" : "Erro ao criar barbeiro"
+        isEditMode ? "Erro ao atualizar professional" : "Erro ao criar professional"
       );
     } finally {
       setIsLoading(false);
@@ -130,37 +130,37 @@ export function BarberDialog({
   };
 
   useEffect(() => {
-    if (open && isEditMode && barber) {
+    if (open && isEditMode && professional) {
       setFormData({
-        name: barber.name ?? "",
-        specialties: Array.isArray(barber.specialties)
-          ? barber.specialties.join(", ")
+        name: professional.name ?? "",
+        specialties: Array.isArray(professional.specialties)
+          ? professional.specialties.join(", ")
           : "",
-        active: barber.active ?? true,
+        active: professional.active ?? true,
       });
     }
     if (!open) {
       resetForm();
     }
-  }, [open, isEditMode, barber]);
+  }, [open, isEditMode, professional]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {isEditMode ? "Editar Barbeiro" : "Novo Barbeiro"}
+            {isEditMode ? "Editar Professional" : "Novo Professional"}
           </DialogTitle>
           <DialogDescription>
             {isEditMode
-              ? "Atualize as informações do barbeiro abaixo"
-              : "Registre um novo barbeiro para sua barbearia"}
+              ? "Atualize as informações do professional abaixo"
+              : "Registre um novo professional para sua business"}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nome do Barbeiro *</Label>
+            <Label htmlFor="name">Nome do Professional *</Label>
             <Input
               id="name"
               type="text"
@@ -190,7 +190,7 @@ export function BarberDialog({
             <div className="space-y-0.5">
               <Label htmlFor="active">Ativo</Label>
               <p className="text-sm text-muted-foreground">
-                Ativar ou desativar este barbeiro
+                Ativar ou desativar este professional
               </p>
             </div>
             <Switch
@@ -223,4 +223,4 @@ export function BarberDialog({
   );
 }
 
-export default BarberDialog;
+export default ProfessionalDialog;

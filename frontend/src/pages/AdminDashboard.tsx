@@ -46,7 +46,7 @@ import { RoleBadge } from "@/components/shared/RoleBadge";
 import { UserRole } from "@/constants/roles";
 import { ROUTES } from "@/constants/routes";
 
-interface Barbershop {
+interface Business {
   id: number;
   name: string;
   phone: string;
@@ -61,19 +61,19 @@ interface User {
   phone?: string;
   businessId?: number;
   role: string;
-  barbershopName?: string;
+  businessName?: string;
 }
 
 export function AdminDashboard() {
   const navigate = useNavigate();
-  const [barbershops, setBarbershops] = useState<Barbershop[]>([]);
+  const [businesses, setProfessionalshops] = useState<Business[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>("");
-  const [selectedBarbershopId, setSelectedBarbershopId] = useState<string>("");
+  const [selectedProfessionalshopId, setSelectedProfessionalshopId] = useState<string>("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -82,7 +82,7 @@ export function AdminDashboard() {
   });
   const [isEditBarbershopDialogOpen, setIsEditBarbershopDialogOpen] =
     useState(false);
-  const [barbershopToEdit, setBarbershopToEdit] = useState<Barbershop | null>(
+  const [barbershopToEdit, setProfessionalshopToEdit] = useState<Business | null>(
     null
   );
   const [editFormData, setEditFormData] = useState({
@@ -94,14 +94,14 @@ export function AdminDashboard() {
   const [isUpdatingBarbershop, setIsUpdatingBarbershop] = useState(false);
 
   useEffect(() => {
-    fetchBarbershops();
+    fetchProfessionalshops();
     fetchUsers();
   }, []);
 
-  const fetchBarbershops = async () => {
+  const fetchProfessionalshops = async () => {
     try {
       const businesses = await businessAPI.getAll();
-      setBarbershops(
+      setProfessionalshops(
         businesses.map((b: any) => ({
           id: b.id,
           name: b.name,
@@ -112,7 +112,7 @@ export function AdminDashboard() {
       );
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error("Error fetching barbershops:", error);
+        console.error("Error fetching businesses:", error);
       }
       toast.error("Erro ao carregar barbearias");
     } finally {
@@ -131,31 +131,31 @@ export function AdminDashboard() {
         address: formData.address,
       });
 
-      toast.success("Barbearia criada com sucesso!");
+      toast.success("Business criada com sucesso!");
       setIsCreateDialogOpen(false);
       setFormData({ name: "", email: "", phone: "", address: "" });
-      fetchBarbershops();
+      fetchProfessionalshops();
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error("Error creating barbershop:", error);
+        console.error("Error creating business:", error);
       }
-      toast.error("Erro ao criar barbearia");
+      toast.error("Erro ao criar business");
     }
   };
 
-  const openEditBarbershopDialog = (barbershop: Barbershop) => {
-    setBarbershopToEdit(barbershop);
+  const openEditBarbershopDialog = (business: Business) => {
+    setProfessionalshopToEdit(business);
     setEditFormData({
-      name: barbershop.name || "",
-      email: barbershop.email || "",
-      phone: barbershop.phone || "",
-      address: barbershop.address || "",
+      name: business.name || "",
+      email: business.email || "",
+      phone: business.phone || "",
+      address: business.address || "",
     });
     setIsEditBarbershopDialogOpen(true);
   };
 
   const resetEditBarbershopState = () => {
-    setBarbershopToEdit(null);
+    setProfessionalshopToEdit(null);
     setEditFormData({ name: "", email: "", phone: "", address: "" });
     setIsUpdatingBarbershop(false);
   };
@@ -173,15 +173,15 @@ export function AdminDashboard() {
         address: editFormData.address || undefined,
       });
 
-      toast.success("Barbearia atualizada com sucesso!");
+      toast.success("Business atualizada com sucesso!");
       setIsEditBarbershopDialogOpen(false);
       resetEditBarbershopState();
-      fetchBarbershops();
+      fetchProfessionalshops();
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
-        console.error("Error updating barbershop:", error);
+        console.error("Error updating business:", error);
       }
-      toast.error("Erro ao atualizar barbearia");
+      toast.error("Erro ao atualizar business");
     } finally {
       setIsUpdatingBarbershop(false);
     }
@@ -198,7 +198,7 @@ export function AdminDashboard() {
           phone: user.phone,
           businessId: user.businessId,
           role: user.role,
-          barbershopName: undefined,
+          businessName: undefined,
         }))
       );
     } catch (error) {
@@ -214,7 +214,7 @@ export function AdminDashboard() {
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
     setSelectedRole(user.role);
-    setSelectedBarbershopId(user.businessId ? user.businessId.toString() : "");
+    setSelectedProfessionalshopId(user.businessId ? user.businessId.toString() : "");
     setIsEditUserDialogOpen(true);
   };
 
@@ -223,10 +223,10 @@ export function AdminDashboard() {
 
     try {
       await usersAPI.update(selectedUser.id, {
-        role: selectedRole as "ADMIN" | "BARBERSHOP" | "CLIENT",
+        role: selectedRole as "ADMIN" | "BUSINESS" | "CLIENT",
         businessId:
-          selectedRole === "BARBERSHOP"
-            ? parseInt(selectedBarbershopId) || undefined
+          selectedRole === "BUSINESS"
+            ? parseInt(selectedProfessionalshopId) || undefined
             : undefined,
       });
 
@@ -273,9 +273,9 @@ export function AdminDashboard() {
       </header>
 
       <main className="container mx-auto p-4 md:p-6 space-y-6">
-        <Tabs defaultValue="barbershops" className="w-full">
+        <Tabs defaultValue="businesses" className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="barbershops">
+            <TabsTrigger value="businesses">
               <Building2 className="mr-2 h-4 w-4" />
               Barbearias
             </TabsTrigger>
@@ -285,7 +285,7 @@ export function AdminDashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="barbershops" className="space-y-6">
+          <TabsContent value="businesses" className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-3xl font-bold">Barbearias</h2>
@@ -300,14 +300,14 @@ export function AdminDashboard() {
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="mr-2 h-4 w-4" />
-                    Nova Barbearia
+                    Nova Business
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Criar Nova Barbearia</DialogTitle>
+                    <DialogTitle>Criar Nova Business</DialogTitle>
                     <DialogDescription>
-                      Preencha os detalhes da barbearia
+                      Preencha os detalhes da business
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleCreateBarbershop} className="space-y-4">
@@ -357,7 +357,7 @@ export function AdminDashboard() {
                       />
                     </div>
                     <Button type="submit" className="w-full">
-                      Criar Barbearia
+                      Criar Business
                     </Button>
                   </form>
                 </DialogContent>
@@ -365,35 +365,35 @@ export function AdminDashboard() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {barbershops.map((barbershop) => (
-                <Card key={barbershop.id}>
+              {businesses.map((business) => (
+                <Card key={business.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
                       <Building2 className="h-8 w-8 text-primary" />
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => openEditBarbershopDialog(barbershop)}
+                        onClick={() => openEditBarbershopDialog(business)}
                       >
                         Editar
                       </Button>
                     </div>
-                    <CardTitle>{barbershop.name}</CardTitle>
+                    <CardTitle>{business.name}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
-                    {barbershop.email && (
+                    {business.email && (
                       <p className="text-muted-foreground">
-                        📧 {barbershop.email}
+                        📧 {business.email}
                       </p>
                     )}
-                    {barbershop.phone && (
+                    {business.phone && (
                       <p className="text-muted-foreground">
-                        📱 {barbershop.phone}
+                        📱 {business.phone}
                       </p>
                     )}
-                    {barbershop.address && (
+                    {business.address && (
                       <p className="text-muted-foreground">
-                        📍 {barbershop.address}
+                        📍 {business.address}
                       </p>
                     )}
                   </CardContent>
@@ -401,10 +401,10 @@ export function AdminDashboard() {
               ))}
             </div>
 
-            {barbershops.length === 0 && (
+            {businesses.length === 0 && (
               <EmptyState
-                title="Nenhuma barbearia registrada"
-                description="Comece criando sua primeira barbearia"
+                title="Nenhuma business registrada"
+                description="Comece criando sua primeira business"
                 icon="🏪"
               />
             )}
@@ -420,9 +420,9 @@ export function AdminDashboard() {
             >
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Editar Barbearia</DialogTitle>
+                  <DialogTitle>Editar Business</DialogTitle>
                   <DialogDescription>
-                    Atualize as informações da barbearia abaixo
+                    Atualize as informações da business abaixo
                   </DialogDescription>
                 </DialogHeader>
 
@@ -558,7 +558,7 @@ export function AdminDashboard() {
             <DialogHeader>
               <DialogTitle>Editar Usuário</DialogTitle>
               <DialogDescription>
-                Altere a função e vincule uma barbearia ao usuário
+                Altere a função e vincule uma business ao usuário
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -574,30 +574,30 @@ export function AdminDashboard() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ADMIN">Administrador</SelectItem>
-                    <SelectItem value="BARBERSHOP">
-                      Gerente de Barbearia
+                    <SelectItem value="BUSINESS">
+                      Gerente de Business
                     </SelectItem>
                     <SelectItem value="CLIENT">Cliente</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              {selectedRole === "BARBERSHOP" && (
+              {selectedRole === "BUSINESS" && (
                 <div className="space-y-2">
-                  <Label htmlFor="barbershop">Barbearia</Label>
+                  <Label htmlFor="business">Business</Label>
                   <Select
-                    value={selectedBarbershopId}
-                    onValueChange={setSelectedBarbershopId}
+                    value={selectedProfessionalshopId}
+                    onValueChange={setSelectedProfessionalshopId}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecionar uma barbearia" />
+                      <SelectValue placeholder="Selecionar uma business" />
                     </SelectTrigger>
                     <SelectContent>
-                      {barbershops.map((barbershop) => (
+                      {businesses.map((business) => (
                         <SelectItem
-                          key={barbershop.id}
-                          value={barbershop.id.toString()}
+                          key={business.id}
+                          value={business.id.toString()}
                         >
-                          {barbershop.name}
+                          {business.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -123,7 +123,7 @@ export class ReschedulingReminderProcessor extends WorkerHost {
         clientName: clientContact.name,
         appointmentDate: 'em breve',
         appointmentTime: 'a agendar',
-        barberName: 'Nosso time',
+        professionalName: 'Nosso time',
         serviceName: 'Serviço',
       });
 

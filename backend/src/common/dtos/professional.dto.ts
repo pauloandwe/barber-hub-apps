@@ -1,6 +1,6 @@
 import { IsString, IsNumber, IsOptional, IsBoolean, IsArray } from 'class-validator';
 
-export class CreateBarberDto {
+export class CreateProfessionalDto {
   @IsNumber()
   businessId: number;
 
@@ -21,7 +21,7 @@ export class CreateBarberDto {
   active?: boolean = true;
 }
 
-export class UpdateBarberDto {
+export class UpdateProfessionalDto {
   @IsOptional()
   @IsString()
   name?: string;
@@ -40,7 +40,7 @@ export class UpdateBarberDto {
   active?: boolean;
 }
 
-export class BarberResponseDto {
+export class ProfessionalResponseDto {
   id: number;
   businessId: number;
   name: string;

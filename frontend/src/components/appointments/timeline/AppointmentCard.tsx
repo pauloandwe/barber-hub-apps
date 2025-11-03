@@ -44,7 +44,7 @@ export function AppointmentCard({
       id: `appointment-${appointment.id}`,
       data: {
         appointmentId: appointment.id,
-        barberId: appointment.barberId,
+        professionalId: appointment.professionalId,
         startDate: appointment.startDate,
         type: "appointment",
       },

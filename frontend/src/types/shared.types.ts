@@ -6,7 +6,7 @@ export interface User {
   name: string;
   phone?: string;
   role: UserRole;
-  barbershopId?: string;
+  businessId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -18,7 +18,7 @@ export interface AuthContext {
   error: string | null;
 }
 
-export interface Barbershop {
+export interface Business {
   id: string;
   name: string;
   email: string;
@@ -30,7 +30,7 @@ export interface Barbershop {
 
 export interface Service {
   id: string;
-  barbershopId: string;
+  businessId: string;
   name: string;
   durationMin: number;
   priceCents: number;
@@ -39,9 +39,9 @@ export interface Service {
   updatedAt: string;
 }
 
-export interface Barber {
+export interface Professional {
   id: string;
-  barbershopId: string;
+  businessId: string;
   name: string;
   bio?: string;
   active: boolean;
@@ -51,9 +51,9 @@ export interface Barber {
 
 export interface Appointment {
   id: string;
-  barbershopId: string;
+  businessId: string;
   userId: string;
-  barberId: string;
+  professionalId: string;
   serviceId: string;
   dateTime: string;
   notes?: string;

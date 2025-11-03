@@ -1,39 +1,39 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BarberWorkingHoursEntity, BarberEntity } from '../../database/entities';
-import { BarberWorkingHourItemDto } from '../../common/dtos/barber-working-hours.dto';
+import { ProfessionalWorkingHoursEntity, ProfessionalEntity } from '../../database/entities';
+import { ProfessionalWorkingHourItemDto } from '../../common/dtos/professional-working-hours.dto';
 
 @Injectable()
-export class BarberWorkingHoursService {
+export class ProfessionalWorkingHoursService {
   constructor(
-    @InjectRepository(BarberWorkingHoursEntity)
-    private readonly workingHoursRepository: Repository<BarberWorkingHoursEntity>,
-    @InjectRepository(BarberEntity)
-    private readonly barberRepository: Repository<BarberEntity>,
+    @InjectRepository(ProfessionalWorkingHoursEntity)
+    private readonly workingHoursRepository: Repository<ProfessionalWorkingHoursEntity>,
+    @InjectRepository(ProfessionalEntity)
+    private readonly professionalRepository: Repository<ProfessionalEntity>,
   ) {}
 
-  async findByBarber(barberId: number): Promise<BarberWorkingHoursEntity[]> {
-    await this.ensureBarberExists(barberId);
+  async findByProfessional(professionalId: number): Promise<ProfessionalWorkingHoursEntity[]> {
+    await this.ensureProfessionalExists(professionalId);
     return this.workingHoursRepository.find({
-      where: { barberId },
+      where: { professionalId },
       order: { dayOfWeek: 'ASC' },
     });
   }
 
-  async replaceForBarber(
-    barberId: number,
-    items: BarberWorkingHourItemDto[],
-  ): Promise<BarberWorkingHoursEntity[]> {
-    await this.ensureBarberExists(barberId);
+  async replaceForProfessional(
+    professionalId: number,
+    items: ProfessionalWorkingHourItemDto[],
+  ): Promise<ProfessionalWorkingHoursEntity[]> {
+    await this.ensureProfessionalExists(professionalId);
 
     const normalized = this.normalizeItems(items ?? []);
 
-    await this.workingHoursRepository.delete({ barberId });
+    await this.workingHoursRepository.delete({ professionalId });
 
     const entities = normalized.map((item) =>
       this.workingHoursRepository.create({
-        barberId,
+        professionalId,
         dayOfWeek: item.dayOfWeek,
         openTime: item.closed ? null : item.openTime ?? null,
         closeTime: item.closed ? null : item.closeTime ?? null,
@@ -46,20 +46,20 @@ export class BarberWorkingHoursService {
     return this.workingHoursRepository.save(entities);
   }
 
-  async deleteForBarber(barberId: number): Promise<void> {
-    await this.ensureBarberExists(barberId);
-    await this.workingHoursRepository.delete({ barberId });
+  async deleteForProfessional(professionalId: number): Promise<void> {
+    await this.ensureProfessionalExists(professionalId);
+    await this.workingHoursRepository.delete({ professionalId });
   }
 
-  private async ensureBarberExists(barberId: number): Promise<void> {
-    const barber = await this.barberRepository.findOne({ where: { id: barberId } });
-    if (!barber) {
-      throw new NotFoundException(`Barber with ID ${barberId} not found`);
+  private async ensureProfessionalExists(professionalId: number): Promise<void> {
+    const professional = await this.professionalRepository.findOne({ where: { id: professionalId } });
+    if (!professional) {
+      throw new NotFoundException(`Professional with ID ${professionalId} not found`);
     }
   }
 
-  private normalizeItems(items: BarberWorkingHourItemDto[]): BarberWorkingHourItemDto[] {
-    const byDay = new Map<number, BarberWorkingHourItemDto>();
+  private normalizeItems(items: ProfessionalWorkingHourItemDto[]): ProfessionalWorkingHourItemDto[] {
+    const byDay = new Map<number, ProfessionalWorkingHourItemDto>();
 
     for (const item of items || []) {
       const day = item.dayOfWeek;
@@ -69,7 +69,7 @@ export class BarberWorkingHoursService {
       byDay.set(day, { ...item });
     }
 
-    const normalized: BarberWorkingHourItemDto[] = [];
+    const normalized: ProfessionalWorkingHourItemDto[] = [];
     for (let day = 0; day < 7; day++) {
       const entry = byDay.get(day) ?? { dayOfWeek: day, closed: true };
       normalized.push(this.validateEntry(entry));
@@ -78,7 +78,7 @@ export class BarberWorkingHoursService {
     return normalized.sort((a, b) => a.dayOfWeek - b.dayOfWeek);
   }
 
-  private validateEntry(entry: BarberWorkingHourItemDto): BarberWorkingHourItemDto {
+  private validateEntry(entry: ProfessionalWorkingHourItemDto): ProfessionalWorkingHourItemDto {
     if (entry.closed) {
       return {
         dayOfWeek: entry.dayOfWeek,

@@ -3,7 +3,7 @@ import {
   BusinessEntity,
   WorkingHoursEntity,
   ServiceEntity,
-  BarberEntity,
+  ProfessionalEntity,
   SettingsEntity,
 } from '../entities';
 
@@ -11,7 +11,7 @@ export const seedBusiness = async (dataSource: DataSource) => {
   const businessRepository = dataSource.getRepository(BusinessEntity);
   const workingHoursRepository = dataSource.getRepository(WorkingHoursEntity);
   const serviceRepository = dataSource.getRepository(ServiceEntity);
-  const barberRepository = dataSource.getRepository(BarberEntity);
+  const professionalRepository = dataSource.getRepository(ProfessionalEntity);
   const settingsRepository = dataSource.getRepository(SettingsEntity);
 
   const existingBusiness = await businessRepository.findOne({
@@ -26,7 +26,7 @@ export const seedBusiness = async (dataSource: DataSource) => {
   const business = businessRepository.create({
     name: 'BarberHub',
     phone: '15551806855',
-    type: 'barbershop',
+    type: 'business',
     token: 'mocked_token_abc123',
   });
 
@@ -143,7 +143,7 @@ export const seedBusiness = async (dataSource: DataSource) => {
 
   await serviceRepository.save(services);
 
-  const barbers = [
+  const professionals = [
     { businessId: savedBusiness.id, name: 'João', specialties: ['Corte', 'Barba'], active: true },
     {
       businessId: savedBusiness.id,
@@ -159,7 +159,7 @@ export const seedBusiness = async (dataSource: DataSource) => {
     },
   ];
 
-  await barberRepository.save(barbers);
+  await professionalRepository.save(professionals);
 
   await settingsRepository.save({
     businessId: savedBusiness.id,
