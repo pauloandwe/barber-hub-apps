@@ -71,11 +71,16 @@ const getStatusLabel = (status: ReminderStatus) => {
   }
 };
 
-export function ReminderLogsTable({ logs, onResendSuccess }: ReminderLogsTableProps) {
+export function ReminderLogsTable({
+  logs,
+  onResendSuccess,
+}: ReminderLogsTableProps) {
   const [resendingId, setResendingId] = useState<number | null>(null);
 
   const canResend = (status: ReminderStatus): boolean => {
-    return status === ReminderStatus.FAILED || status === ReminderStatus.PENDING;
+    return (
+      status === ReminderStatus.FAILED || status === ReminderStatus.PENDING
+    );
   };
 
   const handleResend = async (log: ReminderLog) => {
@@ -90,7 +95,10 @@ export function ReminderLogsTable({ logs, onResendSuccess }: ReminderLogsTablePr
       toast.success("Lembrete reenviado com sucesso!");
       onResendSuccess?.();
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || error.message || "Erro ao reenviar lembrete";
+      const errorMessage =
+        error?.response?.data?.message ||
+        error.message ||
+        "Erro ao reenviar lembrete";
       toast.error(errorMessage);
     } finally {
       setResendingId(null);
@@ -109,7 +117,7 @@ export function ReminderLogsTable({ logs, onResendSuccess }: ReminderLogsTablePr
 
   return (
     <div className="space-y-4">
-      {/* Summary Stats */}
+      {}
       <div className="grid gap-4 md:grid-cols-5">
         {[
           {
@@ -124,7 +132,8 @@ export function ReminderLogsTable({ logs, onResendSuccess }: ReminderLogsTablePr
           },
           {
             label: "Entregues",
-            count: logs.filter((l) => l.status === ReminderStatus.DELIVERED).length,
+            count: logs.filter((l) => l.status === ReminderStatus.DELIVERED)
+              .length,
             color: "bg-green-100 text-green-700",
           },
           {
@@ -134,7 +143,8 @@ export function ReminderLogsTable({ logs, onResendSuccess }: ReminderLogsTablePr
           },
           {
             label: "Falhados",
-            count: logs.filter((l) => l.status === ReminderStatus.FAILED).length,
+            count: logs.filter((l) => l.status === ReminderStatus.FAILED)
+              .length,
             color: "bg-red-100 text-red-700",
           },
         ].map((stat) => (
@@ -149,7 +159,7 @@ export function ReminderLogsTable({ logs, onResendSuccess }: ReminderLogsTablePr
         ))}
       </div>
 
-      {/* Logs Table */}
+      {}
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -203,19 +213,15 @@ export function ReminderLogsTable({ logs, onResendSuccess }: ReminderLogsTablePr
                       </p>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      {format(
-                        new Date(log.scheduledAt),
-                        "dd/MM/yyyy HH:mm",
-                        { locale: ptBR }
-                      )}
+                      {format(new Date(log.scheduledAt), "dd/MM/yyyy HH:mm", {
+                        locale: ptBR,
+                      })}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {log.sentAt
-                        ? format(
-                            new Date(log.sentAt),
-                            "dd/MM/yyyy HH:mm",
-                            { locale: ptBR }
-                          )
+                        ? format(new Date(log.sentAt), "dd/MM/yyyy HH:mm", {
+                            locale: ptBR,
+                          })
                         : "-"}
                     </td>
                     <td className="px-6 py-4 text-center">

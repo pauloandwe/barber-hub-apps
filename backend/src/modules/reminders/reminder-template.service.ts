@@ -24,24 +24,20 @@ export class ReminderTemplateService {
     private reminderTemplateRepository: Repository<ReminderTemplateEntity>,
   ) {}
 
-  async getOrCreateDefaultTemplates(
-    businessId: number,
-  ): Promise<ReminderTemplateEntity[]> {
+  async getOrCreateDefaultTemplates(businessId: number): Promise<ReminderTemplateEntity[]> {
     let templates = await this.reminderTemplateRepository.find({
       where: { businessId },
     });
 
-    // Create default templates if none exist
     if (templates.length === 0) {
-      const defaultTemplates = Object.entries(DEFAULT_TEMPLATES).map(
-        ([type, message]) =>
-          this.reminderTemplateRepository.create({
-            businessId,
-            type: type as ReminderType,
-            message,
-            variables: this.extractVariables(message),
-            active: true,
-          }),
+      const defaultTemplates = Object.entries(DEFAULT_TEMPLATES).map(([type, message]) =>
+        this.reminderTemplateRepository.create({
+          businessId,
+          type: type as ReminderType,
+          message,
+          variables: this.extractVariables(message),
+          active: true,
+        }),
       );
 
       templates = await this.reminderTemplateRepository.save(defaultTemplates);
@@ -136,10 +132,7 @@ export class ReminderTemplateService {
     return this.reminderTemplateRepository.save(template);
   }
 
-  renderTemplate(
-    template: ReminderTemplateEntity,
-    variables: Record<string, string>,
-  ): string {
+  renderTemplate(template: ReminderTemplateEntity, variables: Record<string, string>): string {
     let message = template.message;
 
     Object.entries(variables).forEach(([key, value]) => {
@@ -159,6 +152,6 @@ export class ReminderTemplateService {
       variables.push(match[1]);
     }
 
-    return [...new Set(variables)]; // Remove duplicates
+    return [...new Set(variables)];
   }
 }

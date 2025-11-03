@@ -190,7 +190,9 @@ export class AppointmentsService {
     const dayOfWeek = new Date(year, month - 1, day).getDay();
 
     const professionalTimelines: ProfessionalTimelineDto[] = professionals.map((professional) => {
-      const professionalAppointments = appointments.filter((a) => a.professionalId === professional.id);
+      const professionalAppointments = appointments.filter(
+        (a) => a.professionalId === professional.id,
+      );
       const professionalWorkingHour = workingHours.find(
         (wh) => wh.professionalId === professional.id && wh.dayOfWeek === dayOfWeek,
       );
@@ -199,7 +201,9 @@ export class AppointmentsService {
         id: professional.id,
         name: professional.name,
         specialties: professional.specialties || [],
-        appointments: professionalAppointments.map((apt) => this.formatAppointmentTimelineCard(apt)),
+        appointments: professionalAppointments.map((apt) =>
+          this.formatAppointmentTimelineCard(apt),
+        ),
         workingHours: professionalWorkingHour
           ? this.formatWorkingHourDto(professionalWorkingHour)
           : this.getDefaultClosedHours(),
@@ -247,7 +251,9 @@ export class AppointmentsService {
     };
   }
 
-  private formatWorkingHourDto(workingHour: ProfessionalWorkingHoursEntity): ProfessionalWorkingHourDto {
+  private formatWorkingHourDto(
+    workingHour: ProfessionalWorkingHoursEntity,
+  ): ProfessionalWorkingHourDto {
     return {
       dayOfWeek: workingHour.dayOfWeek,
       openTime: workingHour.openTime,
@@ -340,13 +346,11 @@ export class AppointmentsService {
 
     const savedAppointment = await this.appointmentRepository.save(appointment);
 
-    // Schedule reminders asynchronously
     try {
       await this.remindersService.scheduleConfirmationReminder(savedAppointment.id);
       await this.remindersService.schedulePreAppointmentReminders(savedAppointment.id);
     } catch (error) {
       console.error('Failed to schedule reminders for appointment:', error);
-      // Don't fail the appointment creation if reminder scheduling fails
     }
 
     return this.formatAppointmentResponse(savedAppointment);
@@ -371,7 +375,6 @@ export class AppointmentsService {
     this.validateDateStringWithTimezone(updateAppointmentDto.startDate);
     this.validateDateStringWithTimezone(updateAppointmentDto.endDate);
 
-    // Track original values for reminder scheduling
     const originalStartDate = appointment.startDate;
 
     const shouldCheckConflicts =
@@ -445,8 +448,8 @@ export class AppointmentsService {
       appointment.source = updateAppointmentDto.source;
     }
 
-    // Handle reschedule (date/time change) - reschedule pre-appointment reminders
-    const dateChanged = updateAppointmentDto.startDate &&
+    const dateChanged =
+      updateAppointmentDto.startDate &&
       originalStartDate.getTime() !== appointment.startDate.getTime();
 
     if (dateChanged && appointment.status !== AppointmentStatus.CANCELED) {
@@ -482,7 +485,6 @@ export class AppointmentsService {
       throw new NotFoundException('Appointment not found');
     }
 
-    // Schedule rescheduling reminder before deleting
     try {
       if (appointment.status !== AppointmentStatus.CANCELED) {
         await this.remindersService.scheduleRescheduleReminder(appointmentId, 3);
@@ -534,17 +536,11 @@ export class AppointmentsService {
     return digits.length ? digits : null;
   }
 
-  /**
-   * Valida se a data é uma string ISO válida com timezone explícito.
-   * Aceita formatos como: "2025-03-20T14:30:00Z" ou "2025-03-20T14:30:00+00:00"
-   * Rejeita formatos sem timezone como: "2025-03-20T14:30:00"
-   */
   private validateDateStringWithTimezone(dateString?: string): void {
     if (!dateString) {
       return;
     }
 
-    // Verifica se é uma string ISO válida
     const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?(Z|[+-]\d{2}:\d{2})$/;
     if (!isoRegex.test(dateString)) {
       throw new BadRequestException(
@@ -552,7 +548,6 @@ export class AppointmentsService {
       );
     }
 
-    // Tenta fazer parse da data para garantir que é válida
     const parsedDate = new Date(dateString);
     if (isNaN(parsedDate.getTime())) {
       throw new BadRequestException(`Data inválida. Não consegui fazer parse: "${dateString}"`);

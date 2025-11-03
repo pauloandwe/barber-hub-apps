@@ -1,4 +1,7 @@
-import { ProfessionalTimeline, AppointmentTimelineCard } from "@/api/appointments";
+import {
+  ProfessionalTimeline,
+  AppointmentTimelineCard,
+} from "@/api/appointments";
 import { TimeSlot } from "@/hooks/useTimeSlots";
 import { TimeSlot as TimeSlotComponent } from "./TimeSlot";
 import { AppointmentCard } from "./AppointmentCard";
@@ -9,7 +12,10 @@ interface BarberColumnProps {
   timeSlots: TimeSlot[];
   slotDurationMinutes: number;
   slotHeightPx: number;
-  onSlotClick?: (payload: { professional: ProfessionalTimeline; slot: TimeSlot }) => void;
+  onSlotClick?: (payload: {
+    professional: ProfessionalTimeline;
+    slot: TimeSlot;
+  }) => void;
   onAppointmentEdit?: (appointment: AppointmentTimelineCard) => void;
   onAppointmentDelete?: (appointment: AppointmentTimelineCard) => void;
 }
@@ -26,7 +32,10 @@ export function ProfessionalColumn({
   const effectiveSlotDuration = Math.max(slotDurationMinutes, 1);
 
   const isSlotAvailable = (slotTime: string): boolean => {
-    if (professional.workingHours.closed || !professional.workingHours.openTime) {
+    if (
+      professional.workingHours.closed ||
+      !professional.workingHours.openTime
+    ) {
       return false;
     }
 
@@ -47,10 +56,12 @@ export function ProfessionalColumn({
       return false;
     }
 
-    if (professional.workingHours.breakStart && professional.workingHours.breakEnd) {
-      const [breakStartHour, breakStartMin] = professional.workingHours.breakStart
-        .split(":")
-        .map(Number);
+    if (
+      professional.workingHours.breakStart &&
+      professional.workingHours.breakEnd
+    ) {
+      const [breakStartHour, breakStartMin] =
+        professional.workingHours.breakStart.split(":").map(Number);
       const [breakEndHour, breakEndMin] = professional.workingHours.breakEnd
         .split(":")
         .map(Number);
@@ -77,10 +88,7 @@ export function ProfessionalColumn({
       const aptStart = new Date(apt.startDate);
       const aptEnd = new Date(apt.endDate);
 
-      // Usar getHours() em vez de getUTCHours() para manter consistência com os slots locais
-      // Os slots de trabalho vêm em hora local, então a comparação deve ser em hora local
-      const aptStartMinutes =
-        aptStart.getHours() * 60 + aptStart.getMinutes();
+      const aptStartMinutes = aptStart.getHours() * 60 + aptStart.getMinutes();
       const aptEndMinutes = aptEnd.getHours() * 60 + aptEnd.getMinutes();
 
       return (

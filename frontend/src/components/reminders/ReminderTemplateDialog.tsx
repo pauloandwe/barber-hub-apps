@@ -31,7 +31,10 @@ interface ReminderTemplateDialogProps {
 const REMINDER_TYPES = [
   { value: ReminderType.CONFIRMATION, label: "Confirmação de Agendamento" },
   { value: ReminderType.PRE_APPOINTMENT, label: "Lembrete Pré-Agendamento" },
-  { value: ReminderType.POST_APPOINTMENT, label: "Acompanhamento Pós-Agendamento" },
+  {
+    value: ReminderType.POST_APPOINTMENT,
+    label: "Acompanhamento Pós-Agendamento",
+  },
   { value: ReminderType.RESCHEDULING, label: "Lembrete de Reagendamento" },
 ];
 
@@ -145,13 +148,10 @@ export function ReminderTemplateDialog({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Reminder Type */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="type">Tipo de Lembrete</Label>
-            <Select
-              value={formData.type}
-              onValueChange={handleTypeChange}
-            >
+            <Select value={formData.type} onValueChange={handleTypeChange}>
               <SelectTrigger id="type">
                 <SelectValue />
               </SelectTrigger>
@@ -165,7 +165,7 @@ export function ReminderTemplateDialog({
             </Select>
           </div>
 
-          {/* Message Editor */}
+          {}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label htmlFor="message">Mensagem</Label>
@@ -186,7 +186,7 @@ export function ReminderTemplateDialog({
             </p>
           </div>
 
-          {/* Variables */}
+          {}
           <div className="space-y-3">
             <Label>Variáveis Disponíveis</Label>
             <div className="flex flex-wrap gap-2">
@@ -199,20 +199,26 @@ export function ReminderTemplateDialog({
                   className="gap-2"
                   type="button"
                 >
-                  <span className="font-mono text-xs">{"{" + variable.key + "}"}</span>
+                  <span className="font-mono text-xs">
+                    {"{" + variable.key + "}"}
+                  </span>
                   <span className="text-xs">({variable.label})</span>
                 </Button>
               ))}
             </div>
             <div className="rounded-lg bg-blue-50 p-3">
               <p className="text-xs text-blue-900">
-                <strong>Dica:</strong> Clique em uma variável para inserir no template, ou use{" "}
-                <span className="font-mono bg-blue-100 px-1 rounded">{"{variavel}"}</span> manualmente
+                <strong>Dica:</strong> Clique em uma variável para inserir no
+                template, ou use{" "}
+                <span className="font-mono bg-blue-100 px-1 rounded">
+                  {"{variavel}"}
+                </span>{" "}
+                manualmente
               </p>
             </div>
           </div>
 
-          {/* Live Preview */}
+          {}
           <div className="space-y-2">
             <Label>Preview (Exemplo)</Label>
             <div className="rounded-lg bg-gray-50 p-4 text-sm">
@@ -225,7 +231,7 @@ export function ReminderTemplateDialog({
             </div>
           </div>
 
-          {/* Active Status */}
+          {}
           <div className="flex items-center gap-2">
             <Checkbox
               id="active"
@@ -248,11 +254,7 @@ export function ReminderTemplateDialog({
           >
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="gap-2"
-          >
+          <Button onClick={handleSubmit} disabled={isLoading} className="gap-2">
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             {initialData ? "Atualizar" : "Criar"}
           </Button>

@@ -44,7 +44,6 @@ export class ReminderAnalyticsService {
       relations: ['appointment'],
     });
 
-    // Filter logs by businessId
     const filteredLogs = logs.filter((log) => log.appointment?.businessId === businessId);
 
     const totalReminders = filteredLogs.length;
@@ -115,7 +114,6 @@ export class ReminderAnalyticsService {
     const daily: Record<string, DailyAnalytics> = {};
     const now = new Date();
 
-    // Initialize last 7 days
     for (let i = 0; i < 7; i++) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
@@ -128,7 +126,6 @@ export class ReminderAnalyticsService {
       };
     }
 
-    // Count logs by date
     logs.forEach((log) => {
       if (!log.createdAt) return;
       const dateStr = new Date(log.createdAt).toISOString().split('T')[0];

@@ -1,7 +1,5 @@
 import { apiClient } from "./client";
 
-// ============== TYPES ==============
-
 export enum ReminderType {
   CONFIRMATION = "CONFIRMATION",
   PRE_APPOINTMENT = "PRE_APPOINTMENT",
@@ -106,14 +104,9 @@ export interface PaginatedLogsResponse {
   };
 }
 
-// ============== API FUNCTIONS ==============
-
 export const remindersAPI = {
-  // ===== SETTINGS =====
   async getSettings(businessId: number): Promise<ReminderSettings[]> {
-    const response = await apiClient.get(
-      `/reminders/settings/${businessId}`
-    );
+    const response = await apiClient.get(`/reminders/settings/${businessId}`);
     return response?.data?.data || [];
   },
 
@@ -132,18 +125,17 @@ export const remindersAPI = {
     id: number,
     data: UpdateReminderSettingsRequest
   ): Promise<ReminderSettings> {
-    const response = await apiClient.put(
-      `/reminders/settings/${id}`,
-      data
-    );
+    const response = await apiClient.put(`/reminders/settings/${id}`, data);
     return response?.data?.data;
   },
 
-  async toggleSettings(id: number, enabled: boolean): Promise<ReminderSettings> {
-    const response = await apiClient.put(
-      `/reminders/settings/${id}/toggle`,
-      { enabled }
-    );
+  async toggleSettings(
+    id: number,
+    enabled: boolean
+  ): Promise<ReminderSettings> {
+    const response = await apiClient.put(`/reminders/settings/${id}/toggle`, {
+      enabled,
+    });
     return response?.data?.data;
   },
 
@@ -151,18 +143,13 @@ export const remindersAPI = {
     await apiClient.delete(`/reminders/settings/${id}`);
   },
 
-  // ===== TEMPLATES =====
   async getTemplates(businessId: number): Promise<ReminderTemplate[]> {
-    const response = await apiClient.get(
-      `/reminders/templates/${businessId}`
-    );
+    const response = await apiClient.get(`/reminders/templates/${businessId}`);
     return response?.data?.data || [];
   },
 
   async getTemplate(id: number): Promise<ReminderTemplate> {
-    const response = await apiClient.get(
-      `/reminders/templates/detail/${id}`
-    );
+    const response = await apiClient.get(`/reminders/templates/detail/${id}`);
     return response?.data?.data;
   },
 
@@ -181,10 +168,7 @@ export const remindersAPI = {
     id: number,
     data: UpdateReminderTemplateRequest
   ): Promise<ReminderTemplate> {
-    const response = await apiClient.put(
-      `/reminders/templates/${id}`,
-      data
-    );
+    const response = await apiClient.put(`/reminders/templates/${id}`, data);
     return response?.data?.data;
   },
 
@@ -193,13 +177,10 @@ export const remindersAPI = {
   },
 
   async resetTemplate(id: number): Promise<ReminderTemplate> {
-    const response = await apiClient.post(
-      `/reminders/templates/${id}/reset`
-    );
+    const response = await apiClient.post(`/reminders/templates/${id}/reset`);
     return response?.data?.data;
   },
 
-  // ===== LOGS & ANALYTICS =====
   async getLogs(
     businessId: number,
     skip: number = 0,
@@ -222,9 +203,7 @@ export const remindersAPI = {
   },
 
   async getAnalytics(businessId: number): Promise<ReminderAnalytics> {
-    const response = await apiClient.get(
-      `/reminders/analytics/${businessId}`
-    );
+    const response = await apiClient.get(`/reminders/analytics/${businessId}`);
     const payload = response?.data?.data || {};
 
     const normalizeNumber = (value: any) =>
@@ -250,8 +229,9 @@ export const remindersAPI = {
       });
     }
 
-    const rawLastSeven =
-      Array.isArray(payload?.last7Days) ? payload.last7Days : payload?.lastSevenDays;
+    const rawLastSeven = Array.isArray(payload?.last7Days)
+      ? payload.last7Days
+      : payload?.lastSevenDays;
     const last7Days = Array.isArray(rawLastSeven)
       ? rawLastSeven.map((day: any) => ({
           date: typeof day?.date === "string" ? day.date : "",
@@ -276,24 +256,20 @@ export const remindersAPI = {
     };
   },
 
-  // ===== RESEND REMINDERS =====
   async resendReminder(logId: number): Promise<ReminderLog> {
-    const response = await apiClient.post(
-      `/reminders/logs/${logId}/resend`
-    );
+    const response = await apiClient.post(`/reminders/logs/${logId}/resend`);
     return response?.data?.data;
   },
 
-  // ===== TEST & HEALTH =====
   async sendTestReminder(
     businessId: number,
     appointmentId: number,
     type: ReminderType
   ): Promise<any> {
-    const response = await apiClient.post(
-      `/reminders/test/${businessId}`,
-      { appointmentId, type }
-    );
+    const response = await apiClient.post(`/reminders/test/${businessId}`, {
+      appointmentId,
+      type,
+    });
     return response?.data?.data;
   },
 

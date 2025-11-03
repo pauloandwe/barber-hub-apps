@@ -35,8 +35,6 @@ export class RemindersController {
     private readonly analyticsService: ReminderAnalyticsService,
   ) {}
 
-  // ============ SETTINGS ENDPOINTS ============
-
   @Get('settings/:businessId')
   @ApiOperation({ summary: 'Get all reminder settings for a business' })
   async getSettings(@Param('businessId') businessId: string) {
@@ -62,10 +60,7 @@ export class RemindersController {
 
   @Put('settings/:id')
   @ApiOperation({ summary: 'Update reminder settings by ID' })
-  async updateSettings(
-    @Param('id') id: string,
-    @Body() updateDto: UpdateReminderSettingsDto,
-  ) {
+  async updateSettings(@Param('id') id: string, @Body() updateDto: UpdateReminderSettingsDto) {
     const idNum = parseInt(id, 10);
     if (isNaN(idNum)) {
       throw new BadRequestException('Invalid settings ID');
@@ -93,8 +88,6 @@ export class RemindersController {
     await this.settingsService.deleteSetting(idNum);
     return { message: 'Settings deleted successfully' };
   }
-
-  // ============ TEMPLATES ENDPOINTS ============
 
   @Get('templates/:businessId')
   @ApiOperation({ summary: 'Get all reminder templates for a business' })
@@ -131,10 +124,7 @@ export class RemindersController {
 
   @Put('templates/:id')
   @ApiOperation({ summary: 'Update a reminder template' })
-  async updateTemplate(
-    @Param('id') id: string,
-    @Body() updateDto: UpdateReminderTemplateDto,
-  ) {
+  async updateTemplate(@Param('id') id: string, @Body() updateDto: UpdateReminderTemplateDto) {
     const idNum = parseInt(id, 10);
     if (isNaN(idNum)) {
       throw new BadRequestException('Invalid template ID');
@@ -161,18 +151,23 @@ export class RemindersController {
       throw new BadRequestException('Invalid template ID');
     }
     const template = await this.templateService.getTemplate(idNum);
-    return this.templateService.resetTemplateToDefault(
-      template.businessId,
-      template.type,
-    );
+    return this.templateService.resetTemplateToDefault(template.businessId, template.type);
   }
-
-  // ============ LOGS & ANALYTICS ENDPOINTS ============
 
   @Get('logs/:businessId')
   @ApiOperation({ summary: 'Get reminder logs for a business (paginated)' })
-  @ApiQuery({ name: 'skip', required: false, type: Number, description: 'Number of records to skip' })
-  @ApiQuery({ name: 'take', required: false, type: Number, description: 'Number of records to take' })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+    type: Number,
+    description: 'Number of records to skip',
+  })
+  @ApiQuery({
+    name: 'take',
+    required: false,
+    type: Number,
+    description: 'Number of records to take',
+  })
   async getLogs(
     @Param('businessId') businessId: string,
     @Query('skip') skip?: string,
@@ -222,8 +217,6 @@ export class RemindersController {
       throw new BadRequestException('Invalid business ID');
     }
 
-    // This endpoint is for testing and would trigger actual reminder sending
-    // Implementation depends on WhatsApp service integration
     return {
       message: 'Test reminder request queued',
       appointmentId: body.appointmentId,
@@ -240,8 +233,6 @@ export class RemindersController {
     }
     return this.remindersService.resendReminder(logIdNum);
   }
-
-  // ============ HEALTH CHECK ============
 
   @Get('health')
   @ApiOperation({ summary: 'Health check for reminders service' })

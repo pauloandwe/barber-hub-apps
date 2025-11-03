@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { remindersAPI, ReminderType, ReminderSettings, ReminderTemplate, ReminderLog, ReminderAnalytics } from "@/api/reminders";
+import {
+  remindersAPI,
+  ReminderType,
+  ReminderSettings,
+  ReminderTemplate,
+  ReminderLog,
+  ReminderAnalytics,
+} from "@/api/reminders";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -46,30 +53,28 @@ export function RemindersSettings() {
     return typeof businessId === "number" ? businessId : null;
   }, [businessId]);
 
-  // State Management
   const [settings, setSettings] = useState<ReminderSettings[]>([]);
   const [templates, setTemplates] = useState<ReminderTemplate[]>([]);
   const [logs, setLogs] = useState<ReminderLog[]>([]);
   const [analytics, setAnalytics] = useState<ReminderAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // Dialog States
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
-  const [selectedSetting, setSelectedSetting] = useState<ReminderSettings | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<ReminderTemplate | null>(null);
-
-  // Pagination
+  const [selectedSetting, setSelectedSetting] =
+    useState<ReminderSettings | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<ReminderTemplate | null>(null);
   const [logsPage, setLogsPage] = useState(0);
   const [logsPerPage] = useState(20);
 
-  // Effects
   useEffect(() => {
     if (roleLoading) return;
 
     if (!businessId) {
-      toast.error("Não foi possível encontrar uma business vinculada ao seu usuário");
+      toast.error(
+        "Não foi possível encontrar uma business vinculada ao seu usuário"
+      );
       setIsLoading(false);
       return;
     }
@@ -77,24 +82,24 @@ export function RemindersSettings() {
     fetchAllData(businessId);
   }, [businessId, roleLoading]);
 
-  // Data Fetching
   const fetchAllData = async (id: string | number) => {
     try {
       setIsLoading(true);
       const businessId = typeof id === "string" ? parseInt(id, 10) : id;
 
-      const [settingsData, templatesData, logsData, analyticsData] = await Promise.all([
-        remindersAPI.getSettings(businessId),
-        remindersAPI.getTemplates(businessId),
-        remindersAPI.getLogs(businessId, 0, logsPerPage),
-        remindersAPI.getAnalytics(businessId),
-      ]);
+      const [settingsData, templatesData, logsData, analyticsData] =
+        await Promise.all([
+          remindersAPI.getSettings(businessId),
+          remindersAPI.getTemplates(businessId),
+          remindersAPI.getLogs(businessId, 0, logsPerPage),
+          remindersAPI.getAnalytics(businessId),
+        ]);
 
       setSettings(settingsData);
       setTemplates(templatesData);
       setLogs(logsData.data);
       setAnalytics(analyticsData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error("Erro ao carregar dados de lembretes");
       console.error(error);
     } finally {
@@ -115,23 +120,30 @@ export function RemindersSettings() {
     }
   };
 
-  // Settings Operations
-  const handleSaveSettings = async (data: any) => {
+  const handleSaveSettings = async (data: Omit<ReminderSettings, "id">) => {
     try {
       if (selectedSetting) {
-        const updated = await remindersAPI.updateSettings(selectedSetting.id, data);
-        setSettings(settings.map(s => s.id === updated.id ? updated : s));
+        const updated = await remindersAPI.updateSettings(
+          selectedSetting.id,
+          data
+        );
+        setSettings(settings.map((s) => (s.id === updated.id ? updated : s)));
         toast.success("Configuração atualizada com sucesso");
       } else {
         if (numericBusinessId == null) return;
-        const created = await remindersAPI.createSettings(numericBusinessId, data);
+        const created = await remindersAPI.createSettings(
+          numericBusinessId,
+          data
+        );
         setSettings([...settings, created]);
         toast.success("Configuração criada com sucesso");
       }
       setIsSettingsDialogOpen(false);
       setSelectedSetting(null);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Erro ao salvar configuração");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Erro ao salvar configuração";
+      toast.error(message);
     }
   };
 
@@ -140,9 +152,9 @@ export function RemindersSettings() {
 
     try {
       await remindersAPI.deleteSettings(id);
-      setSettings(settings.filter(s => s.id !== id));
+      setSettings(settings.filter((s) => s.id !== id));
       toast.success("Configuração deletada com sucesso");
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("Erro ao deletar configuração");
     }
   };
@@ -150,30 +162,37 @@ export function RemindersSettings() {
   const handleToggleSetting = async (id: number, enabled: boolean) => {
     try {
       const updated = await remindersAPI.toggleSettings(id, !enabled);
-      setSettings(settings.map(s => s.id === updated.id ? updated : s));
+      setSettings(settings.map((s) => (s.id === updated.id ? updated : s)));
       toast.success(`Configuração ${!enabled ? "ativada" : "desativada"}`);
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("Erro ao atualizar configuração");
     }
   };
 
-  // Template Operations
-  const handleSaveTemplate = async (data: any) => {
+  const handleSaveTemplate = async (data: Omit<ReminderTemplate, "id">) => {
     try {
       if (selectedTemplate) {
-        const updated = await remindersAPI.updateTemplate(selectedTemplate.id, data);
-        setTemplates(templates.map(t => t.id === updated.id ? updated : t));
+        const updated = await remindersAPI.updateTemplate(
+          selectedTemplate.id,
+          data
+        );
+        setTemplates(templates.map((t) => (t.id === updated.id ? updated : t)));
         toast.success("Template atualizado com sucesso");
       } else {
         if (numericBusinessId == null) return;
-        const created = await remindersAPI.createTemplate(numericBusinessId, data);
+        const created = await remindersAPI.createTemplate(
+          numericBusinessId,
+          data
+        );
         setTemplates([...templates, created]);
         toast.success("Template criado com sucesso");
       }
       setIsTemplateDialogOpen(false);
       setSelectedTemplate(null);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Erro ao salvar template");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Erro ao salvar template";
+      toast.error(message);
     }
   };
 
@@ -182,21 +201,22 @@ export function RemindersSettings() {
 
     try {
       await remindersAPI.deleteTemplate(id);
-      setTemplates(templates.filter(t => t.id !== id));
+      setTemplates(templates.filter((t) => t.id !== id));
       toast.success("Template deletado com sucesso");
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("Erro ao deletar template");
     }
   };
 
   const handleResetTemplate = async (id: number) => {
-    if (!confirm("Tem certeza que deseja resetar este template para o padrão?")) return;
+    if (!confirm("Tem certeza que deseja resetar este template para o padrão?"))
+      return;
 
     try {
       const updated = await remindersAPI.resetTemplate(id);
-      setTemplates(templates.map(t => t.id === updated.id ? updated : t));
+      setTemplates(templates.map((t) => (t.id === updated.id ? updated : t)));
       toast.success("Template resetado para o padrão");
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("Erro ao resetar template");
     }
   };
@@ -227,7 +247,6 @@ export function RemindersSettings() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      {/* Header */}
       <div className="border-b bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -267,7 +286,6 @@ export function RemindersSettings() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <Tabs defaultValue="settings" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
@@ -289,7 +307,6 @@ export function RemindersSettings() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
@@ -321,7 +338,10 @@ export function RemindersSettings() {
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 {settings.map((setting) => (
-                  <Card key={setting.id} className="hover:shadow-md transition-shadow">
+                  <Card
+                    key={setting.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div>
@@ -333,7 +353,9 @@ export function RemindersSettings() {
                           </CardDescription>
                         </div>
                         <button
-                          onClick={() => handleToggleSetting(setting.id, setting.enabled)}
+                          onClick={() =>
+                            handleToggleSetting(setting.id, setting.enabled)
+                          }
                           className="text-gray-400 hover:text-gray-600"
                         >
                           {setting.enabled ? (
@@ -386,7 +408,6 @@ export function RemindersSettings() {
             )}
           </TabsContent>
 
-          {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
@@ -418,7 +439,10 @@ export function RemindersSettings() {
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 {templates.map((template) => (
-                  <Card key={template.id} className="hover:shadow-md transition-shadow">
+                  <Card
+                    key={template.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -427,9 +451,13 @@ export function RemindersSettings() {
                           </CardTitle>
                           <CardDescription className="text-xs mt-1">
                             {template.active ? (
-                              <span className="text-green-600 font-medium">● Ativo</span>
+                              <span className="text-green-600 font-medium">
+                                ● Ativo
+                              </span>
                             ) : (
-                              <span className="text-gray-500 font-medium">● Inativo</span>
+                              <span className="text-gray-500 font-medium">
+                                ● Inativo
+                              </span>
                             )}
                           </CardDescription>
                         </div>
@@ -493,7 +521,6 @@ export function RemindersSettings() {
             )}
           </TabsContent>
 
-          {/* Logs Tab */}
           <TabsContent value="logs" className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
@@ -514,9 +541,9 @@ export function RemindersSettings() {
               <ReminderLogsTable
                 logs={logs}
                 onResendSuccess={() => {
-                  // Refetch logs after successful resend
                   if (numericBusinessId == null) return;
-                  remindersAPI.getLogs(numericBusinessId, logsPage, logsPerPage)
+                  remindersAPI
+                    .getLogs(numericBusinessId, logsPage, logsPerPage)
                     .then((data) => setLogs(data.data))
                     .catch(() => toast.error("Erro ao atualizar histórico"));
                 }}
@@ -524,7 +551,6 @@ export function RemindersSettings() {
             )}
           </TabsContent>
 
-          {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
@@ -548,7 +574,6 @@ export function RemindersSettings() {
         </Tabs>
       </div>
 
-      {/* Dialogs */}
       <ReminderSettingsDialog
         open={isSettingsDialogOpen}
         onOpenChange={setIsSettingsDialogOpen}

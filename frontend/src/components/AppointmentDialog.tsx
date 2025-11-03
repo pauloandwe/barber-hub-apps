@@ -112,7 +112,9 @@ export function AppointmentDialog({
       const serviceId = appointment.serviceId
         ? String(appointment.serviceId)
         : "";
-      const professionalId = appointment.professionalId ? String(appointment.professionalId) : "";
+      const professionalId = appointment.professionalId
+        ? String(appointment.professionalId)
+        : "";
       const appointmentTime = originalTime ?? "";
 
       setSelectedService(serviceId);
@@ -156,7 +158,9 @@ export function AppointmentDialog({
     setSelectedService("");
     setNotes("");
     setSelectedProfessional(
-      initialSelection.professionalId ? String(initialSelection.professionalId) : ""
+      initialSelection.professionalId
+        ? String(initialSelection.professionalId)
+        : ""
     );
     setSelectedDate(
       initialSelection.date ? new Date(initialSelection.date) : undefined
@@ -241,7 +245,12 @@ export function AppointmentDialog({
       }
     };
 
-    if (selectedProfessional && selectedDate && selectedService && businessPhone) {
+    if (
+      selectedProfessional &&
+      selectedDate &&
+      selectedService &&
+      businessPhone
+    ) {
       fetchAvailableTimes();
     }
   }, [
@@ -343,7 +352,12 @@ export function AppointmentDialog({
   ]);
 
   const handleSubmit = async () => {
-    if (!selectedService || !selectedProfessional || !selectedDate || !selectedTime) {
+    if (
+      !selectedService ||
+      !selectedProfessional ||
+      !selectedDate ||
+      !selectedTime
+    ) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
@@ -401,23 +415,21 @@ export function AppointmentDialog({
 
       const [hours, minutes] = selectedTime.split(":").map(Number);
 
-      // Criar um Date no timezone local e depois converter para UTC
-      // O usuário seleciona "9:00" em seu timezone local (BRT)
-      // Precisa ser convertido para 12:00 UTC (9:00 BRT + 3h)
       const localDate = new Date(selectedDate);
       localDate.setHours(hours, minutes, 0, 0);
 
-      // Criar um Date em UTC ajustando pelo offset do timezone local
       const offsetMinutes = localDate.getTimezoneOffset();
-      const startDateTime = new Date(Date.UTC(
-        selectedDate.getUTCFullYear(),
-        selectedDate.getUTCMonth(),
-        selectedDate.getUTCDate(),
-        hours,
-        minutes,
-        0,
-        0
-      ));
+      const startDateTime = new Date(
+        Date.UTC(
+          selectedDate.getUTCFullYear(),
+          selectedDate.getUTCMonth(),
+          selectedDate.getUTCDate(),
+          hours,
+          minutes,
+          0,
+          0
+        )
+      );
       startDateTime.setTime(startDateTime.getTime() + offsetMinutes * 60000);
 
       const endDateTime = addMinutes(startDateTime, service.durationMin);
@@ -495,7 +507,9 @@ export function AppointmentDialog({
   const selectedServiceData = services.get(selectedService);
   const selectedDayIndex = selectedDate?.getDay();
 
-  const professionalScheduleSummary = useMemo<ProfessionalScheduleItem[]>(() => {
+  const professionalScheduleSummary = useMemo<
+    ProfessionalScheduleItem[]
+  >(() => {
     if (!professionalWorkingHours.length) {
       return [];
     }

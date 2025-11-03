@@ -50,7 +50,7 @@ export class PreAppointmentReminderProcessor extends WorkerHost {
     );
 
     try {
-      // Busca appointment com relacionamentos
+      
       const appointment = await this.appointmentRepository.findOne({
         where: { id: appointmentId },
         relations: ['clientContact', 'professional', 'service', 'business'],
@@ -67,7 +67,6 @@ export class PreAppointmentReminderProcessor extends WorkerHost {
         return;
       }
 
-      // Verifica se o agendamento ainda não passou
       const now = new Date();
       if (appointment.startDate < now) {
         this.logger.warn(
@@ -82,7 +81,6 @@ export class PreAppointmentReminderProcessor extends WorkerHost {
         return;
       }
 
-      // Não envia se não tiver cliente
       if (!appointment.clientContact?.phone) {
         this.logger.warn(`No phone found for appointment ${appointmentId}`);
         await this.reminderService.updateReminderLog(
@@ -94,7 +92,6 @@ export class PreAppointmentReminderProcessor extends WorkerHost {
         return;
       }
 
-      // Busca template de pré-agendamento
       const template = await this.reminderTemplateRepository.findOne({
         where: {
           businessId: appointment.businessId,
@@ -114,7 +111,6 @@ export class PreAppointmentReminderProcessor extends WorkerHost {
         return;
       }
 
-      // Renderiza mensagem com variáveis
       const message = this.renderMessage(template.message, {
         clientName: appointment.clientContact.name,
         appointmentDate: appointment.startDate.toLocaleDateString('pt-BR'),
@@ -126,7 +122,6 @@ export class PreAppointmentReminderProcessor extends WorkerHost {
         serviceName: appointment.service?.name || 'Serviço',
       });
 
-      // Envia via WhatsApp
       const response = await this.sendReminderToWhatsApp({
         businessPhone: appointment.business.phone,
         clientPhone: appointment.clientContact.phone,

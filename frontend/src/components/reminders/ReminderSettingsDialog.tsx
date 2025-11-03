@@ -30,7 +30,10 @@ interface ReminderSettingsDialogProps {
 const REMINDER_TYPES = [
   { value: ReminderType.CONFIRMATION, label: "Confirmação de Agendamento" },
   { value: ReminderType.PRE_APPOINTMENT, label: "Lembrete Pré-Agendamento" },
-  { value: ReminderType.POST_APPOINTMENT, label: "Acompanhamento Pós-Agendamento" },
+  {
+    value: ReminderType.POST_APPOINTMENT,
+    label: "Acompanhamento Pós-Agendamento",
+  },
   { value: ReminderType.RESCHEDULING, label: "Lembrete de Reagendamento" },
 ];
 
@@ -89,7 +92,9 @@ export function ReminderSettingsDialog({
       return;
     }
 
-    const hours = [...new Set([...formData.hoursBeforeAppointment, newHour])].sort((a, b) => a - b);
+    const hours = [
+      ...new Set([...formData.hoursBeforeAppointment, newHour]),
+    ].sort((a, b) => a - b);
     setFormData({ ...formData, hoursBeforeAppointment: hours });
     setNewHour("");
   };
@@ -97,7 +102,9 @@ export function ReminderSettingsDialog({
   const handleRemoveHour = (hour: number) => {
     setFormData({
       ...formData,
-      hoursBeforeAppointment: formData.hoursBeforeAppointment.filter((h) => h !== hour),
+      hoursBeforeAppointment: formData.hoursBeforeAppointment.filter(
+        (h) => h !== hour
+      ),
     });
   };
 
@@ -126,7 +133,9 @@ export function ReminderSettingsDialog({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Editar Configuração" : "Nova Configuração de Lembrete"}
+            {initialData
+              ? "Editar Configuração"
+              : "Nova Configuração de Lembrete"}
           </DialogTitle>
           <DialogDescription>
             Configure os parâmetros para envio automático de lembretes
@@ -134,7 +143,7 @@ export function ReminderSettingsDialog({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Reminder Type */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="type">Tipo de Lembrete</Label>
             <Select
@@ -156,7 +165,7 @@ export function ReminderSettingsDialog({
             </Select>
           </div>
 
-          {/* Timezone */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="timezone">Fuso Horário</Label>
             <Select
@@ -178,7 +187,7 @@ export function ReminderSettingsDialog({
             </Select>
           </div>
 
-          {/* Hours Before Appointment */}
+          {}
           <div className="space-y-3">
             <Label>Horas Antes do Agendamento</Label>
 
@@ -189,7 +198,9 @@ export function ReminderSettingsDialog({
                     key={hour}
                     className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1.5"
                   >
-                    <span className="text-sm font-medium text-blue-700">{hour}h</span>
+                    <span className="text-sm font-medium text-blue-700">
+                      {hour}h
+                    </span>
                     <button
                       onClick={() => handleRemoveHour(hour)}
                       className="ml-1 text-blue-600 hover:text-blue-800"
@@ -209,7 +220,9 @@ export function ReminderSettingsDialog({
                 placeholder="Ex: 24 (24 horas antes)"
                 value={newHour}
                 onChange={(e) =>
-                  setNewHour(e.target.value === "" ? "" : parseInt(e.target.value, 10))
+                  setNewHour(
+                    e.target.value === "" ? "" : parseInt(e.target.value, 10)
+                  )
                 }
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
@@ -233,9 +246,15 @@ export function ReminderSettingsDialog({
                 <strong>Exemplos comuns:</strong>
               </p>
               <ul className="mt-2 space-y-1 text-xs text-gray-600">
-                <li>• <strong>2</strong> = 2 horas antes</li>
-                <li>• <strong>24</strong> = 1 dia antes</li>
-                <li>• <strong>48</strong> = 2 dias antes</li>
+                <li>
+                  • <strong>2</strong> = 2 horas antes
+                </li>
+                <li>
+                  • <strong>24</strong> = 1 dia antes
+                </li>
+                <li>
+                  • <strong>48</strong> = 2 dias antes
+                </li>
               </ul>
             </div>
           </div>
@@ -249,11 +268,7 @@ export function ReminderSettingsDialog({
           >
             Cancelar
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="gap-2"
-          >
+          <Button onClick={handleSubmit} disabled={isLoading} className="gap-2">
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             {initialData ? "Atualizar" : "Criar"}
           </Button>

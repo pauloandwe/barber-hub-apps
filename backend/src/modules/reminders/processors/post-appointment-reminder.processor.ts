@@ -44,12 +44,9 @@ export class PostAppointmentReminderProcessor extends WorkerHost {
   private async handlePostAppointmentReminder(job: Job<PostAppointmentReminderJob>) {
     const { appointmentId, logId } = job.data;
 
-    this.logger.debug(
-      `Processing post-appointment reminder for appointment ${appointmentId}`,
-    );
+    this.logger.debug(`Processing post-appointment reminder for appointment ${appointmentId}`);
 
     try {
-      // Busca appointment com relacionamentos
       const appointment = await this.appointmentRepository.findOne({
         where: { id: appointmentId },
         relations: ['clientContact', 'professional', 'service', 'business'],
@@ -66,7 +63,6 @@ export class PostAppointmentReminderProcessor extends WorkerHost {
         return;
       }
 
-      // Não envia se não tiver cliente
       if (!appointment.clientContact?.phone) {
         this.logger.warn(`No phone found for appointment ${appointmentId}`);
         await this.reminderService.updateReminderLog(
@@ -78,7 +74,6 @@ export class PostAppointmentReminderProcessor extends WorkerHost {
         return;
       }
 
-      // Busca template de pós-agendamento
       const template = await this.reminderTemplateRepository.findOne({
         where: {
           businessId: appointment.businessId,
@@ -98,7 +93,6 @@ export class PostAppointmentReminderProcessor extends WorkerHost {
         return;
       }
 
-      // Renderiza mensagem com variáveis
       const message = this.renderMessage(template.message, {
         clientName: appointment.clientContact.name,
         appointmentDate: appointment.startDate.toLocaleDateString('pt-BR'),
@@ -110,7 +104,6 @@ export class PostAppointmentReminderProcessor extends WorkerHost {
         serviceName: appointment.service?.name || 'Serviço',
       });
 
-      // Envia via WhatsApp
       const response = await this.sendReminderToWhatsApp({
         businessPhone: appointment.business.phone,
         clientPhone: appointment.clientContact.phone,
@@ -185,15 +178,11 @@ export class PostAppointmentReminderProcessor extends WorkerHost {
 
   @OnWorkerEvent('completed')
   onCompleted(job: Job<PostAppointmentReminderJob>) {
-    this.logger.debug(
-      `Post-appointment reminder job ${job.id} completed successfully`,
-    );
+    this.logger.debug(`Post-appointment reminder job ${job.id} completed successfully`);
   }
 
   @OnWorkerEvent('failed')
   onFailed(job: Job<PostAppointmentReminderJob>, error: Error) {
-    this.logger.error(
-      `Post-appointment reminder job ${job.id} failed: ${error.message}`,
-    );
+    this.logger.error(`Post-appointment reminder job ${job.id} failed: ${error.message}`);
   }
 }

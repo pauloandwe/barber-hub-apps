@@ -1,6 +1,9 @@
 import { useState, useCallback } from "react";
 import { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-import { AppointmentTimelineCard, ProfessionalTimeline } from "@/api/appointments";
+import {
+  AppointmentTimelineCard,
+  ProfessionalTimeline,
+} from "@/api/appointments";
 import { appointmentsAPI } from "@/api/appointments";
 import { toast } from "sonner";
 
@@ -83,8 +86,7 @@ export function useDragAndDrop({
 
         const originalDate = new Date(originalAppointment.startDate);
         const newStartDate = new Date(originalDate);
-        // Usar setHours() em vez de setUTCHours() para manter consistência com hora local
-        // O targetSlotTime vem em hora local, então deve ser configurado em hora local
+
         newStartDate.setHours(targetHour, targetMinute, 0, 0);
         const newEndDate = new Date(newStartDate);
         newEndDate.setMinutes(newEndDate.getMinutes() + durationMinutes);
@@ -183,7 +185,10 @@ export function isTimeSlotAvailable(
     return false;
   }
 
-  if (professional.workingHours.breakStart && professional.workingHours.breakEnd) {
+  if (
+    professional.workingHours.breakStart &&
+    professional.workingHours.breakEnd
+  ) {
     const [breakStartHour, breakStartMin] = professional.workingHours.breakStart
       .split(":")
       .map(Number);

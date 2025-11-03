@@ -44,7 +44,6 @@ export class RemindersService {
         return;
       }
 
-      // Create log entry
       const log = this.reminderLogRepository.create({
         appointmentId,
         clientContactId: appointment.clientContactId,
@@ -54,7 +53,6 @@ export class RemindersService {
       });
       await this.reminderLogRepository.save(log);
 
-      // Schedule job immediately for confirmation
       await this.appointmentConfirmationQueue.add(
         `confirmation-${appointmentId}`,
         {
@@ -62,17 +60,13 @@ export class RemindersService {
           logId: log.id,
         },
         {
-          delay: 1000, // 1 second delay
+          delay: 1000,
         },
       );
 
-      this.logger.debug(
-        `Confirmation reminder scheduled for appointment ${appointmentId}`,
-      );
+      this.logger.debug(`Confirmation reminder scheduled for appointment ${appointmentId}`);
     } catch (error) {
-      this.logger.error(
-        `Failed to schedule confirmation reminder: ${error.message}`,
-      );
+      this.logger.error(`Failed to schedule confirmation reminder: ${error.message}`);
       throw error;
     }
   }
@@ -96,7 +90,6 @@ export class RemindersService {
         return;
       }
 
-      // Get business reminder settings
       const settings = await this.reminderSettingsRepository.find({
         where: {
           businessId: appointment.businessId,
@@ -115,7 +108,6 @@ export class RemindersService {
       const appointmentTime = new Date(appointment.startDate).getTime();
       const setting = settings[0];
 
-      // Schedule reminders for each configured hour before appointment
       for (const hoursBeforeAppointment of setting.hoursBeforeAppointment) {
         const now = new Date().getTime();
         const scheduleTime = appointmentTime - hoursBeforeAppointment * 60 * 60 * 1000;
@@ -149,9 +141,7 @@ export class RemindersService {
         }
       }
     } catch (error) {
-      this.logger.error(
-        `Failed to schedule pre-appointment reminders: ${error.message}`,
-      );
+      this.logger.error(`Failed to schedule pre-appointment reminders: ${error.message}`);
       throw error;
     }
   }
@@ -175,7 +165,6 @@ export class RemindersService {
         return;
       }
 
-      // Get business reminder settings
       const settings = await this.reminderSettingsRepository.find({
         where: {
           businessId: appointment.businessId,
@@ -196,7 +185,7 @@ export class RemindersService {
         clientContactId: appointment.clientContactId,
         type: ReminderType.POST_APPOINTMENT,
         status: ReminderStatus.PENDING,
-        scheduledAt: new Date(new Date().getTime() + 1 * 60 * 60 * 1000), // 1 hour after end
+        scheduledAt: new Date(new Date().getTime() + 1 * 60 * 60 * 1000),
       });
       await this.reminderLogRepository.save(log);
 
@@ -213,18 +202,17 @@ export class RemindersService {
         },
       );
 
-      this.logger.debug(
-        `Post-appointment reminder scheduled for appointment ${appointmentId}`,
-      );
+      this.logger.debug(`Post-appointment reminder scheduled for appointment ${appointmentId}`);
     } catch (error) {
-      this.logger.error(
-        `Failed to schedule post-appointment reminder: ${error.message}`,
-      );
+      this.logger.error(`Failed to schedule post-appointment reminder: ${error.message}`);
       throw error;
     }
   }
 
-  async scheduleRescheduleReminder(appointmentId: number, daysAfterCancellation: number = 3): Promise<void> {
+  async scheduleRescheduleReminder(
+    appointmentId: number,
+    daysAfterCancellation: number = 3,
+  ): Promise<void> {
     try {
       const appointment = await this.appointmentRepository.findOne({
         where: { id: appointmentId },
@@ -243,7 +231,6 @@ export class RemindersService {
         return;
       }
 
-      // Get business reminder settings
       const settings = await this.reminderSettingsRepository.find({
         where: {
           businessId: appointment.businessId,
@@ -253,9 +240,7 @@ export class RemindersService {
       });
 
       if (settings.length === 0) {
-        this.logger.debug(
-          `No rescheduling settings found for business ${appointment.businessId}`,
-        );
+        this.logger.debug(`No rescheduling settings found for business ${appointment.businessId}`);
         return;
       }
 
@@ -287,9 +272,7 @@ export class RemindersService {
         `Rescheduling reminder scheduled for appointment ${appointmentId} in ${daysAfterCancellation} days`,
       );
     } catch (error) {
-      this.logger.error(
-        `Failed to schedule rescheduling reminder: ${error.message}`,
-      );
+      this.logger.error(`Failed to schedule rescheduling reminder: ${error.message}`);
       throw error;
     }
   }
@@ -322,7 +305,6 @@ export class RemindersService {
 
   async resendReminder(logId: number): Promise<ReminderLogEntity> {
     try {
-      // Fetch the reminder log with relationships
       const log = await this.reminderLogRepository.findOne({
         where: { id: logId },
         relations: ['appointment', 'clientContact'],
@@ -333,17 +315,13 @@ export class RemindersService {
         throw new Error(`Reminder log ${logId} not found`);
       }
 
-      // Validate that the reminder can be resent (status must be FAILED or PENDING)
       if (log.status !== ReminderStatus.FAILED && log.status !== ReminderStatus.PENDING) {
-        this.logger.warn(
-          `Cannot resend reminder ${logId} with status ${log.status}`,
-        );
+        this.logger.warn(`Cannot resend reminder ${logId} with status ${log.status}`);
         throw new Error(
           `Cannot resend reminder with status ${log.status}. Only FAILED and PENDING reminders can be resent.`,
         );
       }
 
-      // Determine the queue based on reminder type
       let queue: Queue;
       switch (log.type) {
         case ReminderType.CONFIRMATION:
@@ -362,22 +340,16 @@ export class RemindersService {
           throw new Error(`Unknown reminder type: ${log.type}`);
       }
 
-      // Re-queue the job
       const jobData = {
         appointmentId: log.appointmentId,
         logId: log.id,
-        hoursBeforeAppointment: 0, // For pre-appointment, this will be overridden
+        hoursBeforeAppointment: 0,
       };
 
-      await queue.add(
-        `${log.type.toLowerCase()}-${log.id}-resend`,
-        jobData,
-        {
-          delay: 1000, // 1 second delay to send immediately
-        },
-      );
+      await queue.add(`${log.type.toLowerCase()}-${log.id}-resend`, jobData, {
+        delay: 1000,
+      });
 
-      // Update log status to PENDING and clear error
       log.status = ReminderStatus.PENDING;
       log.error = null;
       log.sentAt = null;
@@ -385,15 +357,11 @@ export class RemindersService {
       log.scheduledAt = new Date();
       await this.reminderLogRepository.save(log);
 
-      this.logger.log(
-        `Reminder ${logId} queued for resend. Type: ${log.type}`,
-      );
+      this.logger.log(`Reminder ${logId} queued for resend. Type: ${log.type}`);
 
       return log;
     } catch (error) {
-      this.logger.error(
-        `Failed to resend reminder ${logId}: ${error.message}`,
-      );
+      this.logger.error(`Failed to resend reminder ${logId}: ${error.message}`);
       throw error;
     }
   }

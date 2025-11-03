@@ -13,14 +13,11 @@ export class ReminderSettingsService {
     private reminderSettingsRepository: Repository<ReminderSettingsEntity>,
   ) {}
 
-  async getOrCreateDefaultSettings(
-    businessId: number,
-  ): Promise<ReminderSettingsEntity[]> {
+  async getOrCreateDefaultSettings(businessId: number): Promise<ReminderSettingsEntity[]> {
     let settings = await this.reminderSettingsRepository.find({
       where: { businessId },
     });
 
-    // Create default settings if none exist
     if (settings.length === 0) {
       const defaultSettings = [
         {
@@ -34,7 +31,7 @@ export class ReminderSettingsService {
           businessId,
           type: ReminderType.PRE_APPOINTMENT,
           enabled: true,
-          hoursBeforeAppointment: [24, 2], // 24 hours and 2 hours before
+          hoursBeforeAppointment: [24, 2],
           timezone: 'America/Sao_Paulo',
         },
         {

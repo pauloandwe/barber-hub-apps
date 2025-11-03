@@ -1,13 +1,13 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 const ensureEnumType = async (
-    queryRunner: QueryRunner,
-    options: { schema?: string; name: string; values: string[] }
+  queryRunner: QueryRunner,
+  options: { schema?: string; name: string; values: string[] },
 ): Promise<void> => {
-    const schema = options.schema ?? "public";
-    const enumValues = options.values.map((value) => `'${value}'`).join(", ");
+  const schema = options.schema ?? 'public';
+  const enumValues = options.values.map((value) => `'${value}'`).join(', ');
 
-    await queryRunner.query(`
+  await queryRunner.query(`
         DO $$
         BEGIN
             IF NOT EXISTS (
@@ -25,35 +25,31 @@ const ensureEnumType = async (
 };
 
 export class CreateReminderTables1762095734668 implements MigrationInterface {
-    name = 'CreateReminderTables1762095734668'
+  name = 'CreateReminderTables1762095734668';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        // Start a clean transaction - don't drop/alter things that might not exist
-        // Just create new tables and types needed for reminders
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await ensureEnumType(queryRunner, {
+      name: 'reminder_settings_type_enum',
+      values: ['CONFIRMATION', 'PRE_APPOINTMENT', 'POST_APPOINTMENT', 'RESCHEDULING'],
+    });
 
-        await ensureEnumType(queryRunner, {
-            name: "reminder_settings_type_enum",
-            values: ["CONFIRMATION", "PRE_APPOINTMENT", "POST_APPOINTMENT", "RESCHEDULING"],
-        });
+    await ensureEnumType(queryRunner, {
+      name: 'reminder_templates_type_enum',
+      values: ['CONFIRMATION', 'PRE_APPOINTMENT', 'POST_APPOINTMENT', 'RESCHEDULING'],
+    });
 
-        await ensureEnumType(queryRunner, {
-            name: "reminder_templates_type_enum",
-            values: ["CONFIRMATION", "PRE_APPOINTMENT", "POST_APPOINTMENT", "RESCHEDULING"],
-        });
+    await ensureEnumType(queryRunner, {
+      name: 'reminder_logs_type_enum',
+      values: ['CONFIRMATION', 'PRE_APPOINTMENT', 'POST_APPOINTMENT', 'RESCHEDULING'],
+    });
 
-        await ensureEnumType(queryRunner, {
-            name: "reminder_logs_type_enum",
-            values: ["CONFIRMATION", "PRE_APPOINTMENT", "POST_APPOINTMENT", "RESCHEDULING"],
-        });
+    await ensureEnumType(queryRunner, {
+      name: 'reminder_logs_status_enum',
+      values: ['PENDING', 'SENT', 'DELIVERED', 'READ', 'FAILED'],
+    });
 
-        await ensureEnumType(queryRunner, {
-            name: "reminder_logs_status_enum",
-            values: ["PENDING", "SENT", "DELIVERED", "READ", "FAILED"],
-        });
-
-        // Create reminder_settings table if it doesn't exist
-        try {
-            await queryRunner.query(`
+    try {
+      await queryRunner.query(`
                 CREATE TABLE IF NOT EXISTS "reminder_settings" (
                     "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                     "businessId" integer NOT NULL,
@@ -66,13 +62,10 @@ export class CreateReminderTables1762095734668 implements MigrationInterface {
                     CONSTRAINT "PK_8967b53d42011ef8628dc889979" PRIMARY KEY ("id")
                 )
             `);
-        } catch (e) {
-            // Table might already exist, continue
-        }
+    } catch (e) {}
 
-        // Create reminder_templates table if it doesn't exist
-        try {
-            await queryRunner.query(`
+    try {
+      await queryRunner.query(`
                 CREATE TABLE IF NOT EXISTS "reminder_templates" (
                     "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                     "businessId" integer NOT NULL,
@@ -85,13 +78,10 @@ export class CreateReminderTables1762095734668 implements MigrationInterface {
                     CONSTRAINT "PK_d4e1f6b10a440630468fcb0a451" PRIMARY KEY ("id")
                 )
             `);
-        } catch (e) {
-            // Table might already exist, continue
-        }
+    } catch (e) {}
 
-        // Create reminder_logs table if it doesn't exist
-        try {
-            await queryRunner.query(`
+    try {
+      await queryRunner.query(`
                 CREATE TABLE IF NOT EXISTS "reminder_logs" (
                     "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                     "appointmentId" integer NOT NULL,
@@ -108,13 +98,10 @@ export class CreateReminderTables1762095734668 implements MigrationInterface {
                     CONSTRAINT "PK_b829028c9baa35c1f66188c186d" PRIMARY KEY ("id")
                 )
             `);
-        } catch (e) {
-            // Table might already exist, continue
-        }
+    } catch (e) {}
 
-        // Create client_preferences table if it doesn't exist
-        try {
-            await queryRunner.query(`
+    try {
+      await queryRunner.query(`
                 CREATE TABLE IF NOT EXISTS "client_preferences" (
                     "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
                     "clientContactId" integer,
@@ -127,178 +114,206 @@ export class CreateReminderTables1762095734668 implements MigrationInterface {
                     CONSTRAINT "PK_0d06e691326d586481f28447cfb" PRIMARY KEY ("id")
                 )
             `);
-        } catch (e) {
-            // Table might already exist, continue
-        }
+    } catch (e) {}
 
-        // Update existing tables - use IF EXISTS for safety
-        try {
-            await queryRunner.query(`ALTER TABLE "unavailability" ALTER COLUMN "created_at" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "unavailability" ALTER COLUMN "created_at" SET NOT NULL`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "unavailability" ALTER COLUMN "created_at" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "unavailability" ALTER COLUMN "created_at" SET DEFAULT now()`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "professional_working_hours" ALTER COLUMN "closed" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "professional_working_hours" ALTER COLUMN "closed" SET NOT NULL`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "professionals" ALTER COLUMN "active" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "professionals" ALTER COLUMN "active" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "professionals" ALTER COLUMN "createdAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "professionals" ALTER COLUMN "createdAt" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "professionals" ALTER COLUMN "createdAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "professionals" ALTER COLUMN "createdAt" SET DEFAULT now()`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "profiles" ALTER COLUMN "role" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "profiles" ALTER COLUMN "role" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "profiles" ALTER COLUMN "createdAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "profiles" ALTER COLUMN "createdAt" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "profiles" ALTER COLUMN "createdAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "profiles" ALTER COLUMN "createdAt" SET DEFAULT now()`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "profiles" ALTER COLUMN "updatedAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "profiles" ALTER COLUMN "updatedAt" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "profiles" ALTER COLUMN "updatedAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "profiles" ALTER COLUMN "updatedAt" SET DEFAULT now()`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "client_contacts" ALTER COLUMN "createdAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "client_contacts" ALTER COLUMN "createdAt" SET NOT NULL`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "client_contacts" ALTER COLUMN "createdAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "client_contacts" ALTER COLUMN "createdAt" SET DEFAULT now()`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "client_contacts" ALTER COLUMN "updatedAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "client_contacts" ALTER COLUMN "updatedAt" SET NOT NULL`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "client_contacts" ALTER COLUMN "updatedAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "client_contacts" ALTER COLUMN "updatedAt" SET DEFAULT now()`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "appointments" ALTER COLUMN "serviceId" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "appointments" ALTER COLUMN "serviceId" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "appointments" ALTER COLUMN "professionalId" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "appointments" ALTER COLUMN "professionalId" SET NOT NULL`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "appointments" ALTER COLUMN "status" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "appointments" ALTER COLUMN "status" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "appointments" ALTER COLUMN "createdAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "appointments" ALTER COLUMN "createdAt" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "appointments" ALTER COLUMN "createdAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "appointments" ALTER COLUMN "createdAt" SET DEFAULT now()`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "appointments" ALTER COLUMN "updatedAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "appointments" ALTER COLUMN "updatedAt" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "appointments" ALTER COLUMN "updatedAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "appointments" ALTER COLUMN "updatedAt" SET DEFAULT now()`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "services" ALTER COLUMN "active" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "services" ALTER COLUMN "active" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "services" ALTER COLUMN "createdAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "services" ALTER COLUMN "createdAt" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "services" ALTER COLUMN "createdAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "services" ALTER COLUMN "createdAt" SET DEFAULT now()`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "reminderHours" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "reminderHours" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "enableReminders" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "enableReminders" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "allowCancellation" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "settings" ALTER COLUMN "allowCancellation" SET NOT NULL`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "cancellationDeadlineHours" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "settings" ALTER COLUMN "cancellationDeadlineHours" SET NOT NULL`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "allowReschedule" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "allowReschedule" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "rescheduleDeadlineHours" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "settings" ALTER COLUMN "rescheduleDeadlineHours" SET NOT NULL`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "autoConfirmAppointments" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "settings" ALTER COLUMN "autoConfirmAppointments" SET NOT NULL`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "createdAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "createdAt" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "createdAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "createdAt" SET DEFAULT now()`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "updatedAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "updatedAt" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "updatedAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "settings" ALTER COLUMN "updatedAt" SET DEFAULT now()`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "businesses" ALTER COLUMN "createdAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "businesses" ALTER COLUMN "createdAt" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "businesses" ALTER COLUMN "createdAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "businesses" ALTER COLUMN "createdAt" SET DEFAULT now()`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "businesses" ALTER COLUMN "updatedAt" SET NOT NULL`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(`ALTER TABLE "businesses" ALTER COLUMN "updatedAt" SET NOT NULL`);
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "businesses" ALTER COLUMN "updatedAt" SET DEFAULT now()`);
-        } catch (e) { }
+    try {
+      await queryRunner.query(
+        `ALTER TABLE "businesses" ALTER COLUMN "updatedAt" SET DEFAULT now()`,
+      );
+    } catch (e) {}
 
-        try {
-            await queryRunner.query(`ALTER TABLE "working_hours" ALTER COLUMN "closed" SET NOT NULL`);
-        } catch (e) { }
-    }
+    try {
+      await queryRunner.query(`ALTER TABLE "working_hours" ALTER COLUMN "closed" SET NOT NULL`);
+    } catch (e) {}
+  }
 
-    public async down(_queryRunner: QueryRunner): Promise<void> {
-        // Reverting would drop the reminder tables - but we'll keep them
-        // This is a data-adding migration, not a destructive one
-    }
+  public async down(_queryRunner: QueryRunner): Promise<void> {}
 }

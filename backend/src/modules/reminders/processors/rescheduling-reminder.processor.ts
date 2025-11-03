@@ -54,7 +54,6 @@ export class ReschedulingReminderProcessor extends WorkerHost {
     );
 
     try {
-      // Busca informações do cliente
       const clientContact = await this.clientContactRepository.findOne({
         where: { id: clientContactId },
       });
@@ -70,7 +69,6 @@ export class ReschedulingReminderProcessor extends WorkerHost {
         return;
       }
 
-      // Não envia se não tiver telefone
       if (!clientContact.phone) {
         this.logger.warn(`No phone found for client contact ${clientContactId}`);
         await this.reminderService.updateReminderLog(
@@ -82,7 +80,6 @@ export class ReschedulingReminderProcessor extends WorkerHost {
         return;
       }
 
-      // Busca informações do negócio
       const business = await this.businessRepository.findOne({
         where: { id: businessId },
       });
@@ -98,7 +95,6 @@ export class ReschedulingReminderProcessor extends WorkerHost {
         return;
       }
 
-      // Busca template de reagendamento
       const template = await this.reminderTemplateRepository.findOne({
         where: {
           businessId,
@@ -118,7 +114,6 @@ export class ReschedulingReminderProcessor extends WorkerHost {
         return;
       }
 
-      // Renderiza mensagem com variáveis (para reagendamento, não há data/hora específica)
       const message = this.renderMessage(template.message, {
         clientName: clientContact.name,
         appointmentDate: 'em breve',
@@ -127,7 +122,6 @@ export class ReschedulingReminderProcessor extends WorkerHost {
         serviceName: 'Serviço',
       });
 
-      // Envia via WhatsApp
       const response = await this.sendReminderToWhatsApp({
         businessPhone: business.phone,
         clientPhone: clientContact.phone,
@@ -202,15 +196,11 @@ export class ReschedulingReminderProcessor extends WorkerHost {
 
   @OnWorkerEvent('completed')
   onCompleted(job: Job<ReschedulingReminderJob>) {
-    this.logger.debug(
-      `Rescheduling reminder job ${job.id} completed successfully`,
-    );
+    this.logger.debug(`Rescheduling reminder job ${job.id} completed successfully`);
   }
 
   @OnWorkerEvent('failed')
   onFailed(job: Job<ReschedulingReminderJob>, error: Error) {
-    this.logger.error(
-      `Rescheduling reminder job ${job.id} failed: ${error.message}`,
-    );
+    this.logger.error(`Rescheduling reminder job ${job.id} failed: ${error.message}`);
   }
 }

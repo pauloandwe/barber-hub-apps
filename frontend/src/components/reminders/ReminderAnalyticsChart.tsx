@@ -15,7 +15,14 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { TrendingUp, Users, MessageSquare, Zap, DollarSign, Activity } from "lucide-react";
+import {
+  TrendingUp,
+  Users,
+  MessageSquare,
+  Zap,
+  DollarSign,
+  Activity,
+} from "lucide-react";
 
 interface ReminderAnalyticsChartProps {
   analytics: ReminderAnalytics;
@@ -29,10 +36,16 @@ const COLORS = {
   pending: "#f59e0b",
 };
 
-export function ReminderAnalyticsChart({ analytics }: ReminderAnalyticsChartProps) {
+export function ReminderAnalyticsChart({
+  analytics,
+}: ReminderAnalyticsChartProps) {
   const statusData = [
     { name: "Enviados", value: analytics.sentReminders, fill: COLORS.sent },
-    { name: "Entregues", value: analytics.deliveredReminders, fill: COLORS.delivered },
+    {
+      name: "Entregues",
+      value: analytics.deliveredReminders,
+      fill: COLORS.delivered,
+    },
     { name: "Lidos", value: analytics.readReminders, fill: COLORS.read },
     { name: "Falhados", value: analytics.failedReminders, fill: COLORS.failed },
   ];
@@ -81,14 +94,16 @@ export function ReminderAnalyticsChart({ analytics }: ReminderAnalyticsChartProp
 
   return (
     <div className="space-y-6">
-      {/* KPIs */}
+      {}
       <div className="grid gap-4 md:grid-cols-4">
         {kpis.map((kpi) => (
           <Card key={kpi.label}>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{kpi.label}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    {kpi.label}
+                  </p>
                   <p className="mt-2 text-3xl font-bold text-gray-900">
                     {kpi.value}
                   </p>
@@ -102,9 +117,9 @@ export function ReminderAnalyticsChart({ analytics }: ReminderAnalyticsChartProp
         ))}
       </div>
 
-      {/* Status Distribution & Type Distribution */}
+      {}
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Status Pie Chart */}
+        {}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Distribuição por Status</CardTitle>
@@ -138,7 +153,7 @@ export function ReminderAnalyticsChart({ analytics }: ReminderAnalyticsChartProp
           </CardContent>
         </Card>
 
-        {/* Type Distribution Bar Chart */}
+        {}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Lembretes por Tipo</CardTitle>
@@ -169,13 +184,16 @@ export function ReminderAnalyticsChart({ analytics }: ReminderAnalyticsChartProp
         </Card>
       </div>
 
-      {/* Last 7 Days Trend */}
+      {}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Tendência dos Últimos 7 Dias</CardTitle>
+          <CardTitle className="text-lg">
+            Tendência dos Últimos 7 Dias
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {last7DaysData.length > 0 && last7DaysData.some((d) => d.total > 0) ? (
+          {last7DaysData.length > 0 &&
+          last7DaysData.some((d) => d.total > 0) ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={last7DaysData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -217,7 +235,7 @@ export function ReminderAnalyticsChart({ analytics }: ReminderAnalyticsChartProp
         </CardContent>
       </Card>
 
-      {/* Detailed Stats */}
+      {}
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -226,15 +244,40 @@ export function ReminderAnalyticsChart({ analytics }: ReminderAnalyticsChartProp
           <CardContent>
             <div className="space-y-3">
               {[
-                { label: "Enviados", value: analytics.sentReminders, color: "bg-blue-100 text-blue-700" },
-                { label: "Entregues", value: analytics.deliveredReminders, color: "bg-green-100 text-green-700" },
-                { label: "Lidos", value: analytics.readReminders, color: "bg-purple-100 text-purple-700" },
-                { label: "Falhados", value: analytics.failedReminders, color: "bg-red-100 text-red-700" },
-                { label: "Pendentes", value: analytics.totalReminders - analytics.sentReminders, color: "bg-yellow-100 text-yellow-700" },
+                {
+                  label: "Enviados",
+                  value: analytics.sentReminders,
+                  color: "bg-blue-100 text-blue-700",
+                },
+                {
+                  label: "Entregues",
+                  value: analytics.deliveredReminders,
+                  color: "bg-green-100 text-green-700",
+                },
+                {
+                  label: "Lidos",
+                  value: analytics.readReminders,
+                  color: "bg-purple-100 text-purple-700",
+                },
+                {
+                  label: "Falhados",
+                  value: analytics.failedReminders,
+                  color: "bg-red-100 text-red-700",
+                },
+                {
+                  label: "Pendentes",
+                  value: analytics.totalReminders - analytics.sentReminders,
+                  color: "bg-yellow-100 text-yellow-700",
+                },
               ].map((stat) => (
-                <div key={stat.label} className="flex items-center justify-between">
+                <div
+                  key={stat.label}
+                  className="flex items-center justify-between"
+                >
                   <span className="text-sm text-gray-600">{stat.label}</span>
-                  <span className={`rounded-full px-3 py-1 text-sm font-bold ${stat.color}`}>
+                  <span
+                    className={`rounded-full px-3 py-1 text-sm font-bold ${stat.color}`}
+                  >
                     {stat.value}
                   </span>
                 </div>
@@ -256,7 +299,9 @@ export function ReminderAnalyticsChart({ analytics }: ReminderAnalyticsChartProp
               ].map((metric) => (
                 <div key={metric.label} className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">{metric.label}</span>
+                    <span className="text-sm text-gray-600">
+                      {metric.label}
+                    </span>
                     <span className="text-lg font-bold text-gray-900">
                       {metric.value.toFixed(1)}%
                     </span>
