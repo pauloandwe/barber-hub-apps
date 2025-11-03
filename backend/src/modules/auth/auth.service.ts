@@ -3,7 +3,12 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { BusinessEntity, ProfileEntity, UserRole } from 'src/database/entities';
+import {
+  BusinessEntity,
+  ProfileEntity,
+  UserRole,
+  ClientContactEntity,
+} from 'src/database/entities';
 import { BusinessResponseDto, BusinessDataDto } from 'src/common/dtos/business-response.dto';
 import { RegisterDto, LoginDto, AuthResponseDto, UserProfileDto } from 'src/common/dtos/auth.dto';
 
@@ -14,6 +19,8 @@ export class AuthService {
     private businessRepository: Repository<BusinessEntity>,
     @InjectRepository(ProfileEntity)
     private profileRepository: Repository<ProfileEntity>,
+    @InjectRepository(ClientContactEntity)
+    private clientContactRepository: Repository<ClientContactEntity>,
     private jwtService: JwtService,
   ) {}
 
@@ -36,6 +43,19 @@ export class AuthService {
       },
     });
 
+    let clientName: string | null = null;
+    try {
+      const clientContact = await this.clientContactRepository.findOne({
+        where: {
+          businessId: business.id,
+          phone,
+        },
+      });
+      clientName = clientContact?.name || null;
+    } catch (err) {
+      console.warn('[AuthService] Failed to fetch client name:', err);
+    }
+
     const tokenPayload = {
       id: profile?.id ?? business.id,
       email: profile?.email ?? `${business.phone}@barberhub.local`,
@@ -46,7 +66,7 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(tokenPayload);
 
-    const businessData = this.formatBusinessResponse(business, accessToken);
+    const businessData = this.formatBusinessResponse(business, accessToken, clientName);
 
     return {
       data: {
@@ -143,13 +163,18 @@ export class AuthService {
     };
   }
 
-  private formatBusinessResponse(business: BusinessEntity, accessToken?: string): BusinessDataDto {
+  private formatBusinessResponse(
+    business: BusinessEntity,
+    accessToken?: string,
+    clientName?: string | null,
+  ): BusinessDataDto {
     return {
       id: business?.id,
       token: accessToken ?? business?.token,
       name: business?.name,
       phone: business?.phone,
       type: business?.type,
+      clientName,
       services:
         business?.services?.map((service) => ({
           id: service.id.toString(),

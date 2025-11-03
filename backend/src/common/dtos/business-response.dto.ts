@@ -25,6 +25,7 @@ export class BusinessDataDto {
   type: string;
   email?: string;
   address?: string;
+  clientName?: string | null;
   services: ServiceDto[];
   settings: SettingsDto;
 }
