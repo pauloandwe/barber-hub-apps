@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { remindersAPI, ReminderType, ReminderSettings, ReminderTemplate, ReminderLog, ReminderAnalytics } from "@/api/reminders";
@@ -38,6 +38,13 @@ import { ReminderAnalyticsChart } from "@/components/reminders/ReminderAnalytics
 export function RemindersSettings() {
   const navigate = useNavigate();
   const { businessId, isLoading: roleLoading } = useUserRole();
+  const numericBusinessId = useMemo(() => {
+    if (typeof businessId === "string") {
+      const parsed = Number.parseInt(businessId, 10);
+      return Number.isNaN(parsed) ? null : parsed;
+    }
+    return typeof businessId === "number" ? businessId : null;
+  }, [businessId]);
 
   // State Management
   const [settings, setSettings] = useState<ReminderSettings[]>([]);
@@ -96,11 +103,10 @@ export function RemindersSettings() {
   };
 
   const handleRefresh = async () => {
-    if (!businessId) return;
+    if (numericBusinessId == null) return;
     try {
       setIsRefreshing(true);
-      const businessId = typeof businessId === "string" ? parseInt(businessId, 10) : businessId;
-      await fetchAllData(businessId);
+      await fetchAllData(numericBusinessId);
       toast.success("Dados atualizados com sucesso");
     } catch (error) {
       toast.error("Erro ao atualizar dados");
@@ -117,9 +123,8 @@ export function RemindersSettings() {
         setSettings(settings.map(s => s.id === updated.id ? updated : s));
         toast.success("Configuração atualizada com sucesso");
       } else {
-        if (!businessId) return;
-        const businessId = typeof businessId === "string" ? parseInt(businessId, 10) : businessId;
-        const created = await remindersAPI.createSettings(businessId, data);
+        if (numericBusinessId == null) return;
+        const created = await remindersAPI.createSettings(numericBusinessId, data);
         setSettings([...settings, created]);
         toast.success("Configuração criada com sucesso");
       }
@@ -160,9 +165,8 @@ export function RemindersSettings() {
         setTemplates(templates.map(t => t.id === updated.id ? updated : t));
         toast.success("Template atualizado com sucesso");
       } else {
-        if (!businessId) return;
-        const businessId = typeof businessId === "string" ? parseInt(businessId, 10) : businessId;
-        const created = await remindersAPI.createTemplate(businessId, data);
+        if (numericBusinessId == null) return;
+        const created = await remindersAPI.createTemplate(numericBusinessId, data);
         setTemplates([...templates, created]);
         toast.success("Template criado com sucesso");
       }
@@ -511,12 +515,10 @@ export function RemindersSettings() {
                 logs={logs}
                 onResendSuccess={() => {
                   // Refetch logs after successful resend
-                  if (businessId) {
-                    const businessId = typeof businessId === "string" ? parseInt(businessId, 10) : businessId;
-                    remindersAPI.getLogs(businessId, logsPage, logsPerPage)
-                      .then((data) => setLogs(data.data))
-                      .catch(() => toast.error("Erro ao atualizar histórico"));
-                  }
+                  if (numericBusinessId == null) return;
+                  remindersAPI.getLogs(numericBusinessId, logsPage, logsPerPage)
+                    .then((data) => setLogs(data.data))
+                    .catch(() => toast.error("Erro ao atualizar histórico"));
                 }}
               />
             )}
