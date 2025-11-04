@@ -2,13 +2,19 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProfessionalEntity } from '../../database/entities/professional.entity';
-import { CreateProfessionalDto, UpdateProfessionalDto, ProfessionalResponseDto } from '../../common/dtos/professional.dto';
+import {
+  CreateProfessionalDto,
+  UpdateProfessionalDto,
+  ProfessionalResponseDto,
+} from '../../common/dtos/professional.dto';
+import { ProfessionalWorkingHoursService } from '../professional-working-hours/professional-working-hours.service';
 
 @Injectable()
 export class ProfessionalsService {
   constructor(
     @InjectRepository(ProfessionalEntity)
     private readonly professionalRepository: Repository<ProfessionalEntity>,
+    private readonly workingHoursService: ProfessionalWorkingHoursService,
   ) {}
 
   async findAll({
@@ -66,7 +72,11 @@ export class ProfessionalsService {
       active: createBarberDto.active !== undefined ? createBarberDto.active : true,
     });
 
-    return this.professionalRepository.save(professional);
+    const savedProfessional = await this.professionalRepository.save(professional);
+
+    await this.workingHoursService.initializeZeroedSchedule(savedProfessional.id);
+
+    return savedProfessional;
   }
 
   async update(id: number, updateBarberDto: UpdateProfessionalDto): Promise<ProfessionalEntity> {

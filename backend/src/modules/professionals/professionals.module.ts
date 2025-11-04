@@ -7,10 +7,12 @@ import { ProfessionalsController } from './professionals.controller';
 import { ProfessionalEntity } from '../../database/entities/professional.entity';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { ProfessionalWorkingHoursModule } from '../professional-working-hours/professional-working-hours.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ProfessionalEntity]),
+    ProfessionalWorkingHoursModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

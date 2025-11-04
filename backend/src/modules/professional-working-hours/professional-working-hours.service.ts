@@ -51,6 +51,17 @@ export class ProfessionalWorkingHoursService {
     await this.workingHoursRepository.delete({ professionalId });
   }
 
+  async initializeZeroedSchedule(professionalId: number): Promise<ProfessionalWorkingHoursEntity[]> {
+    await this.ensureProfessionalExists(professionalId);
+
+    const zerodItems: ProfessionalWorkingHourItemDto[] = Array.from({ length: 7 }, (_, index) => ({
+      dayOfWeek: index,
+      closed: true,
+    }));
+
+    return this.replaceForProfessional(professionalId, zerodItems);
+  }
+
   private async ensureProfessionalExists(professionalId: number): Promise<void> {
     const professional = await this.professionalRepository.findOne({ where: { id: professionalId } });
     if (!professional) {

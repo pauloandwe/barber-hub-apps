@@ -324,11 +324,12 @@ export class AppointmentsService {
         throw new NotFoundException('Professional not found');
       }
     } else if (
-      createAppointmentDto.assignmentStrategy ===
-      ProfessionalAssignmentStrategy.LEAST_APPOINTMENTS
+      createAppointmentDto.assignmentStrategy === ProfessionalAssignmentStrategy.LEAST_APPOINTMENTS
     ) {
       const professional = await this.findProfessionalWithLeastAppointments(
         createAppointmentDto.businessId,
+        startDate,
+        endDate,
       );
 
       if (!professional) {
@@ -670,32 +671,78 @@ export class AppointmentsService {
 
   private async findProfessionalWithLeastAppointments(
     businessId: number,
+    startDate: Date,
+    endDate: Date,
   ): Promise<ProfessionalEntity | null> {
     const professionals = await this.professionalRepository.find({
       where: {
         businessId,
         active: true,
       },
+      relations: ['workingHours'],
     });
 
     if (professionals.length === 0) {
       return null;
     }
 
-    // Count appointments for each professional
+    const dayOfWeek = startDate.getDay();
+    const startTime = startDate.getHours() * 60 + startDate.getMinutes(); // Convert to minutes for easier comparison
+    const endTime = endDate.getHours() * 60 + endDate.getMinutes();
+
+    const availableProfessionals = professionals.filter((professional) => {
+      const workingHourForDay = professional.workingHours?.find((wh) => wh.dayOfWeek === dayOfWeek);
+
+      if (!workingHourForDay || workingHourForDay.closed) {
+        return false;
+      }
+
+      if (!workingHourForDay.openTime || !workingHourForDay.closeTime) {
+        return false;
+      }
+
+      const [openHour, openMinute] = workingHourForDay.openTime.split(':').map(Number);
+      const [closeHour, closeMinute] = workingHourForDay.closeTime.split(':').map(Number);
+      const openTimeInMinutes = openHour * 60 + openMinute;
+      const closeTimeInMinutes = closeHour * 60 + closeMinute;
+
+      if (startTime < openTimeInMinutes || endTime > closeTimeInMinutes) {
+        return false;
+      }
+
+      if (workingHourForDay.breakStart && workingHourForDay.breakEnd) {
+        const [breakStartHour, breakStartMinute] = workingHourForDay.breakStart
+          .split(':')
+          .map(Number);
+        const [breakEndHour, breakEndMinute] = workingHourForDay.breakEnd.split(':').map(Number);
+        const breakStartInMinutes = breakStartHour * 60 + breakStartMinute;
+        const breakEndInMinutes = breakEndHour * 60 + breakEndMinute;
+
+        if (startTime < breakEndInMinutes && endTime > breakStartInMinutes) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    if (availableProfessionals.length === 0) {
+      return null;
+    }
+
     const professionalCounts = await Promise.all(
-      professionals.map(async (professional) => ({
+      availableProfessionals.map(async (professional) => ({
         professional,
         count: await this.appointmentRepository.count({
           where: {
             professionalId: professional.id,
             status: In([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED]),
+            startDate: startDate,
           },
         }),
       })),
     );
 
-    // Find professional with least appointments
     const minCount = Math.min(...professionalCounts.map((pc) => pc.count));
     return professionalCounts.find((pc) => pc.count === minCount)?.professional || null;
   }

@@ -40,8 +40,11 @@ export function ProfessionalSelector({
     try {
       const businessIdNum = parseInt(businessId, 10);
       const data = await professionalsAPI.getAll(businessIdNum);
+      const activeProfessionals = (Array.isArray(data) ? data : []).filter(
+        (professional) => professional && professional.active !== false
+      );
       setProfessionals(
-        data.map((b: any) => ({
+        activeProfessionals.map((b: any) => ({
           id: b.id.toString(),
           name: b.name,
         }))

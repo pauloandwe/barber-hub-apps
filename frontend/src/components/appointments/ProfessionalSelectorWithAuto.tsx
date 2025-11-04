@@ -48,8 +48,11 @@ export function ProfessionalSelectorWithAuto({
     try {
       const businessIdNum = parseInt(businessId, 10);
       const data = await professionalsAPI.getAll(businessIdNum);
+      const activeProfessionals = (Array.isArray(data) ? data : []).filter(
+        (professional) => professional && professional.active !== false
+      );
       setProfessionals(
-        data.map((b: any) => ({
+        activeProfessionals.map((b: any) => ({
           id: b.id.toString(),
           name: b.name,
         }))
@@ -146,7 +149,8 @@ export function ProfessionalSelectorWithAuto({
       {value.strategy === ProfessionalAssignmentStrategy.LEAST_APPOINTMENTS && (
         <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
           <p className="text-sm text-blue-800">
-            ℹ️ O profissional será automaticamente atribuído para o profissional com menos agendamentos.
+            ℹ️ O profissional será automaticamente atribuído para o profissional
+            com menos agendamentos.
           </p>
         </div>
       )}
