@@ -48,14 +48,12 @@ export class ClientsService {
     });
 
     if (!client) {
-      // Create new client contact
       client = this.clientContactRepository.create({
         businessId,
         phone,
         name: name.trim(),
       });
     } else {
-      // Update existing client
       client.name = name.trim();
     }
 
@@ -63,9 +61,7 @@ export class ClientsService {
     return this.formatClientResponse(savedClient);
   }
 
-  async getAllClientsByBusiness(
-    businessId: number,
-  ): Promise<ClientContactResponseDto[]> {
+  async getAllClientsByBusiness(businessId: number): Promise<ClientContactResponseDto[]> {
     const clients = await this.clientContactRepository.find({
       where: { businessId },
       order: { updatedAt: 'DESC' },
@@ -86,9 +82,7 @@ export class ClientsService {
     await this.clientContactRepository.remove(client);
   }
 
-  private formatClientResponse(
-    client: ClientContactEntity,
-  ): ClientContactResponseDto {
+  private formatClientResponse(client: ClientContactEntity): ClientContactResponseDto {
     return {
       id: client.id,
       businessId: client.businessId,

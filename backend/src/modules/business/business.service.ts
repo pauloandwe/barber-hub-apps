@@ -302,17 +302,14 @@ export class BusinessService {
       return [];
     }
 
-    // Map to store unique days: date -> AvailableDay
     const dayMap = new Map<string, AvailableDay>();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // For each date, check if ANY professional has available slots
     for (let i = 0; i < days; i++) {
       const checkDate = new Date(today);
       checkDate.setDate(checkDate.getDate() + i);
 
-      // Skip Sundays
       if (checkDate.getDay() === 0) {
         continue;
       }
@@ -320,7 +317,6 @@ export class BusinessService {
       const dateStr = this.formatDate(checkDate);
       let totalSlotsCount = 0;
 
-      // Check availability for all professionals on this date
       for (const professional of professionals) {
         try {
           const availabilityResponse = await this.findProfessionalSlotsByPhone(
@@ -335,12 +331,10 @@ export class BusinessService {
           const slotsCount = availabilityResponse.professional.slots.length;
           totalSlotsCount += slotsCount;
         } catch (error) {
-          // If any professional has no slots, continue to next
           continue;
         }
       }
 
-      // Only add day if at least one professional has available slots
       if (totalSlotsCount > 0) {
         const dayOfWeek = checkDate.getDay();
         const displayDate = this.formatDisplayDate(checkDate, dayOfWeek);

@@ -305,7 +305,6 @@ export class AppointmentsService {
     let professionalId = createAppointmentDto.professionalId;
     let assignedByStrategy = false;
 
-    // Handle professional assignment based on strategy
     if (createAppointmentDto.assignmentStrategy === ProfessionalAssignmentStrategy.MANUAL) {
       if (!professionalId) {
         throw new BadRequestException(
@@ -687,7 +686,7 @@ export class AppointmentsService {
     }
 
     const dayOfWeek = startDate.getDay();
-    const startTime = startDate.getHours() * 60 + startDate.getMinutes(); // Convert to minutes for easier comparison
+    const startTime = startDate.getHours() * 60 + startDate.getMinutes();
     const endTime = endDate.getHours() * 60 + endDate.getMinutes();
 
     const availableProfessionals = professionals.filter((professional) => {

@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Coffee } from "lucide-react";
 import { DialogProps } from "@/types/shared.types";
 
 interface ProfessionalScheduleDialogProps extends DialogProps {
@@ -311,86 +311,135 @@ export function ProfessionalScheduleDialog({
             {schedule.map((entry) => (
               <div
                 key={entry.dayOfWeek}
-                className="grid grid-cols-12 gap-3 items-center border rounded-lg p-3"
+                className="border rounded-lg overflow-hidden bg-white"
               >
-                <div className="col-span-3">
-                  <Label className="font-medium">{entry.label}</Label>
+                <div className="grid grid-cols-12 gap-3 items-center p-4 border-b bg-gray-50">
+                  <div className="col-span-3">
+                    <Label className="font-semibold text-base">
+                      {entry.label}
+                    </Label>
+                  </div>
+                  <div className="col-span-3 flex items-center gap-2">
+                    <Switch
+                      id={`day-${entry.dayOfWeek}`}
+                      checked={!entry.closed}
+                      onCheckedChange={(checked) =>
+                        handleToggleDay(entry.dayOfWeek, !checked)
+                      }
+                      disabled={isSaving || !professional}
+                    />
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {entry.closed ? "Fechado" : "Aberto"}
+                    </span>
+                  </div>
+                  <div className="col-span-3 flex gap-2">
+                    <div className="flex-1">
+                      <Label
+                        htmlFor={`open-${entry.dayOfWeek}`}
+                        className="text-xs text-muted-foreground mb-1 block"
+                      >
+                        Abertura
+                      </Label>
+                      <Input
+                        id={`open-${entry.dayOfWeek}`}
+                        type="time"
+                        value={entry.openTime}
+                        disabled={entry.closed || isSaving || !professional}
+                        onChange={(event) =>
+                          handleTimeChange(
+                            entry.dayOfWeek,
+                            "openTime",
+                            event.target.value
+                          )
+                        }
+                        step="300"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <Label
+                        htmlFor={`close-${entry.dayOfWeek}`}
+                        className="text-xs text-muted-foreground mb-1 block"
+                      >
+                        Fechamento
+                      </Label>
+                      <Input
+                        id={`close-${entry.dayOfWeek}`}
+                        type="time"
+                        value={entry.closeTime}
+                        disabled={entry.closed || isSaving || !professional}
+                        onChange={(event) =>
+                          handleTimeChange(
+                            entry.dayOfWeek,
+                            "closeTime",
+                            event.target.value
+                          )
+                        }
+                        step="300"
+                      />
+                    </div>
+                  </div>
+                  <div className="col-span-3"></div>
                 </div>
-                <div className="col-span-2 flex items-center gap-2">
-                  <Switch
-                    id={`day-${entry.dayOfWeek}`}
-                    checked={!entry.closed}
-                    onCheckedChange={(checked) =>
-                      handleToggleDay(entry.dayOfWeek, !checked)
-                    }
-                    disabled={isSaving || !professional}
-                  />
-                  <span className="text-sm text-muted-foreground">
-                    {entry.closed ? "Fechado" : "Aberto"}
-                  </span>
-                </div>
-                <div className="col-span-2">
-                  <Input
-                    type="time"
-                    value={entry.openTime}
-                    disabled={entry.closed || isSaving || !professional}
-                    onChange={(event) =>
-                      handleTimeChange(
-                        entry.dayOfWeek,
-                        "openTime",
-                        event.target.value
-                      )
-                    }
-                    step="300"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <Input
-                    type="time"
-                    value={entry.closeTime}
-                    disabled={entry.closed || isSaving || !professional}
-                    onChange={(event) =>
-                      handleTimeChange(
-                        entry.dayOfWeek,
-                        "closeTime",
-                        event.target.value
-                      )
-                    }
-                    step="300"
-                  />
-                </div>
-                <div className="col-span-1">
-                  <Input
-                    type="time"
-                    value={entry.breakStart}
-                    placeholder="Break start"
-                    disabled={entry.closed || isSaving || !professional}
-                    onChange={(event) =>
-                      handleTimeChange(
-                        entry.dayOfWeek,
-                        "breakStart",
-                        event.target.value
-                      )
-                    }
-                    step="300"
-                  />
-                </div>
-                <div className="col-span-1">
-                  <Input
-                    type="time"
-                    value={entry.breakEnd}
-                    placeholder="Break end"
-                    disabled={entry.closed || isSaving || !professional}
-                    onChange={(event) =>
-                      handleTimeChange(
-                        entry.dayOfWeek,
-                        "breakEnd",
-                        event.target.value
-                      )
-                    }
-                    step="300"
-                  />
-                </div>
+
+                {!entry.closed && (
+                  <div className="p-4 bg-blue-50">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Coffee className="h-5 w-5 text-blue-600" />
+                      <Label className="font-semibold text-sm text-blue-900">
+                        Intervalo de Pausa
+                      </Label>
+                      <span className="text-xs text-blue-700 ml-auto">
+                        (Opcional)
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label
+                          htmlFor={`break-start-${entry.dayOfWeek}`}
+                          className="text-xs text-muted-foreground mb-1 block"
+                        >
+                          Início da Pausa
+                        </Label>
+                        <Input
+                          id={`break-start-${entry.dayOfWeek}`}
+                          type="time"
+                          value={entry.breakStart}
+                          disabled={isSaving || !professional}
+                          onChange={(event) =>
+                            handleTimeChange(
+                              entry.dayOfWeek,
+                              "breakStart",
+                              event.target.value
+                            )
+                          }
+                          step="300"
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor={`break-end-${entry.dayOfWeek}`}
+                          className="text-xs text-muted-foreground mb-1 block"
+                        >
+                          Fim da Pausa
+                        </Label>
+                        <Input
+                          id={`break-end-${entry.dayOfWeek}`}
+                          type="time"
+                          value={entry.breakEnd}
+                          disabled={isSaving || !professional}
+                          onChange={(event) =>
+                            handleTimeChange(
+                              entry.dayOfWeek,
+                              "breakEnd",
+                              event.target.value
+                            )
+                          }
+                          step="300"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
