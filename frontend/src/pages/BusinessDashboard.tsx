@@ -52,14 +52,17 @@ export function BusinessDashboard() {
     (Business & { nome?: string }) | null
   >(null);
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
-  const [isProfessionalDialogOpen, setIsProfessionalDialogOpen] = useState(false);
+  const [isProfessionalDialogOpen, setIsProfessionalDialogOpen] =
+    useState(false);
   const [serviceDialogData, setServiceDialogData] =
     useState<ServiceModel | null>(null);
-  const [professionalDialogData, setProfessionalDialogData] = useState<Professional | null>(null);
+  const [professionalDialogData, setProfessionalDialogData] =
+    useState<Professional | null>(null);
   const [isBusinessDialogOpen, setIsBusinessDialogOpen] = useState(false);
   const [businessForm, setBusinessForm] = useState({ name: "", phone: "" });
   const [isSavingBusiness, setIsSavingBusiness] = useState(false);
-  const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
+  const [selectedProfessional, setSelectedProfessional] =
+    useState<Professional | null>(null);
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [scheduleVersion, setScheduleVersion] = useState(0);
   const hasWarnedWithoutBarbershop = useRef(false);
@@ -219,7 +222,7 @@ export function BusinessDashboard() {
       <main className="container mx-auto p-4 md:p-6 space-y-6">
         <Tabs defaultValue="timeline" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="timeline">📅 Agenda</TabsTrigger>
+            <TabsTrigger value="timeline">Agenda</TabsTrigger>
             <TabsTrigger value="services">Serviços</TabsTrigger>
             <TabsTrigger value="professionals">Barbeiros</TabsTrigger>
           </TabsList>
