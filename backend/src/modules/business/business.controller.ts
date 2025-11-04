@@ -96,6 +96,32 @@ export class BusinessController {
     });
   }
 
+  @Get('phone/:phone/available-days-aggregated')
+  @ApiOperation({ summary: 'Get aggregated available days for all professionals (union of all days with slots)' })
+  async findAggregatedAvailableDaysByPhone(
+    @Param('phone') phone: string,
+    @Query('serviceId') serviceId?: string,
+    @Query('days') days: string = '15',
+  ) {
+    let parsedServiceId: number | undefined;
+    if (serviceId !== undefined) {
+      parsedServiceId = Number(serviceId);
+      if (Number.isNaN(parsedServiceId)) {
+        throw new BadRequestException('serviceId must be a valid number');
+      }
+    }
+
+    const parsedDays = Number(days);
+    if (Number.isNaN(parsedDays) || parsedDays < 1 || parsedDays > 365) {
+      throw new BadRequestException('days must be a number between 1 and 365');
+    }
+
+    return await this.businessService.findAggregatedAvailableDaysByPhone(phone, {
+      serviceId: parsedServiceId,
+      days: parsedDays,
+    });
+  }
+
   @Get('phone/:phone/professionals/:professionalId/available-days')
   @ApiOperation({ summary: 'Get available days for a specific professional (next N days with slots)' })
   async findAvailableDaysByPhone(

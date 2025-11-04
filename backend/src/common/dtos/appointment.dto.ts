@@ -1,5 +1,6 @@
 import { IsString, IsNumber, IsDateString, IsOptional, IsNotEmpty, IsEnum } from 'class-validator';
 import { AppointmentOrigin } from 'src/database/entities';
+import { ProfessionalAssignmentStrategy } from 'src/modules/appointments/enums/professional-assignment-strategy.enum';
 
 export class CreateAppointmentDto {
   @IsNumber()
@@ -11,8 +12,12 @@ export class CreateAppointmentDto {
   serviceId: number;
 
   @IsNumber()
+  @IsOptional()
+  professionalId?: number;
+
+  @IsEnum(ProfessionalAssignmentStrategy)
   @IsNotEmpty()
-  professionalId: number;
+  assignmentStrategy: ProfessionalAssignmentStrategy;
 
   @IsNumber()
   @IsOptional()
@@ -51,6 +56,10 @@ export class UpdateAppointmentDto {
   @IsNumber()
   @IsOptional()
   professionalId?: number;
+
+  @IsEnum(ProfessionalAssignmentStrategy)
+  @IsOptional()
+  assignmentStrategy?: ProfessionalAssignmentStrategy;
 
   @IsNumber()
   @IsOptional()
@@ -111,6 +120,8 @@ export class AppointmentResponseDto {
   notes: string;
   source: string;
   status: string;
+  assignmentStrategy: ProfessionalAssignmentStrategy;
+  assignedByStrategy: boolean;
   createdAt: Date;
   updatedAt: Date;
   professional?: { id: number; name: string };

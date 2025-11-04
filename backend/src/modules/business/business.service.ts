@@ -286,6 +286,76 @@ export class BusinessService {
     };
   }
 
+  async findAggregatedAvailableDaysByPhone(
+    phone: string,
+    options: { serviceId?: number; days?: number } = {},
+  ): Promise<AvailableDay[]> {
+    const { serviceId, days = 15 } = options;
+    const business = await this.getBusinessByPhoneOrThrow(phone, ['workingHours']);
+
+    const professionals = await this.professionalRepository.find({
+      where: { businessId: business.id, active: true },
+      relations: ['unavailability', 'workingHours'],
+    });
+
+    if (professionals.length === 0) {
+      return [];
+    }
+
+    // Map to store unique days: date -> AvailableDay
+    const dayMap = new Map<string, AvailableDay>();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // For each date, check if ANY professional has available slots
+    for (let i = 0; i < days; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(checkDate.getDate() + i);
+
+      // Skip Sundays
+      if (checkDate.getDay() === 0) {
+        continue;
+      }
+
+      const dateStr = this.formatDate(checkDate);
+      let totalSlotsCount = 0;
+
+      // Check availability for all professionals on this date
+      for (const professional of professionals) {
+        try {
+          const availabilityResponse = await this.findProfessionalSlotsByPhone(
+            phone,
+            professional.id,
+            {
+              date: dateStr,
+              serviceId,
+            },
+          );
+
+          const slotsCount = availabilityResponse.professional.slots.length;
+          totalSlotsCount += slotsCount;
+        } catch (error) {
+          // If any professional has no slots, continue to next
+          continue;
+        }
+      }
+
+      // Only add day if at least one professional has available slots
+      if (totalSlotsCount > 0) {
+        const dayOfWeek = checkDate.getDay();
+        const displayDate = this.formatDisplayDate(checkDate, dayOfWeek);
+
+        dayMap.set(dateStr, {
+          date: dateStr,
+          displayDate,
+          slotsCount: totalSlotsCount,
+        });
+      }
+    }
+
+    return Array.from(dayMap.values());
+  }
+
   async create(createBusinessDto: CreateBusinessDto): Promise<BusinessEntity> {
     if (!createBusinessDto.token) {
       createBusinessDto.token = this.generateToken();

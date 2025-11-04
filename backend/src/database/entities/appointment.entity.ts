@@ -12,6 +12,7 @@ import { ServiceEntity } from './service.entity';
 import { ProfessionalEntity } from './professional.entity';
 import { ProfileEntity } from './profile.entity';
 import { ClientContactEntity } from './client-contact.entity';
+import { ProfessionalAssignmentStrategy } from 'src/modules/appointments/enums/professional-assignment-strategy.enum';
 
 export enum AppointmentStatus {
   PENDING = 'pending',
@@ -67,6 +68,16 @@ export class AppointmentEntity {
 
   @Column({ type: 'text', nullable: true })
   notes: string;
+
+  @Column({
+    type: 'enum',
+    enum: ProfessionalAssignmentStrategy,
+    default: ProfessionalAssignmentStrategy.MANUAL,
+  })
+  assignmentStrategy: ProfessionalAssignmentStrategy;
+
+  @Column({ type: 'boolean', default: false })
+  assignedByStrategy: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

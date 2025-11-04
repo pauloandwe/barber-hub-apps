@@ -1,5 +1,10 @@
 import { apiClient } from "./client";
 
+export enum ProfessionalAssignmentStrategy {
+  MANUAL = "manual",
+  LEAST_APPOINTMENTS = "least_appointments",
+}
+
 export interface Appointment {
   id: number;
   businessId: number;
@@ -13,6 +18,8 @@ export interface Appointment {
   source: "web" | "whatsapp" | null;
   notes?: string;
   createdAt?: string;
+  assignmentStrategy?: ProfessionalAssignmentStrategy;
+  assignedByStrategy?: boolean;
   professional?: { name: string };
   client?: { id?: number; name: string };
   clientContact?: { id: number; name: string | null; phone: string };
@@ -22,7 +29,8 @@ export interface Appointment {
 export interface CreateAppointmentRequest {
   businessId: number;
   serviceId: number;
-  professionalId: number;
+  professionalId?: number;
+  assignmentStrategy: ProfessionalAssignmentStrategy;
   clientId?: number;
   clientPhone?: string;
   clientName?: string;
@@ -35,6 +43,7 @@ export interface CreateAppointmentRequest {
 export interface UpdateAppointmentRequest {
   serviceId?: number;
   professionalId?: number;
+  assignmentStrategy?: ProfessionalAssignmentStrategy;
   clientId?: number;
   clientPhone?: string;
   clientName?: string;
@@ -150,7 +159,9 @@ export const appointmentsAPI = {
     await apiClient.delete(`/appointments/${businessId}/appointments/${id}`);
   },
 
-  async getSuggestions(data: any): Promise<any> {
+  async getSuggestions(
+    data: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
     const response = await apiClient.post("/appointments/suggest", data);
     return response?.data?.data;
   },

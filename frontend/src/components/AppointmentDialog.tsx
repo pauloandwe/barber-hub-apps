@@ -23,8 +23,9 @@ import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { DialogProps } from "@/types/shared.types";
 import { formatTime } from "@/utils/date.utils";
 import { ServiceSelector, Service } from "./appointments/ServiceSelector";
-import { ProfessionalSelector } from "./appointments/ProfessionalSelector";
+import { ProfessionalSelectorWithAuto } from "./appointments/ProfessionalSelectorWithAuto";
 import { ClientSelector, ClientSelection } from "./appointments/ClientSelector";
+import { ProfessionalAssignmentStrategy } from "@/api/appointments";
 import { DateTimePicker } from "./appointments/DateTimePicker";
 import { AppointmentSummary } from "./appointments/AppointmentSummary";
 
@@ -74,7 +75,13 @@ export function AppointmentDialog({
   initialSelection,
 }: AppointmentDialogProps) {
   const [selectedService, setSelectedService] = useState<string>("");
-  const [selectedProfessional, setSelectedProfessional] = useState<string>("");
+  const [selectedProfessional, setSelectedProfessional] = useState<{
+    strategy: ProfessionalAssignmentStrategy;
+    professionalId?: string;
+  }>({
+    strategy: ProfessionalAssignmentStrategy.MANUAL,
+    professionalId: "",
+  });
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [notes, setNotes] = useState("");
@@ -118,7 +125,12 @@ export function AppointmentDialog({
       const appointmentTime = originalTime ?? "";
 
       setSelectedService(serviceId);
-      setSelectedProfessional(professionalId);
+      setSelectedProfessional({
+        strategy:
+          appointment.assignmentStrategy ||
+          ProfessionalAssignmentStrategy.MANUAL,
+        professionalId,
+      });
       setSelectedDate(start ?? undefined);
       setSelectedTime(appointmentTime);
       setNotes(appointment.notes ?? "");
@@ -147,7 +159,10 @@ export function AppointmentDialog({
 
     if (!initialSelection) {
       setSelectedService("");
-      setSelectedProfessional("");
+      setSelectedProfessional({
+        strategy: ProfessionalAssignmentStrategy.MANUAL,
+        professionalId: "",
+      });
       setSelectedDate(undefined);
       setSelectedTime("");
       setAvailableTimes([]);
@@ -157,11 +172,12 @@ export function AppointmentDialog({
 
     setSelectedService("");
     setNotes("");
-    setSelectedProfessional(
-      initialSelection.professionalId
+    setSelectedProfessional({
+      strategy: ProfessionalAssignmentStrategy.MANUAL,
+      professionalId: initialSelection.professionalId
         ? String(initialSelection.professionalId)
-        : ""
-    );
+        : "",
+    });
     setSelectedDate(
       initialSelection.date ? new Date(initialSelection.date) : undefined
     );
@@ -179,7 +195,7 @@ export function AppointmentDialog({
     const fetchAvailableTimes = async () => {
       if (
         !selectedDate ||
-        !selectedProfessional ||
+        !selectedProfessional.professionalId ||
         !selectedService ||
         !businessPhone ||
         !services.has(selectedService)
@@ -191,7 +207,10 @@ export function AppointmentDialog({
       setIsLoadingTimes(true);
       try {
         const serviceId = parseInt(selectedService, 10);
-        const professionalId = parseInt(selectedProfessional, 10);
+        const professionalId = parseInt(
+          selectedProfessional.professionalId,
+          10
+        );
         if (Number.isNaN(professionalId)) {
           setAvailableTimes([]);
           return;
@@ -246,7 +265,7 @@ export function AppointmentDialog({
     };
 
     if (
-      selectedProfessional &&
+      selectedProfessional.professionalId &&
       selectedDate &&
       selectedService &&
       businessPhone
@@ -254,7 +273,7 @@ export function AppointmentDialog({
       fetchAvailableTimes();
     }
   }, [
-    selectedProfessional,
+    selectedProfessional.professionalId,
     selectedDate,
     selectedService,
     services,
@@ -274,9 +293,8 @@ export function AppointmentDialog({
     const loadBusiness = async () => {
       try {
         const businessIdNum = parseInt(businessId, 10);
-        const response = await businessAPI.getById(businessIdNum);
-        const business = response?.data;
-        setBusinessPhone(business.phone || null);
+        const business = await businessAPI.getById(businessIdNum);
+        setBusinessPhone(business?.phone || null);
       } catch (error) {
         if (process.env.NODE_ENV === "development") {
           console.error("Error loading business info:", error);
@@ -289,12 +307,12 @@ export function AppointmentDialog({
   }, [open, businessId]);
 
   useEffect(() => {
-    if (!selectedProfessional) {
+    if (!selectedProfessional.professionalId) {
       setProfessionalWorkingHours([]);
       return;
     }
 
-    const professionalId = parseInt(selectedProfessional, 10);
+    const professionalId = parseInt(selectedProfessional.professionalId, 10);
     if (Number.isNaN(professionalId)) {
       setProfessionalWorkingHours([]);
       return;
@@ -317,7 +335,7 @@ export function AppointmentDialog({
     };
 
     loadWorkingHours();
-  }, [selectedProfessional]);
+  }, [selectedProfessional.professionalId]);
 
   useEffect(() => {
     if (!selectedTime) {
@@ -352,13 +370,16 @@ export function AppointmentDialog({
   ]);
 
   const handleSubmit = async () => {
-    if (
-      !selectedService ||
-      !selectedProfessional ||
-      !selectedDate ||
-      !selectedTime
-    ) {
+    if (!selectedService || !selectedDate || !selectedTime) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
+      return;
+    }
+
+    if (
+      selectedProfessional.strategy === ProfessionalAssignmentStrategy.MANUAL &&
+      !selectedProfessional.professionalId
+    ) {
+      toast.error("Selecione um profissional");
       return;
     }
 
@@ -407,9 +428,22 @@ export function AppointmentDialog({
       }
 
       const serviceIdNum = parseInt(selectedService, 10);
-      const professionalIdNum = parseInt(selectedProfessional, 10);
-      if (Number.isNaN(serviceIdNum) || Number.isNaN(professionalIdNum)) {
-        toast.error("Serviço ou professional inválido selecionado");
+      const professionalIdNum =
+        selectedProfessional.strategy === ProfessionalAssignmentStrategy.MANUAL
+          ? parseInt(selectedProfessional.professionalId || "0", 10)
+          : 0;
+
+      if (Number.isNaN(serviceIdNum)) {
+        toast.error("Serviço inválido selecionado");
+        return;
+      }
+
+      if (
+        selectedProfessional.strategy ===
+          ProfessionalAssignmentStrategy.MANUAL &&
+        (Number.isNaN(professionalIdNum) || professionalIdNum === 0)
+      ) {
+        toast.error("Profissional inválido selecionado");
         return;
       }
 
@@ -438,7 +472,11 @@ export function AppointmentDialog({
 
       const basePayload = {
         serviceId: serviceIdNum,
-        professionalId: professionalIdNum,
+        ...(selectedProfessional.strategy ===
+          ProfessionalAssignmentStrategy.MANUAL && {
+          professionalId: professionalIdNum,
+        }),
+        assignmentStrategy: selectedProfessional.strategy,
         startDate: startDateTime.toISOString(),
         endDate: endDateTime.toISOString(),
         notes: notes || undefined,
@@ -489,7 +527,10 @@ export function AppointmentDialog({
 
   const resetForm = () => {
     setSelectedService("");
-    setSelectedProfessional("");
+    setSelectedProfessional({
+      strategy: ProfessionalAssignmentStrategy.MANUAL,
+      professionalId: "",
+    });
     setSelectedDate(undefined);
     setSelectedTime("");
     setNotes("");
@@ -577,14 +618,14 @@ export function AppointmentDialog({
             disabled={isLoading}
           />
 
-          <ProfessionalSelector
+          <ProfessionalSelectorWithAuto
             businessId={businessId}
             value={selectedProfessional}
             onChange={setSelectedProfessional}
             disabled={isLoading}
           />
 
-          {selectedProfessional && (
+          {selectedProfessional.professionalId && (
             <div className="space-y-2">
               <Label>Horário do professional</Label>
               {isLoadingProfessionalHours ? (
@@ -651,9 +692,11 @@ export function AppointmentDialog({
             disabled={
               isLoading ||
               !selectedService ||
-              !selectedProfessional ||
               !selectedDate ||
-              !selectedTime
+              !selectedTime ||
+              (selectedProfessional.strategy ===
+                ProfessionalAssignmentStrategy.MANUAL &&
+                !selectedProfessional.professionalId)
             }
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

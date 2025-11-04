@@ -11,6 +11,7 @@ import {
   ClientContactEntity,
   ProfessionalWorkingHoursEntity,
 } from 'src/database/entities';
+import { ProfessionalAssignmentStrategy } from 'src/modules/appointments/enums/professional-assignment-strategy.enum';
 import {
   CreateAppointmentDto,
   UpdateAppointmentDto,
@@ -298,23 +299,51 @@ export class AppointmentsService {
       throw new NotFoundException('Service not found');
     }
 
-    const professional = await this.professionalRepository.findOne({
-      where: {
-        id: createAppointmentDto.professionalId,
-        businessId: createAppointmentDto.businessId,
-      },
-    });
-
-    if (!professional) {
-      throw new NotFoundException('Professional not found');
-    }
-
     const startDate = new Date(createAppointmentDto.startDate);
     const endDate = new Date(createAppointmentDto.endDate);
 
+    let professionalId = createAppointmentDto.professionalId;
+    let assignedByStrategy = false;
+
+    // Handle professional assignment based on strategy
+    if (createAppointmentDto.assignmentStrategy === ProfessionalAssignmentStrategy.MANUAL) {
+      if (!professionalId) {
+        throw new BadRequestException(
+          'professionalId is required when assignmentStrategy is manual',
+        );
+      }
+
+      const professional = await this.professionalRepository.findOne({
+        where: {
+          id: professionalId,
+          businessId: createAppointmentDto.businessId,
+        },
+      });
+
+      if (!professional) {
+        throw new NotFoundException('Professional not found');
+      }
+    } else if (
+      createAppointmentDto.assignmentStrategy ===
+      ProfessionalAssignmentStrategy.LEAST_APPOINTMENTS
+    ) {
+      const professional = await this.findProfessionalWithLeastAppointments(
+        createAppointmentDto.businessId,
+      );
+
+      if (!professional) {
+        throw new NotFoundException('No available professionals found');
+      }
+
+      professionalId = professional.id;
+      assignedByStrategy = true;
+    } else {
+      throw new BadRequestException('Invalid assignment strategy');
+    }
+
     const existingAppointment = await this.appointmentRepository.findOne({
       where: {
-        professionalId: createAppointmentDto.professionalId,
+        professionalId,
         startDate: startDate,
       },
     });
@@ -335,13 +364,15 @@ export class AppointmentsService {
     const appointment = this.appointmentRepository.create({
       businessId: createAppointmentDto.businessId,
       serviceId: createAppointmentDto.serviceId,
-      professionalId: createAppointmentDto.professionalId,
+      professionalId,
       clientId: clientId ?? null,
       clientContactId: clientContact?.id ?? null,
       startDate: startDate,
       endDate: endDate,
       notes: createAppointmentDto.notes,
       source: createAppointmentDto.source,
+      assignmentStrategy: createAppointmentDto.assignmentStrategy,
+      assignedByStrategy,
     });
 
     const savedAppointment = await this.appointmentRepository.save(appointment);
@@ -637,6 +668,38 @@ export class AppointmentsService {
     return dates;
   }
 
+  private async findProfessionalWithLeastAppointments(
+    businessId: number,
+  ): Promise<ProfessionalEntity | null> {
+    const professionals = await this.professionalRepository.find({
+      where: {
+        businessId,
+        active: true,
+      },
+    });
+
+    if (professionals.length === 0) {
+      return null;
+    }
+
+    // Count appointments for each professional
+    const professionalCounts = await Promise.all(
+      professionals.map(async (professional) => ({
+        professional,
+        count: await this.appointmentRepository.count({
+          where: {
+            professionalId: professional.id,
+            status: In([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED]),
+          },
+        }),
+      })),
+    );
+
+    // Find professional with least appointments
+    const minCount = Math.min(...professionalCounts.map((pc) => pc.count));
+    return professionalCounts.find((pc) => pc.count === minCount)?.professional || null;
+  }
+
   private formatAppointmentResponse(appointment: AppointmentEntity): AppointmentResponseDto {
     return {
       id: appointment.id,
@@ -650,6 +713,8 @@ export class AppointmentsService {
       notes: appointment.notes,
       source: appointment.source,
       status: appointment.status,
+      assignmentStrategy: appointment.assignmentStrategy,
+      assignedByStrategy: appointment.assignedByStrategy,
       createdAt: appointment.createdAt,
       updatedAt: appointment.updatedAt,
       professional: appointment.professional
