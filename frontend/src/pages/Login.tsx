@@ -12,7 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Scissors } from "lucide-react";
 import {
   getDashboardRoute,
   hasRouteAccess,
@@ -99,13 +98,15 @@ export function Login() {
     <div className="flex min-h-screen items-center justify-center gradient-subtle p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <Scissors className="h-8 w-8 text-primary" />
-          </div>
+          <img
+            src="/horarius-logo-back.png"
+            alt="Horarius Logo"
+            className="mx-auto h-32 w-32 object-contain"
+          />
           <div>
-            <CardTitle className="text-3xl">Professional Hub</CardTitle>
+            <CardTitle className="text-3xl">Horarius</CardTitle>
             <CardDescription className="mt-2">
-              Gerenciar sua business profissionalmente
+              Gestão profissional de barbearias
             </CardDescription>
           </div>
         </CardHeader>
