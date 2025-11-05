@@ -66,8 +66,7 @@ export function BusinessDashboard() {
   const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
   const [scheduleVersion, setScheduleVersion] = useState(0);
   const hasWarnedWithoutBarbershop = useRef(false);
-  const barbershopDisplayName =
-    barbershopInfo?.name || (barbershopInfo as any)?.nome || "My Business";
+  const barbershopDisplayName = barbershopInfo?.name || "My Business";
 
   useEffect(() => {
     if (roleLoading) return;
